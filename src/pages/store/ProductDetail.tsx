@@ -1,13 +1,15 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '@/data/store';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, ArrowLeft, Package } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Package, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { products, categories, addToCart } = useStore();
+  const { products, categories, addToCart, buyNow } = useStore();
+  const navigate = useNavigate();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);
 
@@ -20,6 +22,24 @@ export default function ProductDetail() {
 
   const cat = categories.find(c => c.name === product.category);
   const related = products.filter(p => p.id !== product.id && p.subcategory === product.subcategory).slice(0, 4);
+
+  const handleAddToCart = () => {
+    if (qty > product.stock) {
+      toast.error(`Only ${product.stock} in stock`);
+      return;
+    }
+    addToCart(product, qty);
+    toast.success(`Added ${qty}× ${product.name} to cart`);
+  };
+
+  const handleBuyNow = () => {
+    if (qty > product.stock) {
+      toast.error(`Only ${product.stock} in stock`);
+      return;
+    }
+    buyNow(product, qty);
+    navigate('/checkout');
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
@@ -46,18 +66,31 @@ export default function ProductDetail() {
             <Package className="h-4 w-4" />
             {product.stock > 0 ? <span className="text-success">{product.stock} in stock</span> : <span className="text-destructive">Out of stock</span>}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center border rounded-lg">
-              <button className="px-3 py-2 hover:bg-muted" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-              <span className="px-3 py-2 min-w-[3rem] text-center font-medium">{qty}</span>
-              <button className="px-3 py-2 hover:bg-muted" onClick={() => setQty(q => q + 1)}>+</button>
+
+          {/* Quantity + Actions */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border rounded-lg">
+                <button className="px-3 py-2 hover:bg-muted" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                <span className="px-3 py-2 min-w-[3rem] text-center font-medium">{qty}</span>
+                <button className="px-3 py-2 hover:bg-muted" onClick={() => setQty(q => Math.min(product.stock, q + 1))}>+</button>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                ${(product.price * qty).toFixed(2)}
+              </span>
             </div>
-            <Button size="lg" onClick={() => addToCart(product, qty)} disabled={product.stock === 0} className="flex-1">
-              <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
-            </Button>
+            <div className="flex gap-3">
+              <Button size="lg" variant="outline" onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1">
+                <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
+              </Button>
+              <Button size="lg" onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1">
+                <Zap className="h-5 w-5 mr-2" /> Buy Now
+              </Button>
+            </div>
           </div>
+
           <p className="text-xs text-muted-foreground mt-4">
-            Earn <span className="font-semibold text-accent">{Math.floor(product.price)}</span> reward points with this purchase
+            Earn <span className="font-semibold text-accent">{Math.floor(product.price * qty)}</span> reward points with this purchase
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             Barcode: <span className="font-mono">{product.barcode}</span>

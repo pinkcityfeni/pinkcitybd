@@ -3,7 +3,20 @@ import { useStore, Order } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { MapPin, Phone, Mail, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Phone, Mail, ChevronDown, ChevronUp, Wallet, Banknote, Smartphone, CreditCard, Building2 } from 'lucide-react';
+
+const PAYMENT_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
+  cod: { label: 'Cash on Delivery', icon: <Banknote className="h-3.5 w-3.5" /> },
+  bkash: { label: 'bKash', icon: <Smartphone className="h-3.5 w-3.5" /> },
+  nagad: { label: 'Nagad', icon: <Smartphone className="h-3.5 w-3.5" /> },
+  card: { label: 'Card', icon: <CreditCard className="h-3.5 w-3.5" /> },
+  bank: { label: 'Bank Transfer', icon: <Building2 className="h-3.5 w-3.5" /> },
+};
+
+const PAYMENT_STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-warning/10 text-warning border-warning/20',
+  paid: 'bg-success/10 text-success border-success/20',
+};
 
 const STATUS_COLORS: Record<Order['status'], string> = {
   pending: 'bg-warning/10 text-warning border-warning/20',
@@ -40,9 +53,19 @@ export default function Orders() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-xs">{o.id}</span>
                     <Badge variant="outline" className="text-[10px]">{o.type.toUpperCase()}</Badge>
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${STATUS_COLORS[o.status]}`}>
-                      {o.status}
-                    </span>
+                     <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${STATUS_COLORS[o.status]}`}>
+                       {o.status}
+                     </span>
+                     {o.paymentMethod && (
+                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground">
+                         {PAYMENT_LABELS[o.paymentMethod]?.icon} {PAYMENT_LABELS[o.paymentMethod]?.label}
+                       </span>
+                     )}
+                     {o.paymentStatus && (
+                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${PAYMENT_STATUS_COLORS[o.paymentStatus] || ''}`}>
+                         {o.paymentStatus === 'paid' ? '✓ Paid' : '⏳ Unpaid'}
+                       </span>
+                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-sm">
                     <span className="font-medium">{o.customerName || 'Guest'}</span>
@@ -72,8 +95,19 @@ export default function Orders() {
                       <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2">
                         <MapPin className="h-3.5 w-3.5 shrink-0" /> {o.deliveryAddress}
                       </div>
-                    )}
-                  </div>
+                     )}
+                     {o.paymentMethod && (
+                       <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2">
+                         <Wallet className="h-3.5 w-3.5 shrink-0" />
+                         <span>{PAYMENT_LABELS[o.paymentMethod]?.label || o.paymentMethod}</span>
+                         {o.paymentStatus && (
+                           <span className={`ml-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium border ${PAYMENT_STATUS_COLORS[o.paymentStatus]}`}>
+                             {o.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+                           </span>
+                         )}
+                       </div>
+                     )}
+                   </div>
 
                   {/* Items */}
                   <div className="space-y-1">

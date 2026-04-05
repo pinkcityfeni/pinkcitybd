@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, CreditCard, Building2, Banknote, Smartphone } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, CreditCard, Building2, Banknote, Smartphone, Copy, Check, Lock } from 'lucide-react';
 import type { PaymentMethod } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
@@ -31,6 +31,11 @@ export default function Checkout() {
   const [address, setAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [copied, setCopied] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [orderTotal, setOrderTotal] = useState(0);
   const [orderPoints, setOrderPoints] = useState(0);
@@ -48,11 +53,35 @@ export default function Checkout() {
 
   const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'nagad' || paymentMethod === 'bank';
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success('কপি হয়েছে!');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const formatCardNumber = (v: string) => {
+    const digits = v.replace(/\D/g, '').slice(0, 16);
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+  };
+
+  const formatExpiry = (v: string) => {
+    const digits = v.replace(/\D/g, '').slice(0, 4);
+    if (digits.length > 2) return digits.slice(0, 2) + '/' + digits.slice(2);
+    return digits;
+  };
+
   const handleContinueToReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) { toast.error('ফোন নম্বর দিন'); return; }
     if (!address.trim()) { toast.error('ডেলিভারি ঠিকানা দিন'); return; }
     if (needsTrxId && !trxId.trim()) { toast.error('Transaction ID দিন'); return; }
+    if (paymentMethod === 'card') {
+      if (cardNumber.replace(/\s/g, '').length < 16) { toast.error('সম্পূর্ণ কার্ড নম্বর দিন'); return; }
+      if (cardExpiry.length < 5) { toast.error('কার্ডের মেয়াদ দিন (MM/YY)'); return; }
+      if (cardCvv.length < 3) { toast.error('CVV দিন'); return; }
+      if (!cardName.trim()) { toast.error('কার্ডধারীর নাম দিন'); return; }
+    }
     setStep('review');
   };
 
@@ -257,7 +286,7 @@ export default function Checkout() {
               <button
                 key={pm.id}
                 type="button"
-                onClick={() => { setPaymentMethod(pm.id); setTrxId(''); }}
+                onClick={() => { setPaymentMethod(pm.id); setTrxId(''); setCardNumber(''); setCardExpiry(''); setCardCvv(''); setCardName(''); }}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                   paymentMethod === pm.id
                     ? 'border-primary bg-primary/5 shadow-sm'
@@ -280,25 +309,120 @@ export default function Checkout() {
             ))}
           </div>
 
-          {/* bKash/Nagad/Bank info */}
+          {/* bKash/Nagad/Bank info with copy */}
           {needsTrxId && (
-            <div className="mt-3 p-3 rounded-xl bg-accent/10 border border-accent/20 space-y-2">
-              <p className="text-xs font-medium text-accent-foreground">
-                {paymentMethod === 'bkash' && '📱 বিকাশ নম্বর: 01XXXXXXXXX (Personal)'}
-                {paymentMethod === 'nagad' && '📱 নগদ নম্বর: 01XXXXXXXXX (Personal)'}
-                {paymentMethod === 'bank' && '🏦 Bank: ABC Bank | A/C: 123456789 | Branch: Dhaka'}
-              </p>
-              <p className="text-xs text-muted-foreground">৳{grandTotal.toFixed(2)} পাঠিয়ে Transaction ID দিন</p>
-              <div>
+            <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
+              {paymentMethod === 'bkash' && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-pink-600">📱 বিকাশ (Personal)</p>
+                  <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
+                    <span className="flex-1 font-mono font-bold text-sm tracking-wider">01XXXXXXXXX</span>
+                    <button type="button" onClick={() => copyToClipboard('01XXXXXXXXX')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
+                      {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {paymentMethod === 'nagad' && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-orange-600">📱 নগদ (Personal)</p>
+                  <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
+                    <span className="flex-1 font-mono font-bold text-sm tracking-wider">01XXXXXXXXX</span>
+                    <button type="button" onClick={() => copyToClipboard('01XXXXXXXXX')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
+                      {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {paymentMethod === 'bank' && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-blue-600">🏦 ব্যাংক ট্রান্সফার</p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">ব্যাংক</p>
+                        <p className="text-xs font-medium">ABC Bank</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
+                      <div className="flex-1">
+                        <p className="text-[10px] text-muted-foreground">অ্যাকাউন্ট নম্বর</p>
+                        <p className="font-mono font-bold text-sm tracking-wider">123456789</p>
+                      </div>
+                      <button type="button" onClick={() => copyToClipboard('123456789')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
+                        {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">ব্রাঞ্চ</p>
+                        <p className="text-xs font-medium">Dhaka</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="pt-1 border-t border-accent/20">
+                <p className="text-xs text-muted-foreground mb-2">৳{grandTotal.toFixed(2)} পাঠিয়ে নিচে Transaction ID দিন</p>
                 <Label htmlFor="trxId" className="text-xs">Transaction ID <span className="text-destructive">*</span></Label>
-                <Input
-                  id="trxId"
-                  value={trxId}
-                  onChange={e => setTrxId(e.target.value)}
-                  placeholder="TrxID লিখুন"
-                  className="mt-1"
-                />
+                <Input id="trxId" value={trxId} onChange={e => setTrxId(e.target.value)} placeholder="TrxID লিখুন" className="mt-1" />
               </div>
+            </div>
+          )}
+
+          {/* Card payment form */}
+          {paymentMethod === 'card' && (
+            <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Lock className="h-3.5 w-3.5 text-success" />
+                <p className="text-xs font-medium text-success">সিকিউর পেমেন্ট</p>
+              </div>
+              <div>
+                <Label htmlFor="cardName" className="text-xs">কার্ডধারীর নাম <span className="text-destructive">*</span></Label>
+                <Input id="cardName" value={cardName} onChange={e => setCardName(e.target.value)} placeholder="CARDHOLDER NAME" className="mt-1 uppercase" />
+              </div>
+              <div>
+                <Label htmlFor="cardNumber" className="text-xs">কার্ড নম্বর <span className="text-destructive">*</span></Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="cardNumber"
+                    value={cardNumber}
+                    onChange={e => setCardNumber(formatCardNumber(e.target.value))}
+                    placeholder="0000 0000 0000 0000"
+                    className="pr-10 font-mono tracking-wider"
+                    maxLength={19}
+                  />
+                  <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="cardExpiry" className="text-xs">মেয়াদ <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="cardExpiry"
+                    value={cardExpiry}
+                    onChange={e => setCardExpiry(formatExpiry(e.target.value))}
+                    placeholder="MM/YY"
+                    className="mt-1 font-mono"
+                    maxLength={5}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cardCvv" className="text-xs">CVV <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="cardCvv"
+                    type="password"
+                    value={cardCvv}
+                    onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="•••"
+                    className="mt-1 font-mono"
+                    maxLength={4}
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Lock className="h-3 w-3" /> আপনার কার্ডের তথ্য সম্পূর্ণ নিরাপদ
+              </p>
             </div>
           )}
         </div>

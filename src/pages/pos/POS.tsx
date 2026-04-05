@@ -33,8 +33,9 @@ export default function POS() {
 
   const handleCompleteSale = () => {
     if (posCart.length === 0) return;
+    const saleTotal = total;
     const id = placeOrder('pos');
-    setSaleComplete(id);
+    setSaleComplete({ id, total: saleTotal });
   };
 
   const filteredProducts = search

@@ -39,27 +39,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Flash Sale / Hot Deals */}
-      <section className="bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 py-3">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-destructive" />
-              <h2 className="font-display text-lg font-bold">Flash Sale</h2>
-              <CountdownTimer />
-            </div>
-            <Link to="/shop" className="text-xs text-primary font-medium flex items-center gap-0.5">
-              Shop More <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
-            {shuffled.slice(0, 6).map(p => (
-              <FlashProductCard key={p.id} product={p} categories={categories} addToCart={addToCart} />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* All Products Grid */}
       <section className="container mx-auto px-3 py-5">
         <div className="flex items-center justify-between mb-4">

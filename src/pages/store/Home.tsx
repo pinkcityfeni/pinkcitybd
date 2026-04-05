@@ -3,11 +3,6 @@ import { useStore } from '@/data/store';
 import { ArrowRight, Zap, Truck, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const EMOJI_MAP: Record<string, string> = {
-  'Electronics': '🔌', 'Clothing': '👕', 'Food & Drinks': '🍵',
-  'Home & Garden': '🌿', 'Sports': '🏃', 'Books': '📚',
-};
-
 export default function Home() {
   const { products, categories } = useStore();
   const featured = products.slice(0, 4);
@@ -29,7 +24,7 @@ export default function Home() {
               <Link to="/shop">Browse Products <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link to="/categories">Categories</Link>
+              <Link to="/category">Categories</Link>
             </Button>
           </div>
         </div>
@@ -59,15 +54,16 @@ export default function Home() {
       {/* Categories */}
       <section className="container mx-auto px-4 py-12">
         <h2 className="page-header mb-6">Shop by Category</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {categories.map(c => (
             <Link
-              key={c}
-              to={`/shop?category=${encodeURIComponent(c)}`}
+              key={c.id}
+              to={`/shop?category=${encodeURIComponent(c.name)}`}
               className="stat-card flex flex-col items-center gap-2 text-center hover:border-primary/30 transition-colors"
             >
-              <span className="text-3xl">{EMOJI_MAP[c] || '📦'}</span>
-              <span className="text-sm font-medium">{c}</span>
+              <span className="text-3xl">{c.icon}</span>
+              <span className="text-sm font-medium">{c.name}</span>
+              <span className="text-xs text-muted-foreground">{c.subcategories.length} subcategories</span>
             </Link>
           ))}
         </div>
@@ -80,16 +76,23 @@ export default function Home() {
           <Link to="/shop" className="text-sm text-primary font-medium hover:underline">View all →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {featured.map(p => (
-            <Link key={p.id} to={`/product/${p.id}`} className="stat-card group">
-              <div className="aspect-square rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/5 transition-colors">
-                <span className="text-5xl">{EMOJI_MAP[p.category] || '📦'}</span>
-              </div>
-              <p className="text-xs text-muted-foreground">{p.category}</p>
-              <h3 className="font-semibold text-sm mt-0.5 line-clamp-1">{p.name}</h3>
-              <p className="font-bold text-primary mt-1">${p.price.toFixed(2)}</p>
-            </Link>
-          ))}
+          {featured.map(p => {
+            const cat = categories.find(c => c.name === p.category);
+            return (
+              <Link key={p.id} to={`/product/${p.id}`} className="stat-card group">
+                <div className="aspect-square rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/5 transition-colors">
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} className="h-full w-full object-cover rounded-lg" />
+                  ) : (
+                    <span className="text-5xl">{cat?.icon || '📦'}</span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">{p.category} · {p.subcategory}</p>
+                <h3 className="font-semibold text-sm mt-0.5 line-clamp-1">{p.name}</h3>
+                <p className="font-bold text-primary mt-1">${p.price.toFixed(2)}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

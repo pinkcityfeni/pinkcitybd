@@ -1,17 +1,26 @@
 // Shared data store for the entire application
 import { create } from 'zustand';
 
+// ─── Types ───
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  subcategories: string[];
+}
+
 export interface Product {
   id: string;
   name: string;
-  description: string;
-  price: number;
-  cost: number;
-  barcode: string;
-  category: string;
   image: string;
+  price: number;
+  buyingPrice: number;
+  barcode: string;
   stock: number;
-  unit: string;
+  category: string;
+  subcategory: string;
+  description: string;
 }
 
 export interface CartItem {
@@ -38,64 +47,120 @@ export interface User {
   role: 'customer' | 'admin' | 'cashier';
 }
 
-const CATEGORIES = ['Electronics', 'Clothing', 'Food & Drinks', 'Home & Garden', 'Sports', 'Books'];
+// ─── Seed Data ───
 
-const MOCK_PRODUCTS: Product[] = [
-  { id: 'p1', name: 'Wireless Earbuds Pro', description: 'Premium noise-cancelling wireless earbuds with 24h battery life.', price: 79.99, cost: 35, barcode: '1001', category: 'Electronics', image: '', stock: 45, unit: 'pcs' },
-  { id: 'p2', name: 'Organic Green Tea', description: 'Hand-picked Japanese matcha green tea, 100g pack.', price: 14.50, cost: 6, barcode: '1002', category: 'Food & Drinks', image: '', stock: 120, unit: 'pcs' },
-  { id: 'p3', name: 'Running Shoes X1', description: 'Lightweight performance running shoes with cushion sole.', price: 129.00, cost: 55, barcode: '1003', category: 'Sports', image: '', stock: 30, unit: 'pair' },
-  { id: 'p4', name: 'Denim Jacket Classic', description: 'Timeless denim jacket, medium wash, relaxed fit.', price: 89.00, cost: 38, barcode: '1004', category: 'Clothing', image: '', stock: 22, unit: 'pcs' },
-  { id: 'p5', name: 'Smart Desk Lamp', description: 'LED desk lamp with adjustable color temperature and brightness.', price: 49.99, cost: 18, barcode: '1005', category: 'Home & Garden', image: '', stock: 60, unit: 'pcs' },
-  { id: 'p6', name: 'Bluetooth Speaker Mini', description: 'Portable waterproof speaker with 360° sound.', price: 39.99, cost: 15, barcode: '1006', category: 'Electronics', image: '', stock: 80, unit: 'pcs' },
-  { id: 'p7', name: 'Yoga Mat Premium', description: 'Extra thick non-slip yoga mat, 6mm, eco-friendly.', price: 34.99, cost: 12, barcode: '1007', category: 'Sports', image: '', stock: 50, unit: 'pcs' },
-  { id: 'p8', name: 'The Art of Code', description: 'Bestselling book on software craftsmanship.', price: 24.99, cost: 8, barcode: '1008', category: 'Books', image: '', stock: 90, unit: 'pcs' },
-  { id: 'p9', name: 'Cotton T-Shirt Basic', description: '100% organic cotton crew neck tee, multiple colors.', price: 19.99, cost: 7, barcode: '1009', category: 'Clothing', image: '', stock: 200, unit: 'pcs' },
-  { id: 'p10', name: 'Plant Pot Ceramic', description: 'Handmade ceramic plant pot with drainage hole, 15cm.', price: 22.00, cost: 9, barcode: '1010', category: 'Home & Garden', image: '', stock: 40, unit: 'pcs' },
-  { id: 'p11', name: 'USB-C Hub 7-in-1', description: 'Multi-port adapter: HDMI, USB 3.0, SD card, PD charging.', price: 44.99, cost: 18, barcode: '1011', category: 'Electronics', image: '', stock: 65, unit: 'pcs' },
-  { id: 'p12', name: 'Protein Energy Bar', description: 'Natural ingredients, 20g protein, box of 12.', price: 29.99, cost: 12, barcode: '1012', category: 'Food & Drinks', image: '', stock: 150, unit: 'box' },
+const INITIAL_CATEGORIES: Category[] = [
+  { id: 'cat-1', name: 'Jewelry', icon: '💍', subcategories: ['Necklace', 'Churi', 'Ring'] },
+  { id: 'cat-2', name: 'Cosmetics', icon: '💄', subcategories: ['Lipstick', 'Cream'] },
 ];
 
-const MOCK_ORDERS: Order[] = [
-  { id: 'ord-001', items: [{ product: MOCK_PRODUCTS[0], quantity: 2 }], total: 159.98, date: '2026-04-04T10:30:00', status: 'completed', type: 'online', customerName: 'Alice Chen', customerEmail: 'alice@email.com' },
-  { id: 'ord-002', items: [{ product: MOCK_PRODUCTS[2], quantity: 1 }, { product: MOCK_PRODUCTS[6], quantity: 1 }], total: 163.99, date: '2026-04-04T14:15:00', status: 'processing', type: 'online', customerName: 'Bob Smith' },
-  { id: 'ord-003', items: [{ product: MOCK_PRODUCTS[1], quantity: 3 }, { product: MOCK_PRODUCTS[4], quantity: 1 }], total: 93.49, date: '2026-04-05T09:00:00', status: 'pending', type: 'pos' },
-  { id: 'ord-004', items: [{ product: MOCK_PRODUCTS[8], quantity: 5 }], total: 99.95, date: '2026-04-03T16:45:00', status: 'completed', type: 'pos' },
-  { id: 'ord-005', items: [{ product: MOCK_PRODUCTS[3], quantity: 1 }], total: 89.00, date: '2026-04-02T11:20:00', status: 'completed', type: 'online', customerName: 'Carol Davis' },
+const INITIAL_PRODUCTS: Product[] = [
+  // Jewelry — Necklace
+  { id: 'p1', name: 'Gold Layered Necklace', image: '', price: 49.99, buyingPrice: 22, barcode: '2001', stock: 35, category: 'Jewelry', subcategory: 'Necklace', description: 'Elegant multi-layer gold-plated necklace, adjustable chain length.' },
+  { id: 'p2', name: 'Pearl Pendant Necklace', image: '', price: 39.99, buyingPrice: 16, barcode: '2002', stock: 50, category: 'Jewelry', subcategory: 'Necklace', description: 'Classic freshwater pearl pendant on a sterling silver chain.' },
+  { id: 'p3', name: 'Silver Statement Necklace', image: '', price: 59.99, buyingPrice: 28, barcode: '2003', stock: 20, category: 'Jewelry', subcategory: 'Necklace', description: 'Bold silver-tone statement necklace for special occasions.' },
+  // Jewelry — Churi
+  { id: 'p4', name: 'Traditional Glass Churi Set', image: '', price: 12.99, buyingPrice: 4, barcode: '2004', stock: 100, category: 'Jewelry', subcategory: 'Churi', description: 'Set of 12 colorful glass bangles, assorted colors.' },
+  { id: 'p5', name: 'Gold Plated Churi Set', image: '', price: 24.99, buyingPrice: 10, barcode: '2005', stock: 60, category: 'Jewelry', subcategory: 'Churi', description: 'Premium gold-plated bangle set of 6, intricate design.' },
+  { id: 'p6', name: 'Crystal Churi Pair', image: '', price: 18.50, buyingPrice: 7, barcode: '2006', stock: 45, category: 'Jewelry', subcategory: 'Churi', description: 'Sparkling crystal-studded bangle pair, one size fits most.' },
+  // Jewelry — Ring
+  { id: 'p7', name: 'Diamond Solitaire Ring', image: '', price: 129.99, buyingPrice: 55, barcode: '2007', stock: 15, category: 'Jewelry', subcategory: 'Ring', description: 'Stunning CZ diamond solitaire ring in white gold setting.' },
+  { id: 'p8', name: 'Stacking Ring Set', image: '', price: 29.99, buyingPrice: 12, barcode: '2008', stock: 40, category: 'Jewelry', subcategory: 'Ring', description: 'Set of 5 minimalist stacking rings, mixed metals.' },
+  { id: 'p9', name: 'Vintage Emerald Ring', image: '', price: 79.99, buyingPrice: 35, barcode: '2009', stock: 18, category: 'Jewelry', subcategory: 'Ring', description: 'Vintage-style emerald green stone ring with filigree band.' },
+  // Cosmetics — Lipstick
+  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', price: 14.99, buyingPrice: 5, barcode: '3001', stock: 120, category: 'Cosmetics', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
+  { id: 'p11', name: 'Glossy Lip Color', image: '', price: 11.99, buyingPrice: 4, barcode: '3002', stock: 90, category: 'Cosmetics', subcategory: 'Lipstick', description: 'High-shine glossy lip color with moisturizing formula.' },
+  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', price: 18.99, buyingPrice: 7, barcode: '3003', stock: 75, category: 'Cosmetics', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
+  // Cosmetics — Cream
+  { id: 'p13', name: 'Hydrating Face Cream', image: '', price: 24.99, buyingPrice: 9, barcode: '3004', stock: 85, category: 'Cosmetics', subcategory: 'Cream', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
+  { id: 'p14', name: 'Night Repair Cream', image: '', price: 34.99, buyingPrice: 14, barcode: '3005', stock: 55, category: 'Cosmetics', subcategory: 'Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
+  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', price: 19.99, buyingPrice: 8, barcode: '3006', stock: 100, category: 'Cosmetics', subcategory: 'Cream', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
 ];
+
+const INITIAL_ORDERS: Order[] = [
+  { id: 'ord-001', items: [{ product: INITIAL_PRODUCTS[0], quantity: 2 }], total: 99.98, date: '2026-04-04T10:30:00', status: 'completed', type: 'online', customerName: 'Fatima Akter', customerEmail: 'fatima@email.com' },
+  { id: 'ord-002', items: [{ product: INITIAL_PRODUCTS[9], quantity: 3 }, { product: INITIAL_PRODUCTS[12], quantity: 1 }], total: 69.96, date: '2026-04-04T14:15:00', status: 'processing', type: 'online', customerName: 'Nusrat Jahan' },
+  { id: 'ord-003', items: [{ product: INITIAL_PRODUCTS[3], quantity: 5 }], total: 64.95, date: '2026-04-05T09:00:00', status: 'pending', type: 'pos' },
+  { id: 'ord-004', items: [{ product: INITIAL_PRODUCTS[6], quantity: 1 }], total: 129.99, date: '2026-04-03T16:45:00', status: 'completed', type: 'pos' },
+  { id: 'ord-005', items: [{ product: INITIAL_PRODUCTS[13], quantity: 2 }], total: 69.98, date: '2026-04-02T11:20:00', status: 'completed', type: 'online', customerName: 'Rashida Begum' },
+];
+
+// ─── Store ───
 
 interface StoreState {
   products: Product[];
   orders: Order[];
   cart: CartItem[];
   posCart: CartItem[];
-  categories: string[];
+  categories: Category[];
+
+  // Category actions
+  addCategory: (name: string, icon?: string) => void;
+  updateCategory: (id: string, updates: Partial<Omit<Category, 'id'>>) => void;
+  deleteCategory: (id: string) => void;
+  addSubcategory: (categoryId: string, subcategory: string) => void;
+  removeSubcategory: (categoryId: string, subcategory: string) => void;
+
   // Cart actions
   addToCart: (product: Product, qty?: number) => void;
   removeFromCart: (productId: string) => void;
   updateCartQty: (productId: string, qty: number) => void;
   clearCart: () => void;
+
   // POS Cart actions
   addToPosCart: (product: Product, qty?: number) => void;
   removeFromPosCart: (productId: string) => void;
   updatePosCartQty: (productId: string, qty: number) => void;
   clearPosCart: () => void;
+
   // Order actions
   placeOrder: (type: 'online' | 'pos', customerName?: string, customerEmail?: string) => string;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
+
   // Product actions
   updateStock: (productId: string, change: number) => void;
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
+
+  // Helpers
+  getCategoryNames: () => string[];
+  getSubcategories: (categoryName: string) => string[];
 }
 
 export const useStore = create<StoreState>((set, get) => ({
-  products: MOCK_PRODUCTS,
-  orders: MOCK_ORDERS,
+  products: INITIAL_PRODUCTS,
+  orders: INITIAL_ORDERS,
   cart: [],
   posCart: [],
-  categories: CATEGORIES,
+  categories: INITIAL_CATEGORIES,
 
+  // ─── Category actions ───
+  addCategory: (name, icon = '📦') => set(s => ({
+    categories: [...s.categories, { id: `cat-${Date.now()}`, name, icon, subcategories: [] }],
+  })),
+  updateCategory: (id, updates) => set(s => ({
+    categories: s.categories.map(c => c.id === id ? { ...c, ...updates } : c),
+  })),
+  deleteCategory: (id) => set(s => ({
+    categories: s.categories.filter(c => c.id !== id),
+  })),
+  addSubcategory: (categoryId, subcategory) => set(s => ({
+    categories: s.categories.map(c =>
+      c.id === categoryId && !c.subcategories.includes(subcategory)
+        ? { ...c, subcategories: [...c.subcategories, subcategory] }
+        : c
+    ),
+  })),
+  removeSubcategory: (categoryId, subcategory) => set(s => ({
+    categories: s.categories.map(c =>
+      c.id === categoryId
+        ? { ...c, subcategories: c.subcategories.filter(sc => sc !== subcategory) }
+        : c
+    ),
+  })),
+
+  // ─── Cart ───
   addToCart: (product, qty = 1) => set(s => {
     const existing = s.cart.find(i => i.product.id === product.id);
     if (existing) return { cart: s.cart.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + qty } : i) };
@@ -105,6 +170,7 @@ export const useStore = create<StoreState>((set, get) => ({
   updateCartQty: (id, qty) => set(s => ({ cart: s.cart.map(i => i.product.id === id ? { ...i, quantity: Math.max(1, qty) } : i) })),
   clearCart: () => set({ cart: [] }),
 
+  // ─── POS Cart ───
   addToPosCart: (product, qty = 1) => set(s => {
     const existing = s.posCart.find(i => i.product.id === product.id);
     if (existing) return { posCart: s.posCart.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + qty } : i) };
@@ -114,6 +180,7 @@ export const useStore = create<StoreState>((set, get) => ({
   updatePosCartQty: (id, qty) => set(s => ({ posCart: s.posCart.map(i => i.product.id === id ? { ...i, quantity: Math.max(1, qty) } : i) })),
   clearPosCart: () => set({ posCart: [] }),
 
+  // ─── Orders ───
   placeOrder: (type, customerName, customerEmail) => {
     const s = get();
     const items = type === 'pos' ? s.posCart : s.cart;
@@ -130,10 +197,18 @@ export const useStore = create<StoreState>((set, get) => ({
     }));
     return id;
   },
-
   updateOrderStatus: (orderId, status) => set(s => ({ orders: s.orders.map(o => o.id === orderId ? { ...o, status } : o) })),
+
+  // ─── Products ───
   updateStock: (productId, change) => set(s => ({ products: s.products.map(p => p.id === productId ? { ...p, stock: Math.max(0, p.stock + change) } : p) })),
   addProduct: (product) => set(s => ({ products: [...s.products, { ...product, id: `p${Date.now()}` }] })),
   updateProduct: (id, updates) => set(s => ({ products: s.products.map(p => p.id === id ? { ...p, ...updates } : p) })),
   deleteProduct: (id) => set(s => ({ products: s.products.filter(p => p.id !== id) })),
+
+  // ─── Helpers ───
+  getCategoryNames: () => get().categories.map(c => c.name),
+  getSubcategories: (categoryName) => {
+    const cat = get().categories.find(c => c.name === categoryName);
+    return cat ? cat.subcategories : [];
+  },
 }));

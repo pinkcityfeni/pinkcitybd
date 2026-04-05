@@ -4,7 +4,7 @@ export default function Sales() {
   const { orders } = useStore();
   const completed = orders.filter(o => o.status === 'completed');
   const totalRevenue = completed.reduce((s, o) => s + o.total, 0);
-  const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.cost * i.quantity, 0), 0);
+  const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
   const totalProfit = totalRevenue - totalCost;
   const margin = totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0;
 
@@ -35,7 +35,7 @@ export default function Sales() {
           </thead>
           <tbody>
             {completed.map(o => {
-              const cost = o.items.reduce((s, i) => s + i.product.cost * i.quantity, 0);
+              const cost = o.items.reduce((s, i) => s + i.product.buyingPrice * i.quantity, 0);
               return (
                 <tr key={o.id} className="border-b last:border-0">
                   <td className="py-3 font-mono text-xs">{o.id}</td>

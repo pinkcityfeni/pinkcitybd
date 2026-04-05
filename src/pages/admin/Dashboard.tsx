@@ -2,7 +2,7 @@ import { useStore } from '@/data/store';
 import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle } from 'lucide-react';
 
 export default function Dashboard() {
-  const { products, orders } = useStore();
+  const { products, orders, categories } = useStore();
   const totalRevenue = orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.total, 0);
   const totalOrders = orders.length;
   const totalProducts = products.length;
@@ -64,7 +64,10 @@ export default function Dashboard() {
             <div className="space-y-3">
               {lowStock.map(p => (
                 <div key={p.id} className="flex items-center justify-between text-sm">
-                  <span>{p.name}</span>
+                  <div>
+                    <span className="font-medium">{p.name}</span>
+                    <span className="text-xs text-muted-foreground ml-2">{p.category} · {p.subcategory}</span>
+                  </div>
                   <span className="font-mono text-destructive">{p.stock} left</span>
                 </div>
               ))}
@@ -87,22 +90,26 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Profit overview */}
+        {/* Category overview */}
         <div className="stat-card">
-          <h3 className="font-semibold mb-4">Profit Overview</h3>
-          {orders.filter(o => o.status === 'completed').slice(0, 4).map(o => {
-            const cost = o.items.reduce((s, i) => s + i.product.cost * i.quantity, 0);
-            const profit = o.total - cost;
-            return (
-              <div key={o.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
-                <span className="font-mono text-xs text-muted-foreground">{o.id}</span>
-                <div className="flex gap-4">
-                  <span>Revenue: ${o.total.toFixed(2)}</span>
-                  <span className="text-success font-medium">Profit: ${profit.toFixed(2)}</span>
+          <h3 className="font-semibold mb-4">Categories Overview</h3>
+          <div className="space-y-3">
+            {categories.map(c => {
+              const count = products.filter(p => p.category === c.name).length;
+              return (
+                <div key={c.id} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <span>{c.icon}</span>
+                    <span className="font-medium">{c.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-semibold">{count} products</span>
+                    <span className="text-xs text-muted-foreground ml-2">· {c.subcategories.length} subs</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

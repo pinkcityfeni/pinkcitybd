@@ -1,19 +1,29 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Store } from 'lucide-react';
+import { ShoppingCart, User, Search, Store, LogOut } from 'lucide-react';
 import { useStore } from '@/data/store';
+import { useAuth } from '@/data/auth';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function StoreLayout() {
   const cart = useStore(s => s.cart);
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/shop', label: 'Shop' },
-    { to: '/categories', label: 'Categories' },
+    { to: '/category', label: 'Categories' },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -50,9 +60,20 @@ export default function StoreLayout() {
                 </Badge>
               )}
             </Link>
-            <Link to="/account" className="p-2 rounded-lg hover:bg-muted transition-colors">
-              <User className="h-5 w-5" />
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <Link to="/account" className="p-2 rounded-lg hover:bg-muted transition-colors">
+                  <User className="h-5 w-5" />
+                </Link>
+                <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground">
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link to="/login">Login</Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>

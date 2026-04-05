@@ -1,28 +1,40 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+// Layouts
 import StoreLayout from "@/components/store/StoreLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
+import POSLayout from "@/components/pos/POSLayout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
+// Public pages - Store
 import Home from "@/pages/store/Home";
 import Shop from "@/pages/store/Shop";
-import Categories from "@/pages/store/Categories";
+import Category from "@/pages/store/Category";
 import ProductDetail from "@/pages/store/ProductDetail";
 import Cart from "@/pages/store/Cart";
 import Checkout from "@/pages/store/Checkout";
 import Account from "@/pages/store/Account";
 
-import POS from "@/pages/pos/POS";
+// Auth pages
+import Login from "@/pages/auth/Login";
+import Signup from "@/pages/auth/Signup";
 
-import AdminLayout from "@/components/admin/AdminLayout";
+// POS pages (protected: cashier or admin)
+import POSSales from "@/pages/pos/POSSales";
+import POSSalesHistory from "@/pages/pos/POSSalesHistory";
+import POSBarcode from "@/pages/pos/POSBarcode";
+
+// Admin pages (protected: admin only)
 import Dashboard from "@/pages/admin/Dashboard";
 import Products from "@/pages/admin/Products";
 import Orders from "@/pages/admin/Orders";
 import Inventory from "@/pages/admin/Inventory";
 import Sales from "@/pages/admin/Sales";
 import Users from "@/pages/admin/Users";
-import Reports from "@/pages/admin/Reports";
 
 import NotFound from "./pages/NotFound";
 
@@ -35,31 +47,54 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Customer storefront */}
+          {/* ─── Public: Customer Storefront ─── */}
           <Route element={<StoreLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
-            <Route path="/categories" element={<Categories />} />
+            <Route path="/category" element={<Category />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/account" element={<Account />} />
           </Route>
 
-          {/* POS system */}
-          <Route path="/pos" element={<POS />} />
+          {/* ─── Public: Auth ─── */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-          {/* Admin panel */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
+          {/* ─── Protected: POS (cashier or admin) ─── */}
+          <Route
+            path="/pos"
+            element={
+              <ProtectedRoute requiredRole="cashier">
+                <POSLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<POSSales />} />
+            <Route path="sales" element={<POSSalesHistory />} />
+            <Route path="barcode" element={<POSBarcode />} />
+          </Route>
+
+          {/* ─── Protected: Admin (admin only) ─── */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="products" element={<Products />} />
             <Route path="orders" element={<Orders />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="sales" element={<Sales />} />
             <Route path="users" element={<Users />} />
-            <Route path="reports" element={<Reports />} />
           </Route>
 
+          {/* ─── Catch-all ─── */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

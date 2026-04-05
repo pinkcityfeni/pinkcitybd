@@ -231,7 +231,7 @@ export default function Checkout() {
           </div>
         </div>
 
-        <Button type="submit" size="lg" className="w-full">
+        <Button type="submit" size="lg" className="w-full rounded-full shadow-lg shadow-primary/20">
           Review Order
         </Button>
       </form>

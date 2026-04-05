@@ -4,7 +4,7 @@ import { useAuth } from '@/data/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Store, AlertCircle } from 'lucide-react';
+import { AlertCircle, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Login() {
@@ -33,46 +33,46 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center hero-gradient px-4">
       <div className="w-full max-w-sm animate-fade-in">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <Store className="h-7 w-7 text-primary" />
-          <span className="text-xl font-bold">ShopFlow</span>
+          <span className="text-2xl">💎</span>
+          <span className="font-display text-xl font-semibold">Glamora</span>
         </Link>
 
-        <div className="stat-card">
-          <h1 className="text-xl font-bold mb-1">Welcome back</h1>
-          <p className="text-sm text-muted-foreground mb-6">Sign in to your account</p>
+        <div className="rounded-2xl border bg-card/90 backdrop-blur-sm p-6 shadow-lg">
+          <h1 className="font-display text-xl font-bold mb-1">Welcome back</h1>
+          <p className="text-xs text-muted-foreground mb-5">Sign in to your account</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
-              <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 rounded-lg px-3 py-2">
-                <AlertCircle className="h-4 w-4 shrink-0" />
+              <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 rounded-xl px-3 py-2">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 {error}
               </div>
             )}
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required />
+              <Label htmlFor="email" className="text-xs">Email</Label>
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-xl" />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
+              <Label htmlFor="password" className="text-xs">Password</Label>
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-xl" />
             </div>
-            <Button type="submit" className="w-full">Sign In</Button>
+            <Button type="submit" className="w-full rounded-full shadow-lg shadow-primary/20">Sign In</Button>
           </form>
 
-          <p className="text-sm text-center mt-4 text-muted-foreground">
+          <p className="text-xs text-center mt-4 text-muted-foreground">
             Don't have an account?{' '}
             <Link to="/signup" className="text-primary font-medium hover:underline">Sign up</Link>
           </p>
         </div>
 
-        <div className="mt-6 stat-card text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground text-sm mb-2">Demo Accounts</p>
-          <p><span className="font-mono">admin@shop.com</span> / <span className="font-mono">admin123</span> — Admin</p>
-          <p><span className="font-mono">cashier@shop.com</span> / <span className="font-mono">cashier123</span> — POS Cashier</p>
-          <p><span className="font-mono">user@shop.com</span> / <span className="font-mono">user123</span> — Customer</p>
+        <div className="mt-5 rounded-2xl border bg-card/60 backdrop-blur-sm p-4 text-xs text-muted-foreground space-y-1">
+          <p className="font-semibold text-foreground text-xs mb-2 flex items-center gap-1"><Sparkles className="h-3 w-3 text-primary" /> Demo Accounts</p>
+          <p><span className="font-mono text-[11px]">admin@shop.com</span> / <span className="font-mono text-[11px]">admin123</span></p>
+          <p><span className="font-mono text-[11px]">cashier@shop.com</span> / <span className="font-mono text-[11px]">cashier123</span></p>
+          <p><span className="font-mono text-[11px]">user@shop.com</span> / <span className="font-mono text-[11px]">user123</span></p>
         </div>
       </div>
     </div>

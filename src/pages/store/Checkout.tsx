@@ -128,7 +128,7 @@ export default function Checkout() {
       <h1 className="text-xl font-bold mb-6">Review Your Order</h1>
 
       {/* Customer info summary */}
-      <div className="rounded-xl border bg-card p-4 mb-4 space-y-2 text-sm">
+      <div className="rounded-2xl border bg-card p-4 mb-4 space-y-2 text-sm">
         <h3 className="font-semibold text-base mb-2">Delivery Details</h3>
         {name && <div className="flex items-center gap-2"><User className="h-3.5 w-3.5 text-muted-foreground" /><span>{name}</span></div>}
         <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
@@ -137,7 +137,7 @@ export default function Checkout() {
       </div>
 
       {/* Items */}
-      <div className="rounded-xl border bg-card p-4 mb-4 space-y-3">
+      <div className="rounded-2xl border bg-card p-4 mb-4 space-y-3">
         <h3 className="font-semibold text-base">Items ({itemCount})</h3>
         {cart.map(i => (
           <div key={i.product.id} className="flex justify-between text-sm">
@@ -178,7 +178,7 @@ export default function Checkout() {
 
       <form onSubmit={handleContinueToReview} className="space-y-4">
         {/* Contact */}
-        <div className="rounded-xl border bg-card p-4 space-y-3">
+        <div className="rounded-2xl border bg-card p-4 space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <User className="h-4 w-4 text-primary" /> Contact Info
             {!isAuthenticated && <span className="text-xs text-muted-foreground font-normal">(optional for guest)</span>}
@@ -194,7 +194,7 @@ export default function Checkout() {
         </div>
 
         {/* Delivery */}
-        <div className="rounded-xl border bg-card p-4 space-y-3">
+        <div className="rounded-2xl border bg-card p-4 space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" /> Delivery Details
           </h3>
@@ -223,7 +223,7 @@ export default function Checkout() {
         </div>
 
         {/* Quick summary */}
-        <div className="rounded-xl border bg-card p-4 space-y-2 text-sm">
+        <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{itemCount} items</span><span>${total.toFixed(2)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base">
@@ -231,7 +231,7 @@ export default function Checkout() {
           </div>
         </div>
 
-        <Button type="submit" size="lg" className="w-full">
+        <Button type="submit" size="lg" className="w-full rounded-full shadow-lg shadow-primary/20">
           Review Order
         </Button>
       </form>

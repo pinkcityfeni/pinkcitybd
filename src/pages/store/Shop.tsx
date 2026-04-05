@@ -4,6 +4,7 @@ import { useStore } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Shop() {
   const { products, categories, addToCart } = useStore();
@@ -89,7 +90,7 @@ export default function Shop() {
               <p className="text-xs text-muted-foreground line-clamp-2 mt-1 flex-1">{p.description}</p>
               <div className="flex items-center justify-between mt-3">
                 <span className="font-bold text-primary">${p.price.toFixed(2)}</span>
-                <Button size="sm" variant="outline" onClick={() => addToCart(p)} disabled={p.stock === 0}>
+                <Button size="sm" variant="outline" onClick={() => { addToCart(p); toast.success(`Added: ${p.name}`); }} disabled={p.stock === 0}>
                   <ShoppingCart className="h-4 w-4 mr-1" />
                   {p.stock > 0 ? 'Add' : 'Out'}
                 </Button>

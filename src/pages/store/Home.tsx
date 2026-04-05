@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { ArrowRight, Zap, Truck, Shield } from 'lucide-react';
+import { ArrowRight, Zap, Truck, Shield, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function Home() {
-  const { products, categories } = useStore();
+  const { products, categories, addToCart } = useStore();
   const featured = products.slice(0, 4);
 
   return (
@@ -35,7 +36,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { icon: Truck, label: 'Free Shipping', desc: 'On orders over $50' },
-            { icon: Shield, label: 'Secure Checkout', desc: 'Safe & encrypted' },
+            { icon: Shield, label: 'Secure Checkout', desc: 'Guest or account' },
             { icon: Zap, label: 'Reward Points', desc: 'Earn on every purchase' },
           ].map(p => (
             <div key={p.label} className="flex items-center gap-3">
@@ -53,13 +54,13 @@ export default function Home() {
 
       {/* Categories */}
       <section className="container mx-auto px-4 py-12">
-        <h2 className="page-header mb-6">Shop by Category</h2>
+        <h2 className="text-lg font-bold mb-6">Shop by Category</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {categories.map(c => (
             <Link
               key={c.id}
               to={`/shop?category=${encodeURIComponent(c.name)}`}
-              className="stat-card flex flex-col items-center gap-2 text-center hover:border-primary/30 transition-colors"
+              className="rounded-xl border bg-card p-4 flex flex-col items-center gap-2 text-center hover:border-primary/30 transition-colors"
             >
               <span className="text-3xl">{c.icon}</span>
               <span className="text-sm font-medium">{c.name}</span>
@@ -72,25 +73,40 @@ export default function Home() {
       {/* Featured */}
       <section className="container mx-auto px-4 pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="page-header">Featured Products</h2>
+          <h2 className="text-lg font-bold">Featured Products</h2>
           <Link to="/shop" className="text-sm text-primary font-medium hover:underline">View all →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {featured.map(p => {
             const cat = categories.find(c => c.name === p.category);
             return (
-              <Link key={p.id} to={`/product/${p.id}`} className="stat-card group">
-                <div className="aspect-square rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/5 transition-colors">
-                  {p.image ? (
-                    <img src={p.image} alt={p.name} className="h-full w-full object-cover rounded-lg" />
-                  ) : (
-                    <span className="text-5xl">{cat?.icon || '📦'}</span>
-                  )}
-                </div>
+              <div key={p.id} className="rounded-xl border bg-card p-4 group">
+                <Link to={`/product/${p.id}`}>
+                  <div className="aspect-square rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/5 transition-colors">
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} className="h-full w-full object-cover rounded-lg" />
+                    ) : (
+                      <span className="text-5xl">{cat?.icon || '📦'}</span>
+                    )}
+                  </div>
+                </Link>
                 <p className="text-xs text-muted-foreground">{p.category} · {p.subcategory}</p>
-                <h3 className="font-semibold text-sm mt-0.5 line-clamp-1">{p.name}</h3>
-                <p className="font-bold text-primary mt-1">${p.price.toFixed(2)}</p>
-              </Link>
+                <Link to={`/product/${p.id}`}>
+                  <h3 className="font-semibold text-sm mt-0.5 line-clamp-1 hover:text-primary">{p.name}</h3>
+                </Link>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="font-bold text-primary">${p.price.toFixed(2)}</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => { addToCart(p); toast.success(`Added: ${p.name}`); }}
+                    disabled={p.stock === 0}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1" />
+                    {p.stock > 0 ? 'Add' : 'Out'}
+                  </Button>
+                </div>
+              </div>
             );
           })}
         </div>

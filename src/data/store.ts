@@ -28,6 +28,8 @@ export interface CartItem {
   quantity: number;
 }
 
+export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'card' | 'bank';
+
 export interface Order {
   id: string;
   items: CartItem[];
@@ -40,6 +42,8 @@ export interface Order {
   customerPhone?: string;
   deliveryAddress?: string;
   pointsEarned?: number;
+  paymentMethod?: PaymentMethod;
+  paymentStatus?: 'pending' | 'paid';
 }
 
 export interface User {

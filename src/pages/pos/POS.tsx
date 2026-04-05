@@ -10,7 +10,7 @@ export default function POS() {
   const { products, posCart, addToPosCart, removeFromPosCart, updatePosCartQty, placeOrder } = useStore();
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
-  const [saleComplete, setSaleComplete] = useState<string | null>(null);
+  const [saleComplete, setSaleComplete] = useState<{ id: string; total: number } | null>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { barcodeRef.current?.focus(); }, []);

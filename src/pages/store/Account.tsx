@@ -1,36 +1,18 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/data/store';
+import { useAuth } from '@/data/auth';
 import { Star, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function Account() {
   const orders = useStore(s => s.orders.filter(o => o.type === 'online'));
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  if (!loggedIn) return (
-    <div className="container mx-auto px-4 py-12 max-w-md animate-fade-in">
-      <Tabs defaultValue="login">
-        <TabsList className="w-full">
-          <TabsTrigger value="login" className="flex-1">Login</TabsTrigger>
-          <TabsTrigger value="signup" className="flex-1">Sign Up</TabsTrigger>
-        </TabsList>
-        <TabsContent value="login" className="stat-card mt-4 space-y-4">
-          <div><Label>Email</Label><Input type="email" placeholder="your@email.com" /></div>
-          <div><Label>Password</Label><Input type="password" placeholder="••••••••" /></div>
-          <Button className="w-full" onClick={() => setLoggedIn(true)}>Login</Button>
-        </TabsContent>
-        <TabsContent value="signup" className="stat-card mt-4 space-y-4">
-          <div><Label>Name</Label><Input placeholder="Your name" /></div>
-          <div><Label>Email</Label><Input type="email" placeholder="your@email.com" /></div>
-          <div><Label>Password</Label><Input type="password" placeholder="••••••••" /></div>
-          <Button className="w-full" onClick={() => setLoggedIn(true)}>Create Account</Button>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
@@ -51,8 +33,11 @@ export default function Account() {
           </div>
         </div>
         <div className="stat-card flex items-center justify-between">
-          <span className="text-sm font-medium">Demo User</span>
-          <Button variant="outline" size="sm" onClick={() => setLoggedIn(false)}>Logout</Button>
+          <div>
+            <p className="text-sm font-medium">{user?.name || 'Guest'}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout}>Logout</Button>
         </div>
       </div>
       <h2 className="font-bold mt-8 mb-4">Recent Orders</h2>
@@ -69,6 +54,7 @@ export default function Account() {
             </div>
           </div>
         ))}
+        {orders.length === 0 && <p className="text-sm text-muted-foreground">No orders yet</p>}
       </div>
     </div>
   );

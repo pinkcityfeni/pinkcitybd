@@ -114,9 +114,9 @@ export default function Home() {
 }
 
 function ProductGrid({ products, categories, addToCart }: {
-  products: ReturnType<typeof useStore>['products'];
-  categories: ReturnType<typeof useStore>['categories'];
-  addToCart: ReturnType<typeof useStore>['addToCart'];
+  products: import('@/data/store').Product[];
+  categories: import('@/data/store').Category[];
+  addToCart: (product: import('@/data/store').Product, qty?: number) => void;
 }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

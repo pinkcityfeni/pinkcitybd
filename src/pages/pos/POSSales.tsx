@@ -10,6 +10,7 @@ export default function POSSales() {
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ id: string; total: number; profit: number; itemCount: number } | null>(null);
+  const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
   // Always keep barcode input focused for scanner
@@ -86,11 +87,25 @@ export default function POSSales() {
     </div>
   );
 
+
   return (
-    <div className="flex-1 flex overflow-hidden">
-      {/* Left: Products panel */}
-      <div className="flex-1 p-4 space-y-3 overflow-auto">
-        {/* Barcode scanner input — always ready */}
+    <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+      {/* Mobile cart toggle */}
+      <button
+        className="md:hidden fixed bottom-4 right-4 z-50 bg-primary text-primary-foreground rounded-full h-14 w-14 flex items-center justify-center shadow-lg"
+        onClick={() => setShowCart(!showCart)}
+      >
+        <ShoppingCart className="h-6 w-6" />
+        {itemCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+            {itemCount}
+          </span>
+        )}
+      </button>
+
+      {/* Products panel */}
+      <div className={`flex-1 p-4 space-y-3 overflow-auto ${showCart ? 'hidden md:block' : ''}`}>
+        {/* Barcode scanner input */}
         <form onSubmit={handleBarcodeScan}>
           <div className="pos-panel flex gap-2 items-center">
             <ScanBarcode className="h-5 w-5 text-primary shrink-0" />
@@ -115,7 +130,6 @@ export default function POSSales() {
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, barcode, or category..."
               className="bg-transparent border-pos-border"
-              onFocus={() => {}} // Don't steal from barcode on click
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -146,11 +160,14 @@ export default function POSSales() {
         </div>
       </div>
 
-      {/* Right: Cart panel */}
-      <div className="w-80 lg:w-96 border-l flex flex-col" style={{ borderColor: 'hsl(var(--pos-border))', background: 'hsl(var(--pos-card))' }}>
-        <div className="p-4 border-b font-semibold text-sm flex items-center gap-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-          <ShoppingCart className="h-4 w-4 text-primary" />
-          Cart ({itemCount} items)
+      {/* Cart panel */}
+      <div className={`${showCart ? 'fixed inset-0 z-40 flex flex-col' : 'hidden'} md:relative md:flex md:w-80 lg:w-96 border-l md:flex-col`} style={{ borderColor: 'hsl(var(--pos-border))', background: 'hsl(var(--pos-card))' }}>
+        <div className="p-4 border-b font-semibold text-sm flex items-center justify-between" style={{ borderColor: 'hsl(var(--pos-border))' }}>
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-4 w-4 text-primary" />
+            Cart ({itemCount} items)
+          </div>
+          <button className="md:hidden text-xs opacity-60" onClick={() => setShowCart(false)}>✕ Close</button>
         </div>
 
         <div className="flex-1 overflow-auto p-3 space-y-1">

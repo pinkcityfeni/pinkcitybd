@@ -37,6 +37,9 @@ export interface Order {
   type: 'online' | 'pos';
   customerName?: string;
   customerEmail?: string;
+  customerPhone?: string;
+  deliveryAddress?: string;
+  pointsEarned?: number;
 }
 
 export interface User {
@@ -78,14 +81,21 @@ const INITIAL_PRODUCTS: Product[] = [
 ];
 
 const INITIAL_ORDERS: Order[] = [
-  { id: 'ord-001', items: [{ product: INITIAL_PRODUCTS[0], quantity: 2 }], total: 99.98, date: '2026-04-04T10:30:00', status: 'completed', type: 'online', customerName: 'Fatima Akter', customerEmail: 'fatima@email.com' },
-  { id: 'ord-002', items: [{ product: INITIAL_PRODUCTS[9], quantity: 3 }, { product: INITIAL_PRODUCTS[12], quantity: 1 }], total: 69.96, date: '2026-04-04T14:15:00', status: 'processing', type: 'online', customerName: 'Nusrat Jahan' },
+  { id: 'ord-001', items: [{ product: INITIAL_PRODUCTS[0], quantity: 2 }], total: 99.98, date: '2026-04-04T10:30:00', status: 'completed', type: 'online', customerName: 'Fatima Akter', customerEmail: 'fatima@email.com', customerPhone: '01712345678', deliveryAddress: 'Dhaka, Bangladesh', pointsEarned: 99 },
+  { id: 'ord-002', items: [{ product: INITIAL_PRODUCTS[9], quantity: 3 }, { product: INITIAL_PRODUCTS[12], quantity: 1 }], total: 69.96, date: '2026-04-04T14:15:00', status: 'processing', type: 'online', customerName: 'Nusrat Jahan', customerPhone: '01898765432', deliveryAddress: 'Chittagong, Bangladesh', pointsEarned: 69 },
   { id: 'ord-003', items: [{ product: INITIAL_PRODUCTS[3], quantity: 5 }], total: 64.95, date: '2026-04-05T09:00:00', status: 'pending', type: 'pos' },
   { id: 'ord-004', items: [{ product: INITIAL_PRODUCTS[6], quantity: 1 }], total: 129.99, date: '2026-04-03T16:45:00', status: 'completed', type: 'pos' },
-  { id: 'ord-005', items: [{ product: INITIAL_PRODUCTS[13], quantity: 2 }], total: 69.98, date: '2026-04-02T11:20:00', status: 'completed', type: 'online', customerName: 'Rashida Begum' },
+  { id: 'ord-005', items: [{ product: INITIAL_PRODUCTS[13], quantity: 2 }], total: 69.98, date: '2026-04-02T11:20:00', status: 'completed', type: 'online', customerName: 'Rashida Begum', customerPhone: '01611223344', deliveryAddress: 'Sylhet, Bangladesh', pointsEarned: 69 },
 ];
 
 // ─── Store ───
+
+interface OrderData {
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  deliveryAddress?: string;
+}
 
 interface StoreState {
   products: Product[];
@@ -114,7 +124,7 @@ interface StoreState {
   clearPosCart: () => void;
 
   // Order actions
-  placeOrder: (type: 'online' | 'pos', customerName?: string, customerEmail?: string) => string;
+  placeOrder: (type: 'online' | 'pos', data?: OrderData) => string;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
 
   // Product actions
@@ -122,6 +132,9 @@ interface StoreState {
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
+
+  // Buy Now
+  buyNow: (product: Product, qty: number) => void;
 
   // Helpers
   getCategoryNames: () => string[];
@@ -170,6 +183,9 @@ export const useStore = create<StoreState>((set, get) => ({
   updateCartQty: (id, qty) => set(s => ({ cart: s.cart.map(i => i.product.id === id ? { ...i, quantity: Math.max(1, qty) } : i) })),
   clearCart: () => set({ cart: [] }),
 
+  // ─── Buy Now (clear cart, add single product, navigate handled by caller) ───
+  buyNow: (product, qty) => set({ cart: [{ product, quantity: qty }] }),
+
   // ─── POS Cart ───
   addToPosCart: (product, qty = 1) => set(s => {
     const existing = s.posCart.find(i => i.product.id === product.id);
@@ -181,12 +197,25 @@ export const useStore = create<StoreState>((set, get) => ({
   clearPosCart: () => set({ posCart: [] }),
 
   // ─── Orders ───
-  placeOrder: (type, customerName, customerEmail) => {
+  placeOrder: (type, data) => {
     const s = get();
     const items = type === 'pos' ? s.posCart : s.cart;
     const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+    const pointsEarned = type === 'online' ? Math.floor(total) : 0;
     const id = `ord-${Date.now()}`;
-    const order: Order = { id, items: [...items], total, date: new Date().toISOString(), status: 'pending', type, customerName, customerEmail };
+    const order: Order = {
+      id,
+      items: [...items],
+      total,
+      date: new Date().toISOString(),
+      status: 'pending',
+      type,
+      customerName: data?.customerName || (type === 'pos' ? 'Walk-in Customer' : 'Guest'),
+      customerEmail: data?.customerEmail,
+      customerPhone: data?.customerPhone,
+      deliveryAddress: data?.deliveryAddress,
+      pointsEarned,
+    };
     set(state => ({
       orders: [order, ...state.orders],
       ...(type === 'pos' ? { posCart: [] } : { cart: [] }),

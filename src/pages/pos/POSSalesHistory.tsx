@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 export default function POSSalesHistory() {
   const orders = useStore(s => s.orders.filter(o => o.type === 'pos'));
   const totalRev = orders.reduce((s, o) => s + o.total, 0);
-  const totalCost = orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.cost * i.quantity, 0), 0);
+  const totalCost = orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
 
   return (
     <div className="flex-1 p-6 overflow-auto">
@@ -40,7 +40,7 @@ export default function POSSalesHistory() {
           </thead>
           <tbody>
             {orders.map(o => {
-              const cost = o.items.reduce((s, i) => s + i.product.cost * i.quantity, 0);
+              const cost = o.items.reduce((s, i) => s + i.product.buyingPrice * i.quantity, 0);
               return (
                 <tr key={o.id} className="border-b last:border-0" style={{ borderColor: 'hsl(var(--pos-border))' }}>
                   <td className="py-3 font-mono text-xs">{o.id}</td>

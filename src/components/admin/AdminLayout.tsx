@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FileText, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/data/auth';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const NAV = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/products', label: 'Products', icon: Package },
+  { to: '/admin/categories', label: 'Categories', icon: FolderTree },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/inventory', label: 'Inventory', icon: Warehouse },
   { to: '/admin/sales', label: 'Sales', icon: BarChart3 },

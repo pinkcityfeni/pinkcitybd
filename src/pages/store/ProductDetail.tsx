@@ -5,14 +5,9 @@ import { ShoppingCart, ArrowLeft, Package } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 
-const EMOJI_MAP: Record<string, string> = {
-  'Electronics': '🔌', 'Clothing': '👕', 'Food & Drinks': '🍵',
-  'Home & Garden': '🌿', 'Sports': '🏃', 'Books': '📚',
-};
-
 export default function ProductDetail() {
   const { id } = useParams();
-  const { products, addToCart } = useStore();
+  const { products, categories, addToCart } = useStore();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);
 
@@ -23,17 +18,27 @@ export default function ProductDetail() {
     </div>
   );
 
+  const cat = categories.find(c => c.name === product.category);
+  const related = products.filter(p => p.id !== product.id && p.subcategory === product.subcategory).slice(0, 4);
+
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <Link to="/shop" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6">
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to Shop
       </Link>
       <div className="grid md:grid-cols-2 gap-10">
-        <div className="aspect-square rounded-2xl bg-muted flex items-center justify-center">
-          <span className="text-8xl">{EMOJI_MAP[product.category] || '📦'}</span>
+        <div className="aspect-square rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
+          {product.image ? (
+            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-8xl">{cat?.icon || '📦'}</span>
+          )}
         </div>
         <div className="flex flex-col">
-          <Badge variant="secondary" className="w-fit mb-2">{product.category}</Badge>
+          <div className="flex gap-2 mb-2">
+            <Badge variant="secondary">{product.category}</Badge>
+            <Badge variant="outline">{product.subcategory}</Badge>
+          </div>
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
           <p className="text-muted-foreground mb-4">{product.description}</p>
           <p className="text-3xl font-bold text-primary mb-4">${product.price.toFixed(2)}</p>
@@ -54,8 +59,33 @@ export default function ProductDetail() {
           <p className="text-xs text-muted-foreground mt-4">
             Earn <span className="font-semibold text-accent">{Math.floor(product.price)}</span> reward points with this purchase
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Barcode: <span className="font-mono">{product.barcode}</span>
+          </p>
         </div>
       </div>
+
+      {/* Related products */}
+      {related.length > 0 && (
+        <div className="mt-12">
+          <h2 className="font-bold text-lg mb-4">More in {product.subcategory}</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {related.map(r => (
+              <Link key={r.id} to={`/product/${r.id}`} className="stat-card group">
+                <div className="aspect-square rounded-lg bg-muted flex items-center justify-center mb-2 overflow-hidden">
+                  {r.image ? (
+                    <img src={r.image} alt={r.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-3xl">{cat?.icon || '📦'}</span>
+                  )}
+                </div>
+                <h3 className="text-sm font-medium line-clamp-1 group-hover:text-primary">{r.name}</h3>
+                <p className="text-sm font-bold text-primary">${r.price.toFixed(2)}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -36,8 +36,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center hero-gradient px-4">
       <div className="w-full max-w-sm animate-fade-in">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <span className="text-2xl">💎</span>
-          <span className="font-display text-xl font-semibold">Glamora</span>
+           <span className="text-2xl">🩷</span>
+           <span className="font-display text-xl font-semibold">PINK CITY</span>
         </Link>
 
         <div className="rounded-2xl border bg-card/90 backdrop-blur-sm p-6 shadow-lg">

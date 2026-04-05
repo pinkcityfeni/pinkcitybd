@@ -87,7 +87,6 @@ export default function POSSales() {
     </div>
   );
 
-  const [showCart, setShowCart] = useState(false);
 
   return (
     <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">

@@ -15,7 +15,7 @@ export default function POSSales() {
   useEffect(() => { barcodeRef.current?.focus(); }, []);
 
   const total = posCart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const totalCost = posCart.reduce((sum, i) => sum + i.product.cost * i.quantity, 0);
+  const totalCost = posCart.reduce((sum, i) => sum + i.product.buyingPrice * i.quantity, 0);
   const profit = total - totalCost;
 
   const handleBarcodeScan = (e: React.FormEvent) => {

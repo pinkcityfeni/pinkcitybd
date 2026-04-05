@@ -47,8 +47,8 @@ export default function POS() {
       <div className="text-center animate-fade-in" style={{ color: 'hsl(var(--pos-foreground))' }}>
         <CheckCircle2 className="h-20 w-20 mx-auto mb-4 text-success" />
         <h2 className="text-2xl font-bold mb-2">Sale Complete!</h2>
-        <p className="text-sm opacity-70 mb-1">Order: {saleComplete}</p>
-        <p className="text-xl font-bold text-success mb-6">${total.toFixed(2)}</p>
+        <p className="text-sm opacity-70 mb-1">Order: {saleComplete.id}</p>
+        <p className="text-xl font-bold text-success mb-6">${saleComplete.total.toFixed(2)}</p>
         <Button size="lg" onClick={() => setSaleComplete(null)}>New Sale</Button>
       </div>
     </div>

@@ -35,7 +35,7 @@ import Orders from "@/pages/admin/Orders";
 import Inventory from "@/pages/admin/Inventory";
 import Sales from "@/pages/admin/Sales";
 import Users from "@/pages/admin/Users";
-
+import AdminCategories from "@/pages/admin/Categories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +88,7 @@ const App = () => (
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="products" element={<Products />} />
+            <Route path="categories" element={<AdminCategories />} />
             <Route path="orders" element={<Orders />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="sales" element={<Sales />} />

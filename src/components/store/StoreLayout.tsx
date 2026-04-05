@@ -38,8 +38,8 @@ export default function StoreLayout() {
       <header className="sticky top-0 z-50 border-b bg-card/90 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl">💎</span>
-            <span className="font-display text-lg font-semibold tracking-tight">Glamora</span>
+            <span className="text-xl">🩷</span>
+            <span className="font-display text-lg font-semibold tracking-tight">PINK CITY</span>
           </Link>
 
           {/* Desktop nav */}
@@ -130,8 +130,8 @@ export default function StoreLayout() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">💎</span>
-                <span className="font-display font-semibold">Glamora</span>
+                <span className="text-lg">🩷</span>
+                <span className="font-display font-semibold">PINK CITY</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Your destination for elegant jewelry & premium cosmetics.
@@ -160,7 +160,7 @@ export default function StoreLayout() {
             </div>
           </div>
           <div className="border-t pt-6 text-center text-xs text-muted-foreground">
-            © 2026 Glamora. All rights reserved.
+            © 2026 PINK CITY. All rights reserved.
           </div>
         </div>
       </footer>

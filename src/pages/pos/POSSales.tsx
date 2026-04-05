@@ -10,6 +10,7 @@ export default function POSSales() {
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ id: string; total: number; profit: number; itemCount: number } | null>(null);
+  const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
   // Always keep barcode input focused for scanner

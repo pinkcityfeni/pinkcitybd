@@ -48,7 +48,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (v: string)
           <span>Upload Photo</span>
         </button>
       )}
-      <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
     </div>
   );
 }

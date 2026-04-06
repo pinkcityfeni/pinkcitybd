@@ -8,7 +8,50 @@ import { Plus, Pencil, Trash2, Search, Camera, X as XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
-const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '' };
+
+function ImageUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => onChange(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="space-y-2">
+      {value ? (
+        <div className="relative w-24 h-24 rounded-xl overflow-hidden border">
+          <img src={value} alt="Product" className="w-full h-full object-cover" />
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="absolute top-1 right-1 bg-background/80 rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors"
+          >
+            <XIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-sm text-muted-foreground w-full justify-center"
+        >
+          <Camera className="h-4 w-4" />
+          <span>Upload Photo</span>
+        </button>
+      )}
+      <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
+    </div>
+  );
+}
+
 
 export default function Products() {
   const { products, addProduct, updateProduct, deleteProduct, categories } = useStore();

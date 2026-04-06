@@ -176,8 +176,11 @@ export default function Products() {
               <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
             </div>
             <div>
-              <Label>Image URL</Label>
-              <Input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." />
+              <Label>Product Image</Label>
+              <ImageUpload
+                value={form.image}
+                onChange={(val) => setForm(f => ({ ...f, image: val }))}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

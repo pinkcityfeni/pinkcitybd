@@ -93,7 +93,37 @@ export default function Products() {
         </div>
       </div>
 
-      <div className="stat-card overflow-auto">
+      {/* Mobile: Card layout */}
+      <div className="sm:hidden space-y-3">
+        {filtered.map(p => (
+          <div key={p.id} className="stat-card p-4 space-y-2">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-medium text-sm">{p.name}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{p.category} · {p.subcategory}</p>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => openEdit(p)} className="p-1.5 hover:text-primary rounded-lg hover:bg-primary/10"><Pencil className="h-4 w-4" /></button>
+                <button onClick={() => { deleteProduct(p.id); toast.success('Deleted'); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <Badge variant="outline" className="text-[10px]">{p.barcode}</Badge>
+              <span className={`font-medium ${p.stock < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>Stock: {p.stock}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-bold text-primary">${p.price.toFixed(2)}</span>
+              <span className="text-xs text-muted-foreground">Buy: ${p.buyingPrice.toFixed(2)}</span>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground text-sm">No products found</div>
+        )}
+      </div>
+
+      {/* Desktop: Table layout */}
+      <div className="hidden sm:block stat-card overflow-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-muted-foreground">

@@ -57,8 +57,18 @@ export interface User {
 // ─── Seed Data ───
 
 const INITIAL_CATEGORIES: Category[] = [
-  { id: 'cat-1', name: 'Jewelry', icon: '💍', subcategories: ['Necklace', 'Churi', 'Ring'] },
-  { id: 'cat-2', name: 'Cosmetics', icon: '💄', subcategories: ['Lipstick', 'Cream'] },
+  { id: 'cat-1', name: 'Jewelry', icon: '💍', subcategories: ['Necklace', 'Churi', 'Ring', 'Earring', 'Bracelet', 'Anklet'] },
+  { id: 'cat-2', name: 'Skin', icon: '✨', subcategories: ['Cleanser', 'Face Wash', 'Toner', 'Serum', 'Moisturizer', 'Sunscreen', 'Face Mask', 'Acne Treatment', 'Eye Cream', 'Night Cream', 'Lip Care'] },
+  { id: 'cat-3', name: 'Health & Hygiene', icon: '🧴', subcategories: ['Sanitizer', 'Feminine Hygiene', 'Deodorant', 'Cotton & Tissue', 'Hand Wash', 'Dettol & Savlon'] },
+  { id: 'cat-4', name: 'Body', icon: '🛁', subcategories: ['Body Wash', 'Body Scrub & Exfoliator', 'Body Wax', 'Body Sun Protection', 'Lotion & Oil', 'Hand & Foot Care', 'Body Cream', 'Body Butter'] },
+  { id: 'cat-5', name: 'Hair', icon: '💇', subcategories: ['Shampoo', 'Hair Serum', 'Conditioner', 'Hair Mask & Cream', 'Hair Oil', 'Hair Color', 'Hair Spray'] },
+  { id: 'cat-6', name: 'Mom & Baby', icon: '👶', subcategories: ['Baby Cream & Moisturizers', 'Baby Shampoo', 'Baby Body Wash', 'Baby Lotion & Oil', 'Baby Powder', 'Stretch Mark', 'Baby Sunscreen', 'Baby Wipes', 'Baby Toothpaste'] },
+  { id: 'cat-7', name: 'Oral Care', icon: '🦷', subcategories: ['Toothpaste', 'Tooth Brush', 'Mouthwash'] },
+  { id: 'cat-8', name: 'Makeup', icon: '💄', subcategories: ['Loose Powder', 'Blush', 'Foundation', 'Concealer', 'Lip Tint', 'Setting Spray', 'Highlighter', 'Compact Powder', 'Primer', 'Mascara', 'Contour & Bronzer', 'BB & CC Cream', 'Makeup Remover', 'Eyeliner', 'Eyeshadow', 'Lipstick', 'Lip Liner', 'Lip Gloss', 'Nail Polish', 'Makeup Brushes & Sponge', 'Face Palette'] },
+  { id: 'cat-9', name: 'Fragrance', icon: '🌸', subcategories: ["Women's Perfume", "Women's Body Mist", "Men's Body Spray", "Women's Body Spray", "Men's Perfume", "Women's Roll Ons", "Men's Roll Ons"] },
+  { id: 'cat-10', name: 'Men', icon: '🧔', subcategories: ['Facewash & Scrub', "Men's Shampoo", "Men's Conditioner", 'Hair Gel', 'Hair Oil', 'Razor', 'Shaving Cream', 'Aftershave Lotion'] },
+  { id: 'cat-11', name: 'Accessories', icon: '🎀', subcategories: ['Bath Sponge & Loofah', 'Hair Accessories', 'Makeup Bag', 'Mirror'] },
+  { id: 'cat-12', name: 'Supplement', icon: '💊', subcategories: ['Vitamins', 'Collagen', 'Protein', 'Health Drink'] },
 ];
 
 const INITIAL_PRODUCTS: Product[] = [

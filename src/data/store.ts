@@ -84,14 +84,14 @@ const INITIAL_PRODUCTS: Product[] = [
   { id: 'p7', name: 'Diamond Solitaire Ring', image: '', price: 129.99, buyingPrice: 55, barcode: '2007', stock: 15, category: 'Jewelry', subcategory: 'Ring', description: 'Stunning CZ diamond solitaire ring in white gold setting.' },
   { id: 'p8', name: 'Stacking Ring Set', image: '', price: 29.99, buyingPrice: 12, barcode: '2008', stock: 40, category: 'Jewelry', subcategory: 'Ring', description: 'Set of 5 minimalist stacking rings, mixed metals.' },
   { id: 'p9', name: 'Vintage Emerald Ring', image: '', price: 79.99, buyingPrice: 35, barcode: '2009', stock: 18, category: 'Jewelry', subcategory: 'Ring', description: 'Vintage-style emerald green stone ring with filigree band.' },
-  // Cosmetics — Lipstick
-  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', price: 14.99, buyingPrice: 5, barcode: '3001', stock: 120, category: 'Cosmetics', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
-  { id: 'p11', name: 'Glossy Lip Color', image: '', price: 11.99, buyingPrice: 4, barcode: '3002', stock: 90, category: 'Cosmetics', subcategory: 'Lipstick', description: 'High-shine glossy lip color with moisturizing formula.' },
-  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', price: 18.99, buyingPrice: 7, barcode: '3003', stock: 75, category: 'Cosmetics', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
-  // Cosmetics — Cream
-  { id: 'p13', name: 'Hydrating Face Cream', image: '', price: 24.99, buyingPrice: 9, barcode: '3004', stock: 85, category: 'Cosmetics', subcategory: 'Cream', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
-  { id: 'p14', name: 'Night Repair Cream', image: '', price: 34.99, buyingPrice: 14, barcode: '3005', stock: 55, category: 'Cosmetics', subcategory: 'Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
-  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', price: 19.99, buyingPrice: 8, barcode: '3006', stock: 100, category: 'Cosmetics', subcategory: 'Cream', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
+  // Makeup — Lipstick
+  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', price: 14.99, buyingPrice: 5, barcode: '3001', stock: 120, category: 'Makeup', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
+  { id: 'p11', name: 'Glossy Lip Color', image: '', price: 11.99, buyingPrice: 4, barcode: '3002', stock: 90, category: 'Makeup', subcategory: 'Lip Gloss', description: 'High-shine glossy lip color with moisturizing formula.' },
+  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', price: 18.99, buyingPrice: 7, barcode: '3003', stock: 75, category: 'Makeup', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
+  // Skin — Cream
+  { id: 'p13', name: 'Hydrating Face Cream', image: '', price: 24.99, buyingPrice: 9, barcode: '3004', stock: 85, category: 'Skin', subcategory: 'Moisturizer', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
+  { id: 'p14', name: 'Night Repair Cream', image: '', price: 34.99, buyingPrice: 14, barcode: '3005', stock: 55, category: 'Skin', subcategory: 'Night Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
+  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', price: 19.99, buyingPrice: 8, barcode: '3006', stock: 100, category: 'Skin', subcategory: 'Sunscreen', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
 ];
 
 const INITIAL_ORDERS: Order[] = [

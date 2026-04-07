@@ -140,7 +140,7 @@ export default function Categories() {
                   onChange={e => setSubInput(s => ({ ...s, [c.id]: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && handleAddSub(c.id)}
                 />
-                <Button size="sm" variant="outline" className="h-8" onClick={() => handleAddSub(c.id)}>
+                <Button type="button" size="sm" variant="outline" className="h-8 shrink-0" onClick={() => handleAddSub(c.id)}>
                   <FolderPlus className="h-3.5 w-3.5 mr-1" /> Add
                 </Button>
               </div>

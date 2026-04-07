@@ -44,7 +44,15 @@ export default function Categories() {
 
   const handleAddSub = (catId: string) => {
     const val = subInput[catId]?.trim();
-    if (!val) return;
+    if (!val) {
+      toast.error('Please enter a subcategory name');
+      return;
+    }
+    const cat = categories.find(c => c.id === catId);
+    if (cat?.subcategories.includes(val)) {
+      toast.error('This subcategory already exists');
+      return;
+    }
     addSubcategory(catId, val);
     setSubInput(s => ({ ...s, [catId]: '' }));
     toast.success('Subcategory added');

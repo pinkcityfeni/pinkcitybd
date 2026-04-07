@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import logoImg from '@/assets/logo.jpg';
 
 export default function StoreLayout() {
   const cart = useStore(s => s.cart);
@@ -38,7 +39,7 @@ export default function StoreLayout() {
       <header className="sticky top-0 z-50 border-b bg-card/90 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl">🩷</span>
+            <img src={logoImg} alt="PINK CITY" className="h-8 w-8 rounded-lg object-cover" />
             <span className="font-display text-lg font-semibold tracking-tight">PINK CITY</span>
           </Link>
 
@@ -130,7 +131,7 @@ export default function StoreLayout() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">🩷</span>
+                <img src={logoImg} alt="PINK CITY" className="h-7 w-7 rounded-lg object-cover" />
                 <span className="font-display font-semibold">PINK CITY</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">

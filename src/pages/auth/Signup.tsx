@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import logoImg from '@/assets/logo.jpg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/data/auth';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,7 @@ export default function Signup() {
     <div className="min-h-screen flex items-center justify-center hero-gradient px-4">
       <div className="w-full max-w-sm animate-fade-in">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-           <span className="text-2xl">🩷</span>
+           <img src={logoImg} alt="PINK CITY" className="h-10 w-10 rounded-lg object-cover" />
            <span className="font-display text-xl font-semibold">PINK CITY</span>
         </Link>
 

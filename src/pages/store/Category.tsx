@@ -1,71 +1,75 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Grid3X3 } from 'lucide-react';
 
 export default function Category() {
   const { categories, products } = useStore();
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
-      <div className="text-center mb-8">
-        <h1 className="font-display text-2xl font-bold">All Categories</h1>
-        <p className="text-sm text-muted-foreground mt-1">Browse by category and subcategory</p>
+    <div className="container mx-auto px-4 py-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-6">
+        <Grid3X3 className="h-5 w-5 text-primary" />
+        <h1 className="font-display text-xl font-bold">All Categories</h1>
       </div>
 
-      <div className="space-y-5">
+      {/* Category Grid - Chardike style */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map(c => {
           const catProducts = products.filter(p => p.category === c.name);
           return (
-            <div key={c.id} className="rounded-2xl border bg-card p-5 hover:shadow-md transition-shadow">
+            <div key={c.id} className="rounded-2xl border bg-card overflow-hidden hover:shadow-lg transition-all duration-300 group">
+              {/* Category Header */}
               <Link
                 to={`/shop?category=${encodeURIComponent(c.name)}`}
-                className="flex items-center gap-3 mb-4 group"
+                className="flex items-center gap-3 p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-b group-hover:from-primary/10 group-hover:to-primary/15 transition-colors"
               >
-                <div className="h-12 w-12 rounded-2xl soft-gradient flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shrink-0">
+                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0">
                   {c.icon}
                 </div>
-                <div className="flex-1">
-                  <h2 className="font-display font-semibold text-lg group-hover:text-primary transition-colors">{c.name}</h2>
-                  <p className="text-xs text-muted-foreground">{catProducts.length} products</p>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-display font-semibold text-base truncate">{c.name}</h2>
+                  <p className="text-[11px] text-muted-foreground">{catProducts.length} products</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
               </Link>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                {c.subcategories.map(sc => {
-                  const subProducts = catProducts.filter(p => p.subcategory === sc);
-                  return (
-                    <Link
-                      key={sc}
-                      to={`/shop?category=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sc)}`}
-                      className="rounded-xl border bg-card p-3 hover:border-primary/30 hover:shadow-sm transition-all group"
-                    >
-                      <h3 className="font-medium text-sm group-hover:text-primary transition-colors">{sc}</h3>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{subProducts.length} products</p>
-                      {subProducts.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {subProducts.slice(0, 2).map(p => (
-                            <span key={p.id} className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground truncate max-w-[90px]">
-                              {p.name}
-                            </span>
-                          ))}
-                          {subProducts.length > 2 && (
-                            <span className="text-[9px] text-muted-foreground">+{subProducts.length - 2}</span>
-                          )}
-                        </div>
-                      )}
-                    </Link>
-                  );
-                })}
+              {/* Subcategories List */}
+              <div className="p-3">
+                {c.subcategories.length > 0 ? (
+                  <div className="space-y-0.5">
+                    {c.subcategories.map(sc => {
+                      const subCount = catProducts.filter(p => p.subcategory === sc).length;
+                      return (
+                        <Link
+                          key={sc}
+                          to={`/shop?category=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sc)}`}
+                          className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors group/sub"
+                        >
+                          <span className="text-sm group-hover/sub:text-primary transition-colors">{sc}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{subCount}</span>
+                            <ChevronRight className="h-3 w-3 text-muted-foreground group-hover/sub:text-primary transition-colors" />
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-3 italic">No subcategories</p>
+                )}
               </div>
             </div>
           );
         })}
-
-        {categories.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">No categories yet</div>
-        )}
       </div>
+
+      {categories.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          <Grid3X3 className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p className="font-display text-lg">No categories yet</p>
+        </div>
+      )}
     </div>
   );
 }

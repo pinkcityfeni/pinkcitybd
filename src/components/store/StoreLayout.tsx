@@ -189,7 +189,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
-      <div className="relative bg-card/95 backdrop-blur-xl border-t h-14 flex items-center justify-around">
+      <div className="relative bg-card/95 backdrop-blur-xl border-t h-14 grid grid-cols-5 items-center">
         {tabs.map((t, i) => {
           const isHome = t.to === '/';
           const active = isHome ? location.pathname === '/' : location.pathname.startsWith(t.to.split('?')[0]) && (t.to.includes('?') ? location.search.includes('wishlist') : !location.search.includes('wishlist'));

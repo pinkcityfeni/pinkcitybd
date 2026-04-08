@@ -16,7 +16,8 @@ export default function POSSales() {
   const placeOrder = useStore(s => s.placeOrder);
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
-  const [saleComplete, setSaleComplete] = useState<{ id: string; total: number; profit: number; itemCount: number } | null>(null);
+  const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number } | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 

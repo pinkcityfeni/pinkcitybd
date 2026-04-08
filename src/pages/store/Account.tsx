@@ -3,7 +3,7 @@ import { useAuth } from '@/data/auth';
 import { Star, Package, Heart, ChevronDown, ChevronUp, CheckCircle2, Clock, Truck, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const ORDER_STEPS = [
   { status: 'pending', label: 'অর্ডার রিসিভ', icon: Clock },
@@ -12,14 +12,15 @@ const ORDER_STEPS = [
 ];
 
 export default function Account() {
-  const orders = useStore(s => s.orders.filter(o => o.type === 'online'));
+  const allOrders = useStore(s => s.orders);
   const wishlist = useStore(s => s.wishlist);
   const products = useStore(s => s.products);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  const wishedProducts = products.filter(p => wishlist.includes(p.id));
+  const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);
+  const wishedProducts = useMemo(() => products.filter(p => wishlist.includes(p.id)), [products, wishlist]);
 
   const handleLogout = () => {
     logout();

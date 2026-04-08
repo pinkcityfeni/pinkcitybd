@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useStore, Product } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 
 const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '' };
 
-function ImageUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function ImageUpload({ value, onChange, uploadLabel }: { value: string; onChange: (v: string) => void; uploadLabel: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,7 +32,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (v: string)
         </div>
       ) : (
         <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-sm text-muted-foreground w-full justify-center">
-          <Camera className="h-4 w-4" /><span>Upload Photo</span>
+          <Camera className="h-4 w-4" /><span>{uploadLabel}</span>
         </button>
       )}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
@@ -45,6 +46,7 @@ export default function Products() {
   const updateProduct = useStore(s => s.updateProduct);
   const deleteProduct = useStore(s => s.deleteProduct);
   const categories = useStore(s => s.categories);
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
   const [editProduct, setEditProduct] = useState<Product | null>(null);
@@ -73,10 +75,10 @@ export default function Products() {
   };
 
   const handleSave = () => {
-    if (!form.name || !form.price || !form.category) { toast.error('Please fill required fields'); return; }
+    if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
     const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: form.image };
-    if (editProduct) { updateProduct(editProduct.id, data); toast.success('Product updated'); }
-    else { addProduct(data); toast.success('Product added'); }
+    if (editProduct) { updateProduct(editProduct.id, data); toast.success(t('prod.updated')); }
+    else { addProduct(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
   };
 
@@ -89,19 +91,19 @@ export default function Products() {
     <div className="p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="page-header">Products</h1>
-          <p className="page-subheader">{products.length} total products</p>
+          <h1 className="page-header">{t('prod.title')}</h1>
+          <p className="page-subheader">{t('prod.totalProducts', { n: products.length })}</p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Add Product</Button>
+        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> {t('prod.addProduct')}</Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-8" placeholder="Search by name or barcode..." value={search} onChange={e => setSearch(e.target.value)} />
+          <Input className="pl-8" placeholder={t('prod.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button variant={!filterCat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat('')}>All</Button>
+          <Button variant={!filterCat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat('')}>{t('general.all')}</Button>
           {categories.map(c => (
             <Button key={c.id} variant={filterCat === c.name ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat(c.name)}>{c.icon} {c.name}</Button>
           ))}
@@ -119,20 +121,20 @@ export default function Products() {
               </div>
               <div className="flex gap-1">
                 <button onClick={() => openEdit(p)} className="p-1.5 hover:text-primary rounded-lg hover:bg-primary/10"><Pencil className="h-4 w-4" /></button>
-                <button onClick={() => { deleteProduct(p.id); toast.success('Deleted'); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => { deleteProduct(p.id); toast.success(t('prod.deleted')); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline" className="text-[10px]">{p.barcode}</Badge>
-              <span className={`font-medium ${p.stock < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>Stock: {p.stock}</span>
+              <span className={`font-medium ${p.stock < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>{t('prod.stock')}: {p.stock}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="font-bold text-primary">৳{p.price.toFixed(0)}</span>
-              <span className="text-xs text-muted-foreground">Buy: ৳{p.buyingPrice.toFixed(0)}</span>
+              <span className="text-xs text-muted-foreground">{t('prod.buyPrice')}: ৳{p.buyingPrice.toFixed(0)}</span>
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">No products found</div>}
+        {filtered.length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">{t('prod.noProducts')}</div>}
       </div>
 
       {/* Desktop */}
@@ -140,14 +142,14 @@ export default function Products() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-muted-foreground">
-              <th className="pb-3 font-medium">Product</th>
-              <th className="pb-3 font-medium">Barcode</th>
-              <th className="pb-3 font-medium">Category</th>
-              <th className="pb-3 font-medium">Subcategory</th>
-              <th className="pb-3 font-medium text-right">Price</th>
-              <th className="pb-3 font-medium text-right">Buy Price</th>
-              <th className="pb-3 font-medium text-right">Stock</th>
-              <th className="pb-3 font-medium text-right">Actions</th>
+              <th className="pb-3 font-medium">{t('prod.product')}</th>
+              <th className="pb-3 font-medium">{t('prod.barcode')}</th>
+              <th className="pb-3 font-medium">{t('prod.category')}</th>
+              <th className="pb-3 font-medium">{t('prod.subcategory')}</th>
+              <th className="pb-3 font-medium text-right">{t('prod.price')}</th>
+              <th className="pb-3 font-medium text-right">{t('prod.buyPrice')}</th>
+              <th className="pb-3 font-medium text-right">{t('prod.stock')}</th>
+              <th className="pb-3 font-medium text-right">{t('prod.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -162,47 +164,47 @@ export default function Products() {
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? 'text-destructive' : ''}`}>{p.stock}</td>
                 <td className="py-3 text-right">
                   <button onClick={() => openEdit(p)} className="p-1 hover:text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => { deleteProduct(p.id); toast.success('Deleted'); }} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => { deleteProduct(p.id); toast.success(t('prod.deleted')); }} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">No products found</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">{t('prod.noProducts')}</td></tr>}
           </tbody>
         </table>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editProduct ? 'Edit Product' : 'New Product'}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editProduct ? t('prod.editProduct') : t('prod.newProduct')}</DialogTitle></DialogHeader>
           <div className="grid gap-3 max-h-[70vh] overflow-auto pr-1">
-            <div><Label>Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
-            <div><Label>Description</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
-            <div><Label>Product Image</Label><ImageUpload value={form.image} onChange={(val) => setForm(f => ({ ...f, image: val }))} /></div>
+            <div><Label>{t('prod.name')}</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+            <div><Label>{t('prod.description')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
+            <div><Label>{t('prod.image')}</Label><ImageUpload value={form.image} onChange={(val) => setForm(f => ({ ...f, image: val }))} uploadLabel={t('prod.uploadPhoto')} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Selling Price (৳) *</Label><Input type="number" step="1" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
-              <div><Label>Buying Price (৳)</Label><Input type="number" step="1" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
+              <div><Label>{t('prod.sellingPrice')}</Label><Input type="number" step="1" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
+              <div><Label>{t('prod.buyingPrice')}</Label><Input type="number" step="1" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>
-              <div><Label>Stock</Label><Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} /></div>
+              <div><Label>{t('prod.barcode')}</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>
+              <div><Label>{t('prod.stock')}</Label><Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Category *</Label>
+                <Label>{t('prod.category')}</Label>
                 <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.category} onChange={e => handleCategoryChange(e.target.value)}>
-                  <option value="">Select category</option>
+                  <option value="">{t('prod.selectCategory')}</option>
                   {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <div>
-                <Label>Subcategory</Label>
+                <Label>{t('prod.subcategory')}</Label>
                 <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.subcategory} onChange={e => setForm(f => ({ ...f, subcategory: e.target.value }))}>
-                  <option value="">Select subcategory</option>
+                  <option value="">{t('prod.selectSubcategory')}</option>
                   {subcategories.map(sc => <option key={sc} value={sc}>{sc}</option>)}
                 </select>
               </div>
             </div>
-            <Button onClick={handleSave} className="mt-2">{editProduct ? 'Update' : 'Add'} Product</Button>
+            <Button onClick={handleSave} className="mt-2">{editProduct ? t('prod.update') : t('prod.add')} {t('prod.product')}</Button>
           </div>
         </DialogContent>
       </Dialog>

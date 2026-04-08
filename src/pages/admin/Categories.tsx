@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore, Category } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,72 +17,48 @@ export default function Categories() {
   const deleteCategory = useStore(s => s.deleteCategory);
   const addSubcategory = useStore(s => s.addSubcategory);
   const removeSubcategory = useStore(s => s.removeSubcategory);
+  const { t } = useLanguage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCat, setEditCat] = useState<Category | null>(null);
   const [catName, setCatName] = useState('');
   const [catIcon, setCatIcon] = useState('📦');
   const [subInput, setSubInput] = useState<Record<string, string>>({});
 
-  const openNew = () => {
-    setEditCat(null);
-    setCatName('');
-    setCatIcon('📦');
-    setDialogOpen(true);
-  };
-
-  const openEdit = (c: Category) => {
-    setEditCat(c);
-    setCatName(c.name);
-    setCatIcon(c.icon);
-    setDialogOpen(true);
-  };
+  const openNew = () => { setEditCat(null); setCatName(''); setCatIcon('📦'); setDialogOpen(true); };
+  const openEdit = (c: Category) => { setEditCat(c); setCatName(c.name); setCatIcon(c.icon); setDialogOpen(true); };
 
   const handleSave = () => {
     if (!catName.trim()) return;
-    if (editCat) {
-      updateCategory(editCat.id, { name: catName.trim(), icon: catIcon });
-      toast.success('Category updated');
-    } else {
-      addCategory(catName.trim(), catIcon);
-      toast.success('Category added');
-    }
+    if (editCat) { updateCategory(editCat.id, { name: catName.trim(), icon: catIcon }); toast.success(t('cat.categoryUpdated')); }
+    else { addCategory(catName.trim(), catIcon); toast.success(t('cat.categoryAdded')); }
     setDialogOpen(false);
   };
 
   const handleAddSub = (catId: string) => {
     const val = subInput[catId]?.trim();
-    if (!val) {
-      toast.error('Please enter a subcategory name');
-      return;
-    }
+    if (!val) { toast.error(t('cat.enterSubName')); return; }
     const cat = categories.find(c => c.id === catId);
-    if (cat?.subcategories.includes(val)) {
-      toast.error('This subcategory already exists');
-      return;
-    }
+    if (cat?.subcategories.includes(val)) { toast.error(t('cat.subExists')); return; }
     addSubcategory(catId, val);
     setSubInput(s => ({ ...s, [catId]: '' }));
-    toast.success('Subcategory added');
+    toast.success(t('cat.subAdded'));
   };
 
   const handleDeleteCat = (c: Category) => {
     const productCount = products.filter(p => p.category === c.name).length;
-    if (productCount > 0) {
-      toast.error(`Cannot delete: ${productCount} products in this category`);
-      return;
-    }
+    if (productCount > 0) { toast.error(t('cat.cantDelete', { n: productCount })); return; }
     deleteCategory(c.id);
-    toast.success('Category deleted');
+    toast.success(t('cat.catDeleted'));
   };
 
   return (
     <div className="p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="page-header">Categories</h1>
-          <p className="page-subheader">{categories.length} categories</p>
+          <h1 className="page-header">{t('cat.title')}</h1>
+          <p className="page-subheader">{t('cat.nCategories', { n: categories.length })}</p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Add Category</Button>
+        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> {t('cat.addCategory')}</Button>
       </div>
 
       <div className="grid gap-4">
@@ -94,22 +71,17 @@ export default function Categories() {
                   <span className="text-2xl">{c.icon}</span>
                   <div>
                     <h3 className="font-semibold text-base">{c.name}</h3>
-                    <p className="text-xs text-muted-foreground">{catProducts.length} products</p>
+                    <p className="text-xs text-muted-foreground">{t('cat.nProducts', { n: catProducts.length })}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary">
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => handleDeleteCat(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => handleDeleteCat(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
 
-              {/* Subcategories */}
               <div className="mb-3">
-                <p className="text-xs font-medium text-muted-foreground mb-2">Subcategories</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{t('cat.subcategories')}</p>
                 <div className="flex flex-wrap gap-2">
                   {c.subcategories.map(sc => {
                     const subCount = catProducts.filter(p => p.subcategory === sc).length;
@@ -120,9 +92,9 @@ export default function Categories() {
                         <button
                           onClick={() => {
                             const scProducts = catProducts.filter(p => p.subcategory === sc).length;
-                            if (scProducts > 0) { toast.error(`Cannot delete: ${scProducts} products in this subcategory`); return; }
+                            if (scProducts > 0) { toast.error(t('cat.cantDeleteSub', { n: scProducts })); return; }
                             removeSubcategory(c.id, sc);
-                            toast.success('Subcategory removed');
+                            toast.success(t('cat.subRemoved'));
                           }}
                           className="ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive"
                         >
@@ -131,30 +103,20 @@ export default function Categories() {
                       </Badge>
                     );
                   })}
-                  {c.subcategories.length === 0 && (
-                    <span className="text-xs text-muted-foreground italic">No subcategories</span>
-                  )}
+                  {c.subcategories.length === 0 && <span className="text-xs text-muted-foreground italic">{t('cat.noSubcategories')}</span>}
                 </div>
               </div>
 
-              {/* Add subcategory inline */}
               <div className="flex gap-2">
-                <Input
-                  placeholder="New subcategory name..."
-                  className="h-8 text-sm"
-                  value={subInput[c.id] || ''}
-                  onChange={e => setSubInput(s => ({ ...s, [c.id]: e.target.value }))}
-                  onKeyDown={e => e.key === 'Enter' && handleAddSub(c.id)}
-                />
+                <Input placeholder={t('cat.newSubcategory')} className="h-8 text-sm" value={subInput[c.id] || ''} onChange={e => setSubInput(s => ({ ...s, [c.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleAddSub(c.id)} />
                 <Button type="button" size="sm" variant="outline" className="h-8 shrink-0" onClick={() => handleAddSub(c.id)}>
-                  <FolderPlus className="h-3.5 w-3.5 mr-1" /> Add
+                  <FolderPlus className="h-3.5 w-3.5 mr-1" /> {t('cat.addSub')}
                 </Button>
               </div>
 
-              {/* Products in this category */}
               {catProducts.length > 0 && (
                 <div className="mt-4 border-t pt-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Products in this category</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">{t('cat.productsInCat')}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                     {catProducts.map(p => (
                       <div key={p.id} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-xs">
@@ -162,7 +124,7 @@ export default function Categories() {
                           <p className="font-medium truncate">{p.name}</p>
                           <p className="text-muted-foreground">{p.subcategory}</p>
                         </div>
-                        <span className="font-semibold text-primary shrink-0 ml-2">${p.price.toFixed(2)}</span>
+                        <span className="font-semibold text-primary shrink-0 ml-2">৳{p.price.toFixed(0)}</span>
                       </div>
                     ))}
                   </div>
@@ -173,22 +135,13 @@ export default function Categories() {
         })}
       </div>
 
-      {/* Add/Edit Category Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{editCat ? 'Edit Category' : 'New Category'}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{editCat ? t('cat.editCategory') : t('cat.newCategory')}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
-            <div>
-              <Label>Category Name</Label>
-              <Input value={catName} onChange={e => setCatName(e.target.value)} placeholder="e.g. Electronics" />
-            </div>
-            <div>
-              <Label>Icon (emoji)</Label>
-              <Input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="📦" className="w-20" />
-            </div>
-            <Button onClick={handleSave}>{editCat ? 'Update' : 'Create'} Category</Button>
+            <div><Label>{t('cat.categoryName')}</Label><Input value={catName} onChange={e => setCatName(e.target.value)} placeholder={t('cat.namePlaceholder')} /></div>
+            <div><Label>{t('cat.icon')}</Label><Input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="📦" className="w-20" /></div>
+            <Button onClick={handleSave}>{editCat ? t('cat.update') : t('cat.create')} {t('cat.title')}</Button>
           </div>
         </DialogContent>
       </Dialog>

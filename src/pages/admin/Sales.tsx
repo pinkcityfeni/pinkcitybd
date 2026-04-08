@@ -1,10 +1,12 @@
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Sales() {
   const orders = useStore(s => s.orders);
+  const { t } = useLanguage();
   const completed = orders.filter(o => o.status === 'completed');
   const totalRevenue = completed.reduce((s, o) => s + o.total, 0);
   const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
@@ -25,42 +27,42 @@ export default function Sales() {
     a.download = `sales-report-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('CSV ডাউনলোড হচ্ছে');
+    toast.success(t('sales.downloading'));
   };
 
   return (
     <div className="p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="page-header">সেলস</h1>
-          <p className="page-subheader">রেভিনিউ ও লাভের বিশ্লেষণ</p>
+          <h1 className="page-header">{t('sales.title')}</h1>
+          <p className="page-subheader">{t('sales.subtitle')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={exportCSV}>
-          <Download className="h-4 w-4 mr-1" /> CSV ডাউনলোড
+          <Download className="h-4 w-4 mr-1" /> {t('sales.csvDownload')}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-        <div className="stat-card"><p className="text-sm text-muted-foreground">রেভিনিউ</p><p className="text-2xl font-bold">৳{totalRevenue.toFixed(0)}</p></div>
-        <div className="stat-card"><p className="text-sm text-muted-foreground">খরচ</p><p className="text-2xl font-bold text-muted-foreground">৳{totalCost.toFixed(0)}</p></div>
-        <div className="stat-card"><p className="text-sm text-muted-foreground">লাভ</p><p className="text-2xl font-bold text-success">৳{totalProfit.toFixed(0)}</p></div>
-        <div className="stat-card"><p className="text-sm text-muted-foreground">মার্জিন</p><p className="text-2xl font-bold text-primary">{margin.toFixed(1)}%</p></div>
+        <div className="stat-card"><p className="text-sm text-muted-foreground">{t('sales.revenue')}</p><p className="text-2xl font-bold">৳{totalRevenue.toFixed(0)}</p></div>
+        <div className="stat-card"><p className="text-sm text-muted-foreground">{t('sales.cost')}</p><p className="text-2xl font-bold text-muted-foreground">৳{totalCost.toFixed(0)}</p></div>
+        <div className="stat-card"><p className="text-sm text-muted-foreground">{t('sales.profit')}</p><p className="text-2xl font-bold text-success">৳{totalProfit.toFixed(0)}</p></div>
+        <div className="stat-card"><p className="text-sm text-muted-foreground">{t('sales.margin')}</p><p className="text-2xl font-bold text-primary">{margin.toFixed(1)}%</p></div>
       </div>
 
       <div className="stat-card">
-        <h3 className="font-semibold mb-4">সম্পন্ন বিক্রি</h3>
+        <h3 className="font-semibold mb-4">{t('sales.completedSales')}</h3>
         {completed.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">কোনো সম্পন্ন বিক্রি নেই</p>
+          <p className="text-sm text-muted-foreground py-8 text-center">{t('sales.noSales')}</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
-                <th className="pb-3 font-medium">অর্ডার</th>
-                <th className="pb-3 font-medium">তারিখ</th>
-                <th className="pb-3 font-medium">চ্যানেল</th>
-                <th className="pb-3 font-medium text-right">রেভিনিউ</th>
-                <th className="pb-3 font-medium text-right">খরচ</th>
-                <th className="pb-3 font-medium text-right">লাভ</th>
+                <th className="pb-3 font-medium">{t('sales.order')}</th>
+                <th className="pb-3 font-medium">{t('sales.date')}</th>
+                <th className="pb-3 font-medium">{t('sales.channel')}</th>
+                <th className="pb-3 font-medium text-right">{t('sales.revenue')}</th>
+                <th className="pb-3 font-medium text-right">{t('sales.cost')}</th>
+                <th className="pb-3 font-medium text-right">{t('sales.profit')}</th>
               </tr>
             </thead>
             <tbody>

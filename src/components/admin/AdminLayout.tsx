@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,6 +12,7 @@ const NAV = [
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/inventory', label: 'Inventory', icon: Warehouse },
   { to: '/admin/sales', label: 'Sales', icon: BarChart3 },
+  { to: '/admin/reviews', label: 'Reviews', icon: Star },
   { to: '/admin/users', label: 'Users', icon: Users },
 ];
 

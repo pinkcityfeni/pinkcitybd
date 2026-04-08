@@ -131,16 +131,34 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-6 animate-fade-in space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t('dash.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('dash.subtitle')}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold">{t('dash.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('dash.subtitle')}</p>
+        </div>
+        <div className="flex items-center gap-1 rounded-lg border bg-card p-1">
+          {DATE_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setDateFilter(f.value)}
+              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                dateFilter === f.value
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Filtered Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={TrendingUp} label={t('dash.todaySales')} value={`৳${stats.todaySales.toFixed(0)}`} sub={t('dash.orders', { n: stats.todayOrders.length })} color="text-primary" bgColor="bg-primary/10" />
-        <StatCard icon={Monitor} label={t('dash.onlineOrders')} value={stats.allOnline.length.toString()} sub={t('dash.today', { n: stats.todayOnline.length })} color="text-blue-500" bgColor="bg-blue-500/10" />
-        <StatCard icon={ScanBarcode} label={t('dash.posSales')} value={stats.allPos.length.toString()} sub={t('dash.today', { n: stats.todayPos.length })} color="text-violet-500" bgColor="bg-violet-500/10" />
-        <StatCard icon={TrendingUp} label={t('dash.totalProfit')} value={`৳${stats.totalProfit.toFixed(0)}`} sub={t('dash.revenue', { n: stats.totalRevenue.toFixed(0) })} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={TrendingUp} label="বিক্রি" value={`৳${filtered.sales.toFixed(0)}`} sub={`${filtered.orders.length}টি অর্ডার`} color="text-primary" bgColor="bg-primary/10" />
+        <StatCard icon={ArrowUpRight} label="লাভ" value={`৳${filtered.profit.toFixed(0)}`} sub={`খরচ: ৳${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={Monitor} label="অনলাইন অর্ডার" value={filtered.online.length.toString()} sub={`৳${filtered.online.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-blue-500" bgColor="bg-blue-500/10" />
+        <StatCard icon={ScanBarcode} label="POS বিক্রি" value={filtered.pos.length.toString()} sub={`৳${filtered.pos.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-violet-500" bgColor="bg-violet-500/10" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

@@ -189,14 +189,14 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
-      <div className="relative bg-card/95 backdrop-blur-xl border-t h-14 flex items-center justify-around">
+      <div className="relative bg-card/95 backdrop-blur-xl border-t h-14 grid grid-cols-5 items-center">
         {tabs.map((t, i) => {
           const isHome = t.to === '/';
           const active = isHome ? location.pathname === '/' : location.pathname.startsWith(t.to.split('?')[0]) && (t.to.includes('?') ? location.search.includes('wishlist') : !location.search.includes('wishlist'));
 
           if (isHome) {
             return (
-              <Link key={t.to} to={t.to} className="flex flex-col items-center -mt-6 relative z-10">
+              <Link key={t.to} to={t.to} className="flex flex-col items-center -mt-6 relative z-10 justify-self-center">
                 <div className={`h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${active ? 'bg-primary text-primary-foreground shadow-primary/40 scale-105' : 'bg-gradient-to-br from-primary to-accent text-white shadow-primary/30'}`}>
                   <t.icon className="h-6 w-6" />
                 </div>
@@ -206,7 +206,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
           }
 
           return (
-            <Link key={t.to} to={t.to} className={`flex flex-col items-center gap-0.5 px-3 py-1 relative transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Link key={t.to} to={t.to} className={`flex flex-col items-center gap-0.5 py-1 relative transition-colors justify-self-center ${active ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className="relative">
                 <t.icon className="h-5 w-5" />
                 {t.badge !== undefined && t.badge > 0 && (

@@ -246,7 +246,36 @@ export default function POSSales() {
         </div>
 
         <div className="p-4 border-t space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-          <div className="flex justify-between text-xs opacity-70"><span>সাবটোটাল ({itemCount} items)</span><span>৳{total.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs opacity-70"><span>সাবটোটাল ({itemCount} items)</span><span>৳{subtotal.toFixed(0)}</span></div>
+
+          {/* Discount Section */}
+          <div className="flex items-center gap-1.5">
+            <Tag className="h-3.5 w-3.5 text-primary shrink-0" />
+            <div className="flex rounded-lg overflow-hidden flex-1" style={{ background: 'hsl(var(--pos-bg))' }}>
+              <button
+                onClick={() => setDiscountType('fixed')}
+                className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'fixed' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}
+              >৳</button>
+              <button
+                onClick={() => setDiscountType('percent')}
+                className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'percent' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}
+              ><Percent className="h-3 w-3" /></button>
+              <Input
+                type="number"
+                placeholder={discountType === 'fixed' ? 'ছাড় (৳)...' : 'ছাড় (%)...'}
+                value={discountValue}
+                onChange={e => setDiscountValue(e.target.value)}
+                className="h-7 text-xs bg-transparent border-0 focus-visible:ring-0 flex-1"
+              />
+            </div>
+          </div>
+          {discountAmount > 0 && (
+            <div className="flex justify-between text-xs font-medium text-destructive">
+              <span>ছাড় {discountType === 'percent' ? `(${discountNum}%)` : ''}</span>
+              <span>-৳{discountAmount.toFixed(0)}</span>
+            </div>
+          )}
+
           <div className="flex justify-between text-xs opacity-70"><span>খরচ</span><span>৳{totalCost.toFixed(0)}</span></div>
           <div className="flex justify-between text-xs font-medium text-success"><span>লাভ</span><span>৳{profit.toFixed(0)}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>

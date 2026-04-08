@@ -90,7 +90,7 @@ export default function Orders() {
                       {o.deliveryZone && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Truck className="h-3.5 w-3.5 shrink-0" />
-                          <span>{o.deliveryZone === 'dhaka' ? 'ঢাকার ভিতরে' : 'ঢাকার বাইরে'} — ৳{o.deliveryCharge || 0}</span>
+                          <span>{o.deliveryZone === 'feni' ? 'ফেনী' : 'ফেনীর বাইরে'} — ৳{o.deliveryCharge || 0}</span>
                         </div>
                       )}
                       {o.paymentMethod && (

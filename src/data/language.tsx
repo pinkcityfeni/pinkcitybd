@@ -307,6 +307,8 @@ const translations = {
   'cat.newCategory': { bn: 'নতুন ক্যাটাগরি', en: 'New Category' },
   'cat.categoryName': { bn: 'ক্যাটাগরির নাম', en: 'Category Name' },
   'cat.icon': { bn: 'আইকন (ইমোজি)', en: 'Icon (emoji)' },
+  'cat.image': { bn: 'ক্যাটাগরি ছবি', en: 'Category Image' },
+  'cat.uploadImage': { bn: 'ছবি আপলোড করুন', en: 'Upload Image' },
   'cat.create': { bn: 'তৈরি করুন', en: 'Create' },
   'cat.update': { bn: 'আপডেট', en: 'Update' },
   'cat.subcategories': { bn: 'সাবক্যাটাগরি', en: 'Subcategories' },

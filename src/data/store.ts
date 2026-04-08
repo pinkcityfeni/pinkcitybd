@@ -30,7 +30,7 @@ export interface CartItem {
 
 export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'card' | 'bank';
 
-export type DeliveryZone = 'dhaka' | 'outside';
+export type DeliveryZone = 'feni' | 'outside';
 
 export interface Review {
   id: string;

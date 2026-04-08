@@ -20,8 +20,8 @@ const paymentMethods: { id: PaymentMethod; label: string; labelBn: string; icon:
 ];
 
 const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
-  dhaka: 60,
-  outside: 120,
+  feni: 30,
+  outside: 150,
 };
 
 export default function Checkout() {

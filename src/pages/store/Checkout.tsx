@@ -39,7 +39,7 @@ export default function Checkout() {
   const [copied, setCopied] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [orderTotal, setOrderTotal] = useState(0);
-  const [orderPoints, setOrderPoints] = useState(0);
+  
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -52,7 +52,7 @@ export default function Checkout() {
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const deliveryCharge = DELIVERY_CHARGES[deliveryZone];
   const grandTotal = total + deliveryCharge;
-  const points = Math.floor(total);
+  
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   if (cart.length === 0 && step !== 'done') {
@@ -96,7 +96,6 @@ export default function Checkout() {
 
   const handlePlaceOrder = () => {
     const savedTotal = grandTotal;
-    const savedPoints = points;
     const id = placeOrder('online', {
       customerName: name || 'Guest',
       customerEmail: email || undefined,
@@ -109,7 +108,7 @@ export default function Checkout() {
     });
     setOrderId(id);
     setOrderTotal(savedTotal);
-    setOrderPoints(savedPoints);
+    
     setStep('done');
     toast.success(t('checkout.orderPlaced'));
   };
@@ -146,15 +145,6 @@ export default function Checkout() {
               <p className="text-sm font-medium">{selectedPayment.label}</p>
             </div>
           </div>
-          {orderPoints > 0 && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/10">
-              <Gift className="h-4 w-4 text-accent shrink-0" />
-              <div>
-                <p className="text-xs text-muted-foreground">{t('checkout.pointsLabel')}</p>
-                <p className="text-sm font-bold text-accent">{orderPoints} {t('cart.points')}</p>
-              </div>
-            </div>
-          )}
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <MapPin className="h-4 w-4 text-primary shrink-0" />
             <div>
@@ -216,7 +206,7 @@ export default function Checkout() {
         <div className="border-t pt-2 space-y-1 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('cart.points')}</span><span className="text-accent">+{points} pts</span></div>
+          
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">
           <span>{t('checkout.total')}</span>
@@ -266,7 +256,7 @@ export default function Checkout() {
           </div>
           <div>
             <p className="font-medium text-sm">{t('checkout.loggedInAs', { name: user?.name || '' })}</p>
-            <p className="text-xs text-muted-foreground">{t('checkout.earnPointsDesc')}</p>
+            <p className="text-xs text-muted-foreground">{t('checkout.loggedInAs', { name: user?.name || '' })}</p>
           </div>
         </div>
       )}

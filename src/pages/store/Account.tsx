@@ -34,14 +34,7 @@ export default function Account() {
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <h1 className="page-header">{t('account.title')}</h1>
-      <div className="grid md:grid-cols-3 gap-6 mt-6">
-        <div className="stat-card flex items-center gap-3">
-          <Star className="h-8 w-8 text-accent" />
-          <div>
-            <p className="text-2xl font-bold">245</p>
-            <p className="text-sm text-muted-foreground">{t('account.rewardPoints')}</p>
-          </div>
-        </div>
+      <div className="grid md:grid-cols-2 gap-6 mt-6">
         <div className="stat-card flex items-center gap-3">
           <Package className="h-8 w-8 text-primary" />
           <div>

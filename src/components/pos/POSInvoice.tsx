@@ -74,6 +74,12 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
           <span className="text-gray-500">সাবটোটাল ({itemCount}টি আইটেম)</span>
           <span>৳{subtotal.toFixed(0)}</span>
         </div>
+        {order.discount && order.discount > 0 ? (
+          <div className="flex justify-between text-[10px]">
+            <span className="text-gray-500">ছাড় {order.discountType === 'percent' ? `(${order.discount}%)` : ''}</span>
+            <span className="text-red-500">-৳{order.discountType === 'percent' ? Math.round(subtotal * order.discount / 100) : order.discount}</span>
+          </div>
+        ) : null}
         {order.deliveryCharge ? (
           <div className="flex justify-between text-[10px]">
             <span className="text-gray-500">ডেলিভারি</span>

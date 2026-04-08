@@ -192,7 +192,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
       <div className="relative bg-card/95 backdrop-blur-xl border-t h-14 grid grid-cols-5 items-center">
         {tabs.map((t, i) => {
           const isHome = t.to === '/';
-          const active = isHome ? location.pathname === '/' : location.pathname.startsWith(t.to.split('?')[0]) && (t.to.includes('?') ? location.search.includes('wishlist') : !location.search.includes('wishlist'));
+          const active = isHome ? location.pathname === '/' : location.pathname.startsWith(t.to);
 
           if (isHome) {
             return (

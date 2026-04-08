@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Phone, Mail } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Phone, Mail, Heart } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -180,8 +180,9 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
   const { t } = useLanguage();
 
   const tabs = [
-    { to: '/', icon: Home, label: t('nav.home') },
+    { to: '/account?tab=wishlist', icon: Heart, label: t('nav.wishlist'), badge: wishlistCount },
     { to: '/category', icon: Grid3X3, label: t('nav.category') },
+    { to: '/', icon: Home, label: t('nav.home') },
     { to: '/cart', icon: ShoppingCart, label: t('nav.cart'), badge: cartCount },
     { to: '/account', icon: User, label: t('nav.account') },
   ];

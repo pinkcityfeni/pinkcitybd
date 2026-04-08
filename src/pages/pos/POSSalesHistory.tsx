@@ -1,10 +1,12 @@
 import { useStore } from '@/data/store';
 import { Badge } from '@/components/ui/badge';
+import { useMemo } from 'react';
 
 export default function POSSalesHistory() {
-  const orders = useStore(s => s.orders.filter(o => o.type === 'pos'));
-  const totalRev = orders.reduce((s, o) => s + o.total, 0);
-  const totalCost = orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+  const allOrders = useStore(s => s.orders);
+  const orders = useMemo(() => allOrders.filter(o => o.type === 'pos'), [allOrders]);
+  const totalRev = useMemo(() => orders.reduce((s, o) => s + o.total, 0), [orders]);
+  const totalCost = useMemo(() => orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0), [orders]);
 
   return (
     <div className="flex-1 p-6 overflow-auto">

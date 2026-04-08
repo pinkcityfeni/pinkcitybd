@@ -6,7 +6,7 @@ import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Login() {
@@ -71,12 +71,6 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="mt-5 rounded-2xl border bg-card/60 backdrop-blur-sm p-4 text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground text-xs mb-2 flex items-center gap-1"><Sparkles className="h-3 w-3 text-primary" /> {t('auth.demoAccounts')}</p>
-          <p><span className="font-mono text-[11px]">pinkcity.feni@gmail.com</span> / <span className="font-mono text-[11px]">rihan56</span></p>
-          <p><span className="font-mono text-[11px]">cashier@shop.com</span> / <span className="font-mono text-[11px]">cashier123</span></p>
-          <p><span className="font-mono text-[11px]">user@shop.com</span> / <span className="font-mono text-[11px]">user123</span></p>
-        </div>
       </div>
     </div>
   );

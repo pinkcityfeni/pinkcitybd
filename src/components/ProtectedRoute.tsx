@@ -23,9 +23,6 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
           <p className="text-muted-foreground text-sm mb-6">
             You need <span className="font-semibold capitalize">{requiredRole}</span> privileges to access this area.
           </p>
-          <p className="text-xs text-muted-foreground">
-            Demo: login as <span className="font-mono">pinkcity.feni@gmail.com</span> / <span className="font-mono">rihan56</span>
-          </p>
         </div>
       </div>
     );

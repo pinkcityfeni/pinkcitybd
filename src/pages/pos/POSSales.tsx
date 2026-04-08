@@ -3,7 +3,7 @@ import { useStore } from '@/data/store';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split } from 'lucide-react';
+import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
 
@@ -35,16 +35,24 @@ export default function POSSales() {
   const [splitMethod2, setSplitMethod2] = useState<PaymentMethod>('bkash');
   const [splitAmount1, setSplitAmount1] = useState('');
 
+  // Discount state
+  const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
+  const [discountValue, setDiscountValue] = useState('');
+
   const focusBarcode = useCallback(() => {
     setTimeout(() => barcodeRef.current?.focus(), 50);
   }, []);
 
   useEffect(() => { focusBarcode(); }, [focusBarcode]);
 
-  const total = posCart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const subtotal = posCart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const totalCost = posCart.reduce((sum, i) => sum + i.product.buyingPrice * i.quantity, 0);
-  const profit = total - totalCost;
   const itemCount = posCart.reduce((sum, i) => sum + i.quantity, 0);
+
+  const discountNum = parseFloat(discountValue) || 0;
+  const discountAmount = discountType === 'percent' ? Math.round(subtotal * discountNum / 100) : discountNum;
+  const total = Math.max(0, subtotal - discountAmount);
+  const profit = total - totalCost;
 
   const splitAmt1 = parseFloat(splitAmount1) || 0;
   const splitAmt2 = Math.max(0, total - splitAmt1);
@@ -90,6 +98,8 @@ export default function POSSales() {
       paymentMethod: isSplit ? splitMethod1 : paymentMethod,
       paymentStatus: 'paid',
       splitPayment,
+      discount: discountNum > 0 ? discountNum : undefined,
+      discountType: discountNum > 0 ? discountType : undefined,
     });
     const orders = useStore.getState().orders;
     const completedOrder = orders.find(o => o.id === id);
@@ -100,6 +110,8 @@ export default function POSSales() {
     setPaymentMethod('cash');
     setIsSplit(false);
     setSplitAmount1('');
+    setDiscountValue('');
+    setDiscountType('fixed');
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };

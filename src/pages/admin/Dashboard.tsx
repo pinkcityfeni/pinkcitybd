@@ -159,10 +159,10 @@ export default function Dashboard() {
 
       {/* Filtered Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={TrendingUp} label="বিক্রি" value={`৳${filtered.sales.toFixed(0)}`} sub={`${filtered.orders.length}টি অর্ডার`} color="text-primary" bgColor="bg-primary/10" />
-        <StatCard icon={ArrowUpRight} label="লাভ" value={`৳${filtered.profit.toFixed(0)}`} sub={`খরচ: ৳${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
-        <StatCard icon={Monitor} label="অনলাইন অর্ডার" value={filtered.online.length.toString()} sub={`৳${filtered.online.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-blue-500" bgColor="bg-blue-500/10" />
-        <StatCard icon={ScanBarcode} label="POS বিক্রি" value={filtered.pos.length.toString()} sub={`৳${filtered.pos.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-violet-500" bgColor="bg-violet-500/10" />
+        <StatCard icon={TrendingUp} label={t('dash.sales')} value={`৳${filtered.sales.toFixed(0)}`} sub={t('dash.orders', { n: filtered.orders.length })} color="text-primary" bgColor="bg-primary/10" />
+        <StatCard icon={ArrowUpRight} label={t('dash.profit')} value={`৳${filtered.profit.toFixed(0)}`} sub={`${t('dash.cost')}: ৳${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={Monitor} label={t('dash.onlineLabel')} value={filtered.online.length.toString()} sub={`৳${filtered.online.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-blue-500" bgColor="bg-blue-500/10" />
+        <StatCard icon={ScanBarcode} label={t('dash.posLabel')} value={filtered.pos.length.toString()} sub={`৳${filtered.pos.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-violet-500" bgColor="bg-violet-500/10" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -234,11 +234,11 @@ export default function Dashboard() {
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl border bg-card p-5">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Crown className="h-4 w-4 text-warning" /> টপ প্রোডাক্ট
+            <Crown className="h-4 w-4 text-warning" /> {t('dash.topProducts')}
             <span className="text-[10px] font-normal text-muted-foreground ml-1">({DATE_FILTERS.find(f => f.value === dateFilter)?.label})</span>
           </h3>
           {filtered.topProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">কোনো বিক্রি নেই</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('dash.noSales')}</p>
           ) : (
             <div className="space-y-2">
               {filtered.topProducts.slice(0, 5).map((p, i) => (
@@ -261,9 +261,9 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> সর্বকালের টপ সেলিং</h3>
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> {t('dash.allTimeTop')}</h3>
           {stats.topProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">কোনো বিক্রি নেই</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('dash.noSales')}</p>
           ) : (
             <div className="space-y-2">
               {stats.topProducts.map((p, i) => (
@@ -322,7 +322,7 @@ export default function Dashboard() {
               return { name: c.name, value, icon: c.icon, count: catProducts.length };
             }).filter(c => c.value > 0);
             return catData.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">কোনো ডেটা নেই</p>
+              <p className="text-sm text-muted-foreground py-8 text-center">{t('dash.noData')}</p>
             ) : (
               <div className="flex items-center gap-4">
                 <ResponsiveContainer width={160} height={160}>
@@ -350,7 +350,7 @@ export default function Dashboard() {
 
       {/* Order Type Comparison Bar Chart */}
       <div className="rounded-xl border bg-card p-5">
-        <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> মাসিক অর্ডার তুলনা (Online vs POS)</h3>
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> {t('dash.monthlyComparison')}</h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={stats.monthly} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />

@@ -410,6 +410,11 @@ const translations = {
   'user.role': { bn: 'রোল', en: 'Role' },
   'user.points': { bn: 'পয়েন্ট', en: 'Points' },
   'user.orders': { bn: 'অর্ডার', en: 'Orders' },
+  'user.actions': { bn: 'অ্যাকশন', en: 'Actions' },
+  'user.confirmDelete': { bn: 'ইউজার ডিলিট করুন', en: 'Confirm Delete' },
+  'user.deleteWarning': { bn: 'এই অ্যাকশন পূর্বাবস্থায় ফেরানো যাবে না।', en: 'This action cannot be undone.' },
+  'user.cancel': { bn: 'বাতিল', en: 'Cancel' },
+  'user.delete': { bn: 'ডিলিট', en: 'Delete' },
 
   // POS
   'pos.sales': { bn: 'বিক্রয়', en: 'Sales' },

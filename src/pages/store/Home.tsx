@@ -129,23 +129,7 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
         </div>
       </Link>
 
-      {/* Nav arrows */}
-      {banners.length > 1 && (
-        <>
-          <button
-            onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center hover:bg-background/90 transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center hover:bg-background/90 transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </>
-      )}
+      {/* Nav arrows removed — auto-slide only */}
 
       {/* Dots */}
       {banners.length > 1 && (

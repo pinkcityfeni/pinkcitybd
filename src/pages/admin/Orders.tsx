@@ -124,14 +124,17 @@ export default function Orders() {
                       <div className="text-xs text-muted-foreground">
                         {o.pointsEarned ? t('order.pointsEarned', { n: o.pointsEarned }) : ''}
                       </div>
-                      <div className="flex gap-2">
-                        {o.status !== 'completed' && o.status !== 'cancelled' && (
-                          <>
-                            <Button size="sm" variant="outline" onClick={() => { updateOrderStatus(o.id, 'cancelled'); toast.success(t('order.cancelled')); }}>{t('order.cancel')}</Button>
-                            <Button size="sm" onClick={() => advance(o)}>{o.status === 'pending' ? t('order.process') : t('order.complete')}</Button>
-                          </>
-                        )}
-                      </div>
+                       <div className="flex gap-2">
+                         {o.status !== 'completed' && o.status !== 'cancelled' && (
+                           <>
+                             <Button size="sm" variant="outline" onClick={() => { updateOrderStatus(o.id, 'cancelled'); toast.success(t('order.cancelled')); }}>{t('order.cancel')}</Button>
+                             <Button size="sm" onClick={() => advance(o)}>{o.status === 'pending' ? t('order.process') : t('order.complete')}</Button>
+                           </>
+                         )}
+                         <Button size="sm" variant="destructive" onClick={() => { deleteOrder(o.id); toast.success('অর্ডার ডিলিট হয়েছে'); }}>
+                           <Trash2 className="h-3.5 w-3.5 mr-1" /> ডিলিট
+                         </Button>
+                       </div>
                     </div>
                   </div>
                 )}

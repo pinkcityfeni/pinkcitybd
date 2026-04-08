@@ -12,47 +12,32 @@ const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barc
 
 function ImageUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
-
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be under 5MB');
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return; }
     const reader = new FileReader();
     reader.onload = () => onChange(reader.result as string);
     reader.readAsDataURL(file);
   };
-
   return (
     <div className="space-y-2">
       {value ? (
         <div className="relative w-24 h-24 rounded-xl overflow-hidden border">
           <img src={value} alt="Product" className="w-full h-full object-cover" />
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="absolute top-1 right-1 bg-background/80 rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors"
-          >
+          <button type="button" onClick={() => onChange('')} className="absolute top-1 right-1 bg-background/80 rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors">
             <XIcon className="h-3.5 w-3.5" />
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-sm text-muted-foreground w-full justify-center"
-        >
-          <Camera className="h-4 w-4" />
-          <span>Upload Photo</span>
+        <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-sm text-muted-foreground w-full justify-center">
+          <Camera className="h-4 w-4" /><span>Upload Photo</span>
         </button>
       )}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
     </div>
   );
 }
-
 
 export default function Products() {
   const { products, addProduct, updateProduct, deleteProduct, categories } = useStore();
@@ -79,31 +64,15 @@ export default function Products() {
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
-    setForm({
-      name: p.name, description: p.description, price: String(p.price),
-      buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category,
-      subcategory: p.subcategory, stock: String(p.stock), image: p.image,
-    });
+    setForm({ name: p.name, description: p.description, price: String(p.price), buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image });
     setDialogOpen(true);
   };
 
   const handleSave = () => {
-    if (!form.name || !form.price || !form.category) {
-      toast.error('Please fill required fields');
-      return;
-    }
-    const data: Omit<Product, 'id'> = {
-      name: form.name, description: form.description, price: Number(form.price),
-      buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category,
-      subcategory: form.subcategory, stock: Number(form.stock), image: form.image,
-    };
-    if (editProduct) {
-      updateProduct(editProduct.id, data);
-      toast.success('Product updated');
-    } else {
-      addProduct(data);
-      toast.success('Product added');
-    }
+    if (!form.name || !form.price || !form.category) { toast.error('Please fill required fields'); return; }
+    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: form.image };
+    if (editProduct) { updateProduct(editProduct.id, data); toast.success('Product updated'); }
+    else { addProduct(data); toast.success('Product added'); }
     setDialogOpen(false);
   };
 
@@ -130,14 +99,12 @@ export default function Products() {
         <div className="flex gap-2 flex-wrap">
           <Button variant={!filterCat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat('')}>All</Button>
           {categories.map(c => (
-            <Button key={c.id} variant={filterCat === c.name ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat(c.name)}>
-              {c.icon} {c.name}
-            </Button>
+            <Button key={c.id} variant={filterCat === c.name ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat(c.name)}>{c.icon} {c.name}</Button>
           ))}
         </div>
       </div>
 
-      {/* Mobile: Card layout */}
+      {/* Mobile */}
       <div className="sm:hidden space-y-3">
         {filtered.map(p => (
           <div key={p.id} className="stat-card p-4 space-y-2">
@@ -156,17 +123,15 @@ export default function Products() {
               <span className={`font-medium ${p.stock < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>Stock: {p.stock}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="font-bold text-primary">${p.price.toFixed(2)}</span>
-              <span className="text-xs text-muted-foreground">Buy: ${p.buyingPrice.toFixed(2)}</span>
+              <span className="font-bold text-primary">৳{p.price.toFixed(0)}</span>
+              <span className="text-xs text-muted-foreground">Buy: ৳{p.buyingPrice.toFixed(0)}</span>
             </div>
           </div>
         ))}
-        {filtered.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground text-sm">No products found</div>
-        )}
+        {filtered.length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">No products found</div>}
       </div>
 
-      {/* Desktop: Table layout */}
+      {/* Desktop */}
       <div className="hidden sm:block stat-card overflow-auto">
         <table className="w-full text-sm">
           <thead>
@@ -188,8 +153,8 @@ export default function Products() {
                 <td className="py-3 font-mono text-xs">{p.barcode}</td>
                 <td className="py-3"><Badge variant="outline" className="text-xs">{p.category}</Badge></td>
                 <td className="py-3 text-xs text-muted-foreground">{p.subcategory}</td>
-                <td className="py-3 text-right">${p.price.toFixed(2)}</td>
-                <td className="py-3 text-right text-muted-foreground">${p.buyingPrice.toFixed(2)}</td>
+                <td className="py-3 text-right">৳{p.price.toFixed(0)}</td>
+                <td className="py-3 text-right text-muted-foreground">৳{p.buyingPrice.toFixed(0)}</td>
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? 'text-destructive' : ''}`}>{p.stock}</td>
                 <td className="py-3 text-right">
                   <button onClick={() => openEdit(p)} className="p-1 hover:text-primary"><Pencil className="h-4 w-4" /></button>
@@ -197,74 +162,37 @@ export default function Products() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
-              <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">No products found</td></tr>
-            )}
+            {filtered.length === 0 && <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">No products found</td></tr>}
           </tbody>
         </table>
       </div>
 
-      {/* Product Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editProduct ? 'Edit Product' : 'New Product'}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{editProduct ? 'Edit Product' : 'New Product'}</DialogTitle></DialogHeader>
           <div className="grid gap-3 max-h-[70vh] overflow-auto pr-1">
-            <div>
-              <Label>Name *</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Description</Label>
-              <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Product Image</Label>
-              <ImageUpload
-                value={form.image}
-                onChange={(val) => setForm(f => ({ ...f, image: val }))}
-              />
+            <div><Label>Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+            <div><Label>Description</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
+            <div><Label>Product Image</Label><ImageUpload value={form.image} onChange={(val) => setForm(f => ({ ...f, image: val }))} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Selling Price (৳) *</Label><Input type="number" step="1" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
+              <div><Label>Buying Price (৳)</Label><Input type="number" step="1" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Selling Price *</Label>
-                <Input type="number" step="0.01" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Buying Price</Label>
-                <Input type="number" step="0.01" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Barcode</Label>
-                <Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Stock</Label>
-                <Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} />
-              </div>
+              <div><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>
+              <div><Label>Stock</Label><Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Category *</Label>
-                <select
-                  className="w-full h-10 rounded-md border bg-background px-3 text-sm"
-                  value={form.category}
-                  onChange={e => handleCategoryChange(e.target.value)}
-                >
+                <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.category} onChange={e => handleCategoryChange(e.target.value)}>
                   <option value="">Select category</option>
                   {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <div>
                 <Label>Subcategory</Label>
-                <select
-                  className="w-full h-10 rounded-md border bg-background px-3 text-sm"
-                  value={form.subcategory}
-                  onChange={e => setForm(f => ({ ...f, subcategory: e.target.value }))}
-                >
+                <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.subcategory} onChange={e => setForm(f => ({ ...f, subcategory: e.target.value }))}>
                   <option value="">Select subcategory</option>
                   {subcategories.map(sc => <option key={sc} value={sc}>{sc}</option>)}
                 </select>

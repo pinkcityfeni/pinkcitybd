@@ -30,6 +30,17 @@ export interface CartItem {
 
 export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'card' | 'bank';
 
+export type DeliveryZone = 'dhaka' | 'outside';
+
+export interface Review {
+  id: string;
+  productId: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 export interface Order {
   id: string;
   items: CartItem[];
@@ -41,6 +52,8 @@ export interface Order {
   customerEmail?: string;
   customerPhone?: string;
   deliveryAddress?: string;
+  deliveryZone?: DeliveryZone;
+  deliveryCharge?: number;
   pointsEarned?: number;
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
@@ -80,34 +93,21 @@ const INITIAL_CATEGORIES: Category[] = [
 ];
 
 const INITIAL_PRODUCTS: Product[] = [
-  // Jewelry — Necklace
-  { id: 'p1', name: 'Gold Layered Necklace', image: '', price: 49.99, buyingPrice: 22, barcode: '2001', stock: 35, category: 'Jewelry', subcategory: 'Necklace', description: 'Elegant multi-layer gold-plated necklace, adjustable chain length.' },
-  { id: 'p2', name: 'Pearl Pendant Necklace', image: '', price: 39.99, buyingPrice: 16, barcode: '2002', stock: 50, category: 'Jewelry', subcategory: 'Necklace', description: 'Classic freshwater pearl pendant on a sterling silver chain.' },
-  { id: 'p3', name: 'Silver Statement Necklace', image: '', price: 59.99, buyingPrice: 28, barcode: '2003', stock: 20, category: 'Jewelry', subcategory: 'Necklace', description: 'Bold silver-tone statement necklace for special occasions.' },
-  // Jewelry — Churi
-  { id: 'p4', name: 'Traditional Glass Churi Set', image: '', price: 12.99, buyingPrice: 4, barcode: '2004', stock: 100, category: 'Jewelry', subcategory: 'Churi', description: 'Set of 12 colorful glass bangles, assorted colors.' },
-  { id: 'p5', name: 'Gold Plated Churi Set', image: '', price: 24.99, buyingPrice: 10, barcode: '2005', stock: 60, category: 'Jewelry', subcategory: 'Churi', description: 'Premium gold-plated bangle set of 6, intricate design.' },
-  { id: 'p6', name: 'Crystal Churi Pair', image: '', price: 18.50, buyingPrice: 7, barcode: '2006', stock: 45, category: 'Jewelry', subcategory: 'Churi', description: 'Sparkling crystal-studded bangle pair, one size fits most.' },
-  // Jewelry — Ring
-  { id: 'p7', name: 'Diamond Solitaire Ring', image: '', price: 129.99, buyingPrice: 55, barcode: '2007', stock: 15, category: 'Jewelry', subcategory: 'Ring', description: 'Stunning CZ diamond solitaire ring in white gold setting.' },
-  { id: 'p8', name: 'Stacking Ring Set', image: '', price: 29.99, buyingPrice: 12, barcode: '2008', stock: 40, category: 'Jewelry', subcategory: 'Ring', description: 'Set of 5 minimalist stacking rings, mixed metals.' },
-  { id: 'p9', name: 'Vintage Emerald Ring', image: '', price: 79.99, buyingPrice: 35, barcode: '2009', stock: 18, category: 'Jewelry', subcategory: 'Ring', description: 'Vintage-style emerald green stone ring with filigree band.' },
-  // Makeup — Lipstick
-  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', price: 14.99, buyingPrice: 5, barcode: '3001', stock: 120, category: 'Makeup', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
-  { id: 'p11', name: 'Glossy Lip Color', image: '', price: 11.99, buyingPrice: 4, barcode: '3002', stock: 90, category: 'Makeup', subcategory: 'Lip Gloss', description: 'High-shine glossy lip color with moisturizing formula.' },
-  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', price: 18.99, buyingPrice: 7, barcode: '3003', stock: 75, category: 'Makeup', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
-  // Skin — Cream
-  { id: 'p13', name: 'Hydrating Face Cream', image: '', price: 24.99, buyingPrice: 9, barcode: '3004', stock: 85, category: 'Skin', subcategory: 'Moisturizer', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
-  { id: 'p14', name: 'Night Repair Cream', image: '', price: 34.99, buyingPrice: 14, barcode: '3005', stock: 55, category: 'Skin', subcategory: 'Night Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
-  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', price: 19.99, buyingPrice: 8, barcode: '3006', stock: 100, category: 'Skin', subcategory: 'Sunscreen', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
-];
-
-const INITIAL_ORDERS: Order[] = [
-  { id: 'ord-001', items: [{ product: INITIAL_PRODUCTS[0], quantity: 2 }], total: 99.98, date: '2026-04-04T10:30:00', status: 'completed', type: 'online', customerName: 'Fatima Akter', customerEmail: 'fatima@email.com', customerPhone: '01712345678', deliveryAddress: 'Dhaka, Bangladesh', pointsEarned: 99 },
-  { id: 'ord-002', items: [{ product: INITIAL_PRODUCTS[9], quantity: 3 }, { product: INITIAL_PRODUCTS[12], quantity: 1 }], total: 69.96, date: '2026-04-04T14:15:00', status: 'processing', type: 'online', customerName: 'Nusrat Jahan', customerPhone: '01898765432', deliveryAddress: 'Chittagong, Bangladesh', pointsEarned: 69 },
-  { id: 'ord-003', items: [{ product: INITIAL_PRODUCTS[3], quantity: 5 }], total: 64.95, date: '2026-04-05T09:00:00', status: 'pending', type: 'pos' },
-  { id: 'ord-004', items: [{ product: INITIAL_PRODUCTS[6], quantity: 1 }], total: 129.99, date: '2026-04-03T16:45:00', status: 'completed', type: 'pos' },
-  { id: 'ord-005', items: [{ product: INITIAL_PRODUCTS[13], quantity: 2 }], total: 69.98, date: '2026-04-02T11:20:00', status: 'completed', type: 'online', customerName: 'Rashida Begum', customerPhone: '01611223344', deliveryAddress: 'Sylhet, Bangladesh', pointsEarned: 69 },
+  { id: 'p1', name: 'Gold Layered Necklace', image: '', price: 2500, buyingPrice: 1100, barcode: '2001', stock: 35, category: 'Jewelry', subcategory: 'Necklace', description: 'Elegant multi-layer gold-plated necklace, adjustable chain length.' },
+  { id: 'p2', name: 'Pearl Pendant Necklace', image: '', price: 1800, buyingPrice: 800, barcode: '2002', stock: 50, category: 'Jewelry', subcategory: 'Necklace', description: 'Classic freshwater pearl pendant on a sterling silver chain.' },
+  { id: 'p3', name: 'Silver Statement Necklace', image: '', price: 3200, buyingPrice: 1400, barcode: '2003', stock: 20, category: 'Jewelry', subcategory: 'Necklace', description: 'Bold silver-tone statement necklace for special occasions.' },
+  { id: 'p4', name: 'Traditional Glass Churi Set', image: '', price: 350, buyingPrice: 120, barcode: '2004', stock: 100, category: 'Jewelry', subcategory: 'Churi', description: 'Set of 12 colorful glass bangles, assorted colors.' },
+  { id: 'p5', name: 'Gold Plated Churi Set', image: '', price: 1200, buyingPrice: 500, barcode: '2005', stock: 60, category: 'Jewelry', subcategory: 'Churi', description: 'Premium gold-plated bangle set of 6, intricate design.' },
+  { id: 'p6', name: 'Crystal Churi Pair', image: '', price: 850, buyingPrice: 350, barcode: '2006', stock: 45, category: 'Jewelry', subcategory: 'Churi', description: 'Sparkling crystal-studded bangle pair, one size fits most.' },
+  { id: 'p7', name: 'Diamond Solitaire Ring', image: '', price: 6500, buyingPrice: 2800, barcode: '2007', stock: 15, category: 'Jewelry', subcategory: 'Ring', description: 'Stunning CZ diamond solitaire ring in white gold setting.' },
+  { id: 'p8', name: 'Stacking Ring Set', image: '', price: 1500, buyingPrice: 600, barcode: '2008', stock: 40, category: 'Jewelry', subcategory: 'Ring', description: 'Set of 5 minimalist stacking rings, mixed metals.' },
+  { id: 'p9', name: 'Vintage Emerald Ring', image: '', price: 4000, buyingPrice: 1800, barcode: '2009', stock: 18, category: 'Jewelry', subcategory: 'Ring', description: 'Vintage-style emerald green stone ring with filigree band.' },
+  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', price: 450, buyingPrice: 150, barcode: '3001', stock: 120, category: 'Makeup', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
+  { id: 'p11', name: 'Glossy Lip Color', image: '', price: 380, buyingPrice: 130, barcode: '3002', stock: 90, category: 'Makeup', subcategory: 'Lip Gloss', description: 'High-shine glossy lip color with moisturizing formula.' },
+  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', price: 650, buyingPrice: 250, barcode: '3003', stock: 75, category: 'Makeup', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
+  { id: 'p13', name: 'Hydrating Face Cream', image: '', price: 950, buyingPrice: 350, barcode: '3004', stock: 85, category: 'Skin', subcategory: 'Moisturizer', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
+  { id: 'p14', name: 'Night Repair Cream', image: '', price: 1400, buyingPrice: 550, barcode: '3005', stock: 55, category: 'Skin', subcategory: 'Night Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
+  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', price: 750, buyingPrice: 300, barcode: '3006', stock: 100, category: 'Skin', subcategory: 'Sunscreen', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
 ];
 
 // ─── Store ───
@@ -117,6 +117,10 @@ interface OrderData {
   customerEmail?: string;
   customerPhone?: string;
   deliveryAddress?: string;
+  deliveryZone?: DeliveryZone;
+  deliveryCharge?: number;
+  paymentMethod?: PaymentMethod;
+  paymentStatus?: 'pending' | 'paid';
 }
 
 interface StoreState {
@@ -126,6 +130,8 @@ interface StoreState {
   posCart: CartItem[];
   categories: Category[];
   banners: Banner[];
+  wishlist: string[];
+  reviews: Review[];
 
   // Banner actions
   addBanner: (banner: Omit<Banner, 'id'>) => void;
@@ -161,17 +167,24 @@ interface StoreState {
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
 
+  // Wishlist
+  toggleWishlist: (productId: string) => void;
+
+  // Reviews
+  addReview: (review: Omit<Review, 'id' | 'date'>) => void;
+
   // Buy Now
   buyNow: (product: Product, qty: number) => void;
 
   // Helpers
   getCategoryNames: () => string[];
   getSubcategories: (categoryName: string) => string[];
+  getProductRating: (productId: string) => { avg: number; count: number };
 }
 
 export const useStore = create<StoreState>((set, get) => ({
   products: INITIAL_PRODUCTS,
-  orders: INITIAL_ORDERS,
+  orders: [],
   cart: [],
   posCart: [],
   categories: INITIAL_CATEGORIES,
@@ -179,6 +192,8 @@ export const useStore = create<StoreState>((set, get) => ({
     { id: 'banner-1', image: '', title: 'বৈশাখী অফার — ৩৫% পর্যন্ত ছাড়!', link: '/shop', active: true },
     { id: 'banner-2', image: '', title: '৳৫০০+ অর্ডারে ফ্রি ডেলিভারি', link: '/shop', active: true },
   ],
+  wishlist: [],
+  reviews: [],
 
   // ─── Banner actions ───
   addBanner: (banner) => set(s => ({
@@ -225,7 +240,7 @@ export const useStore = create<StoreState>((set, get) => ({
   updateCartQty: (id, qty) => set(s => ({ cart: s.cart.map(i => i.product.id === id ? { ...i, quantity: Math.max(1, qty) } : i) })),
   clearCart: () => set({ cart: [] }),
 
-  // ─── Buy Now (clear cart, add single product, navigate handled by caller) ───
+  // ─── Buy Now ───
   buyNow: (product, qty) => set({ cart: [{ product, quantity: qty }] }),
 
   // ─── POS Cart ───
@@ -242,8 +257,10 @@ export const useStore = create<StoreState>((set, get) => ({
   placeOrder: (type, data) => {
     const s = get();
     const items = type === 'pos' ? s.posCart : s.cart;
-    const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-    const pointsEarned = type === 'online' ? Math.floor(total) : 0;
+    const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+    const deliveryCharge = data?.deliveryCharge || 0;
+    const total = subtotal + deliveryCharge;
+    const pointsEarned = type === 'online' ? Math.floor(subtotal) : 0;
     const id = `ord-${Date.now()}`;
     const order: Order = {
       id,
@@ -256,7 +273,11 @@ export const useStore = create<StoreState>((set, get) => ({
       customerEmail: data?.customerEmail,
       customerPhone: data?.customerPhone,
       deliveryAddress: data?.deliveryAddress,
+      deliveryZone: data?.deliveryZone,
+      deliveryCharge,
       pointsEarned,
+      paymentMethod: data?.paymentMethod,
+      paymentStatus: data?.paymentStatus || (data?.paymentMethod === 'cod' ? 'pending' : 'paid'),
     };
     set(state => ({
       orders: [order, ...state.orders],
@@ -276,10 +297,28 @@ export const useStore = create<StoreState>((set, get) => ({
   updateProduct: (id, updates) => set(s => ({ products: s.products.map(p => p.id === id ? { ...p, ...updates } : p) })),
   deleteProduct: (id) => set(s => ({ products: s.products.filter(p => p.id !== id) })),
 
+  // ─── Wishlist ───
+  toggleWishlist: (productId) => set(s => ({
+    wishlist: s.wishlist.includes(productId)
+      ? s.wishlist.filter(id => id !== productId)
+      : [...s.wishlist, productId],
+  })),
+
+  // ─── Reviews ───
+  addReview: (review) => set(s => ({
+    reviews: [...s.reviews, { ...review, id: `rev-${Date.now()}`, date: new Date().toISOString() }],
+  })),
+
   // ─── Helpers ───
   getCategoryNames: () => get().categories.map(c => c.name),
   getSubcategories: (categoryName) => {
     const cat = get().categories.find(c => c.name === categoryName);
     return cat ? cat.subcategories : [];
+  },
+  getProductRating: (productId) => {
+    const reviews = get().reviews.filter(r => r.productId === productId);
+    if (reviews.length === 0) return { avg: 0, count: 0 };
+    const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+    return { avg, count: reviews.length };
   },
 }));

@@ -1,17 +1,41 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
-  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown
+  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown, CalendarDays
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { startOfDay, startOfWeek, startOfMonth, subDays, isAfter, format } from 'date-fns';
+
+type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
+
+const DATE_FILTERS: { value: DateFilter; label: string }[] = [
+  { value: 'today', label: 'আজ' },
+  { value: 'yesterday', label: 'গতকাল' },
+  { value: 'week', label: 'এই সপ্তাহ' },
+  { value: 'month', label: 'এই মাস' },
+  { value: 'all', label: 'সর্বমোট' },
+];
+
+function getDateRange(filter: DateFilter): { start: Date; end: Date } {
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  switch (filter) {
+    case 'today': return { start: todayStart, end: now };
+    case 'yesterday': { const ys = subDays(todayStart, 1); return { start: ys, end: todayStart }; }
+    case 'week': return { start: startOfWeek(now, { weekStartsOn: 6 }), end: now };
+    case 'month': return { start: startOfMonth(now), end: now };
+    case 'all': return { start: new Date(0), end: now };
+  }
+}
 
 export default function Dashboard() {
   const products = useStore(s => s.products);
   const orders = useStore(s => s.orders);
   const categories = useStore(s => s.categories);
   const { t } = useLanguage();
+  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -67,6 +91,34 @@ export default function Dashboard() {
     }
     return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly, topProducts, todayTopProducts };
   }, [orders, products]);
+
+  // Filtered stats based on selected date range
+  const filtered = useMemo(() => {
+    const { start, end } = getDateRange(dateFilter);
+    const fOrders = orders.filter(o => {
+      const d = new Date(o.date);
+      return d >= start && d <= end;
+    });
+    const sales = fOrders.reduce((s, o) => s + o.total, 0);
+    const cost = fOrders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+    const profit = sales - cost;
+    const online = fOrders.filter(o => o.type === 'online');
+    const pos = fOrders.filter(o => o.type === 'pos');
+
+    const productSales: Record<string, { name: string; category: string; qty: number; revenue: number }> = {};
+    fOrders.forEach(o => {
+      o.items.forEach(i => {
+        if (!productSales[i.product.id]) {
+          productSales[i.product.id] = { name: i.product.name, category: i.product.category, qty: 0, revenue: 0 };
+        }
+        productSales[i.product.id].qty += i.quantity;
+        productSales[i.product.id].revenue += i.product.price * i.quantity;
+      });
+    });
+    const topProducts = Object.values(productSales).sort((a, b) => b.qty - a.qty).slice(0, 8);
+
+    return { sales, profit, cost, orders: fOrders, online, pos, topProducts };
+  }, [orders, dateFilter]);
 
   useEffect(() => {
     const critical = stats.lowStock.filter(p => p.stock <= 5);

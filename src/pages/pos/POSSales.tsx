@@ -51,11 +51,13 @@ export default function POSSales() {
 
   const handleCompleteSale = () => {
     if (posCart.length === 0) return;
-    const saleTotal = total;
     const saleProfit = profit;
-    const saleItems = itemCount;
     const id = placeOrder('pos');
-    setSaleComplete({ id, total: saleTotal, profit: saleProfit, itemCount: saleItems });
+    const orders = useStore.getState().orders;
+    const completedOrder = orders.find(o => o.id === id);
+    if (completedOrder) {
+      setSaleComplete({ order: completedOrder, profit: saleProfit });
+    }
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };

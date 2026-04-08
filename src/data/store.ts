@@ -46,6 +46,14 @@ export interface Order {
   paymentStatus?: 'pending' | 'paid';
 }
 
+export interface Banner {
+  id: string;
+  image: string;
+  title: string;
+  link: string;
+  active: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -117,6 +125,12 @@ interface StoreState {
   cart: CartItem[];
   posCart: CartItem[];
   categories: Category[];
+  banners: Banner[];
+
+  // Banner actions
+  addBanner: (banner: Omit<Banner, 'id'>) => void;
+  updateBanner: (id: string, updates: Partial<Banner>) => void;
+  deleteBanner: (id: string) => void;
 
   // Category actions
   addCategory: (name: string, icon?: string) => void;
@@ -161,8 +175,22 @@ export const useStore = create<StoreState>((set, get) => ({
   cart: [],
   posCart: [],
   categories: INITIAL_CATEGORIES,
+  banners: [
+    { id: 'banner-1', image: '', title: 'বৈশাখী অফার — ৩৫% পর্যন্ত ছাড়!', link: '/shop', active: true },
+    { id: 'banner-2', image: '', title: '৳৫০০+ অর্ডারে ফ্রি ডেলিভারি', link: '/shop', active: true },
+  ],
 
-  // ─── Category actions ───
+  // ─── Banner actions ───
+  addBanner: (banner) => set(s => ({
+    banners: [...s.banners, { ...banner, id: `banner-${Date.now()}` }],
+  })),
+  updateBanner: (id, updates) => set(s => ({
+    banners: s.banners.map(b => b.id === id ? { ...b, ...updates } : b),
+  })),
+  deleteBanner: (id) => set(s => ({
+    banners: s.banners.filter(b => b.id !== id),
+  })),
+
   addCategory: (name, icon = '📦') => set(s => ({
     categories: [...s.categories, { id: `cat-${Date.now()}`, name, icon, subcategories: [] }],
   })),

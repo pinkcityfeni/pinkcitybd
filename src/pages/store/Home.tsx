@@ -1,21 +1,19 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { ArrowRight, ShoppingCart, Sparkles, ChevronRight, Flame, Clock } from 'lucide-react';
+import { ShoppingCart, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { useRef, useState, useEffect, useMemo } from 'react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 export default function Home() {
-  const { products, categories, addToCart } = useStore();
-
-  // Shuffle products for "random" display
+  const { products, categories, addToCart, banners } = useStore();
+  const activeBanners = banners.filter(b => b.active);
   const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
 
   return (
     <div className="animate-fade-in">
-      {/* Announcement Banner */}
-      <AnnouncementBanner />
+      {/* Hero Banner Slider */}
+      {activeBanners.length > 0 && <BannerSlider banners={activeBanners} />}
 
       {/* Category Scrollable Icons */}
       <section className="border-b bg-card">
@@ -97,25 +95,71 @@ export default function Home() {
   );
 }
 
-function AnnouncementBanner() {
-  const announcements = [
-    "🎉 4.4 Summer Sale — Up to 60% OFF!",
-    "🚚 Free Delivery on orders over ৳500",
-    "💎 Earn double points this week!",
-  ];
-  const [idx, setIdx] = useState(0);
+function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] }) {
+  const [current, setCurrent] = useState(0);
+
+  const next = useCallback(() => setCurrent(i => (i + 1) % banners.length), [banners.length]);
+  const prev = useCallback(() => setCurrent(i => (i - 1 + banners.length) % banners.length), [banners.length]);
 
   useEffect(() => {
-    const timer = setInterval(() => setIdx(i => (i + 1) % announcements.length), 3500);
+    if (banners.length <= 1) return;
+    const timer = setInterval(next, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [banners.length, next]);
+
+  const banner = banners[current];
 
   return (
-    <div className="bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground text-center py-2.5 px-4">
-      <p className="text-xs font-medium animate-fade-in" key={idx}>
-        {announcements[idx]}
-      </p>
-    </div>
+    <section className="relative w-full overflow-hidden bg-muted/30">
+      <Link to={banner.link} className="block">
+        <div className="relative aspect-[21/9] sm:aspect-[3/1] w-full">
+          {banner.image ? (
+            <img
+              src={banner.image}
+              alt={banner.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-primary via-primary/80 to-accent flex items-center justify-center px-6">
+              <h2 className="text-primary-foreground text-lg sm:text-2xl md:text-3xl font-display font-bold text-center leading-snug">
+                {banner.title}
+              </h2>
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {/* Nav arrows */}
+      {banners.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center hover:bg-background/90 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center hover:bg-background/90 transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </>
+      )}
+
+      {/* Dots */}
+      {banners.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-primary-foreground' : 'w-1.5 bg-primary-foreground/50'}`}
+            />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

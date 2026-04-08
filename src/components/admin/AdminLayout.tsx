@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -8,6 +8,7 @@ const NAV = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/categories', label: 'Categories', icon: FolderTree },
+  { to: '/admin/banners', label: 'Banners', icon: Image },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/inventory', label: 'Inventory', icon: Warehouse },
   { to: '/admin/sales', label: 'Sales', icon: BarChart3 },

@@ -14,8 +14,6 @@ import {
 
 type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
 
-// DATE_FILTERS moved inside component to use t()
-
 function getDateRange(filter: DateFilter): { start: Date; end: Date } {
   const now = new Date();
   const todayStart = startOfDay(now);
@@ -34,6 +32,14 @@ export default function Dashboard() {
   const categories = useStore(s => s.categories);
   const { t } = useLanguage();
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+
+  const DATE_FILTERS: { value: DateFilter; label: string }[] = [
+    { value: 'today', label: t('dash.filterToday') },
+    { value: 'yesterday', label: t('dash.filterYesterday') },
+    { value: 'week', label: t('dash.filterWeek') },
+    { value: 'month', label: t('dash.filterMonth') },
+    { value: 'all', label: t('dash.filterAll') },
+  ];
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);

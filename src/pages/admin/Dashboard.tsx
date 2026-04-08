@@ -314,20 +314,55 @@ export default function Dashboard() {
 
         <div className="rounded-xl border bg-card p-5">
           <h3 className="font-semibold mb-4">{t('dash.catBreakdown')}</h3>
-          <div className="space-y-3">
-            {categories.map(c => {
+          {(() => {
+            const PIE_COLORS = ['hsl(var(--primary))', 'hsl(142 71% 45%)', 'hsl(38 92% 50%)', 'hsl(262 83% 58%)', 'hsl(0 84% 60%)', 'hsl(199 89% 48%)'];
+            const catData = categories.map(c => {
               const catProducts = products.filter(p => p.category === c.name);
-              const catStock = catProducts.reduce((s, p) => s + p.stock, 0);
-              const catValue = catProducts.reduce((s, p) => s + p.price * p.stock, 0);
-              return (
-                <div key={c.id} className="rounded-lg bg-muted/50 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm flex items-center gap-1.5"><span>{c.icon}</span> {c.name}</span>
-                    <span className="text-xs text-muted-foreground">{t('dash.nProducts', { n: catProducts.length })}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{t('dash.unitsInStock', { n: catStock })}</span>
-                    <span className="font-medium text-foreground">৳{catValue.toFixed(0)}</span>
+              const value = catProducts.reduce((s, p) => s + p.price * p.stock, 0);
+              return { name: c.name, value, icon: c.icon, count: catProducts.length };
+            }).filter(c => c.value > 0);
+            return catData.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-8 text-center">কোনো ডেটা নেই</p>
+            ) : (
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width={160} height={160}>
+                  <PieChart>
+                    <Pie data={catData} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} strokeWidth={0}>
+                      {catData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip formatter={(v: number) => `৳${v.toFixed(0)}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex-1 space-y-1.5">
+                  {catData.map((c, i) => (
+                    <div key={c.name} className="flex items-center gap-2 text-xs">
+                      <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                      <span className="flex-1 truncate">{c.icon} {c.name}</span>
+                      <span className="font-medium">৳{c.value.toFixed(0)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* Order Type Comparison Bar Chart */}
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> মাসিক অর্ডার তুলনা (Online vs POS)</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={stats.monthly} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+            <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} />
+            <Bar dataKey="revenue" name="রেভিনিউ" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="profit" name="লাভ" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
                   </div>
                 </div>
               );

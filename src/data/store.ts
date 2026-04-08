@@ -175,8 +175,22 @@ export const useStore = create<StoreState>((set, get) => ({
   cart: [],
   posCart: [],
   categories: INITIAL_CATEGORIES,
+  banners: [
+    { id: 'banner-1', image: '', title: 'বৈশাখী অফার — ৩৫% পর্যন্ত ছাড়!', link: '/shop', active: true },
+    { id: 'banner-2', image: '', title: '৳৫০০+ অর্ডারে ফ্রি ডেলিভারি', link: '/shop', active: true },
+  ],
 
-  // ─── Category actions ───
+  // ─── Banner actions ───
+  addBanner: (banner) => set(s => ({
+    banners: [...s.banners, { ...banner, id: `banner-${Date.now()}` }],
+  })),
+  updateBanner: (id, updates) => set(s => ({
+    banners: s.banners.map(b => b.id === id ? { ...b, ...updates } : b),
+  })),
+  deleteBanner: (id) => set(s => ({
+    banners: s.banners.filter(b => b.id !== id),
+  })),
+
   addCategory: (name, icon = '📦') => set(s => ({
     categories: [...s.categories, { id: `cat-${Date.now()}`, name, icon, subcategories: [] }],
   })),

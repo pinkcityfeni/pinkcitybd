@@ -6,8 +6,13 @@ import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 export default function Home() {
-  const { products, categories, addToCart, banners, wishlist, toggleWishlist } = useStore();
-  const activeBanners = banners.filter(b => b.active);
+  const products = useStore(s => s.products);
+  const categories = useStore(s => s.categories);
+  const addToCart = useStore(s => s.addToCart);
+  const banners = useStore(s => s.banners);
+  const wishlist = useStore(s => s.wishlist);
+  const toggleWishlist = useStore(s => s.toggleWishlist);
+  const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
   const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
 
   return (

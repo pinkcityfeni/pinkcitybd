@@ -3,10 +3,14 @@ import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
-  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown, CalendarDays
+  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { startOfDay, startOfWeek, startOfMonth, subDays, isAfter, format } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, subDays } from 'date-fns';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar, Legend
+} from 'recharts';
 
 type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
 
@@ -127,7 +131,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  const maxRevenue = Math.max(...stats.monthly.map(m => m.revenue), 1);
+  
 
   return (
     <div className="p-4 md:p-6 animate-fade-in space-y-6">
@@ -174,26 +178,31 @@ export default function Dashboard() {
             <h3 className="font-semibold flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> {t('dash.monthlyReport')}</h3>
             <span className="text-xs text-muted-foreground">{t('dash.last6Months')}</span>
           </div>
-          <div className="space-y-3">
-            {stats.monthly.map(m => (
-              <div key={m.month} className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground w-14 shrink-0">{m.month}</span>
-                <div className="flex-1 flex items-center gap-2">
-                  <div className="flex-1 h-6 bg-muted rounded-md overflow-hidden relative">
-                    <div className="h-full bg-primary/20 rounded-md transition-all" style={{ width: `${(m.revenue / maxRevenue) * 100}%` }} />
-                    <div className="h-full bg-success/40 rounded-md absolute top-0 left-0 transition-all" style={{ width: `${(m.profit / maxRevenue) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="text-right shrink-0 w-28">
-                  <span className="text-xs font-medium">৳{m.revenue.toFixed(0)}</span>
-                  <span className="text-[10px] text-success ml-1.5">+৳{m.profit.toFixed(0)}</span>
-                </div>
-                <span className="text-[10px] text-muted-foreground w-12 text-right">{m.orders} ord</span>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={stats.monthly} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(142 71% 45%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(142 71% 45%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <Tooltip
+                contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                formatter={(value: number, name: string) => [`৳${value.toFixed(0)}`, name === 'revenue' ? 'রেভিনিউ' : 'লাভ']}
+              />
+              <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="url(#colorRevenue)" strokeWidth={2} />
+              <Area type="monotone" dataKey="profit" stroke="hsl(142 71% 45%)" fill="url(#colorProfit)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
           <div className="flex gap-4 mt-3 pt-3 border-t text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-primary/20" /> {t('dash.revenueLabel')}</span>
+            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-primary/40" /> {t('dash.revenueLabel')}</span>
             <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-success/40" /> {t('dash.profitLabel')}</span>
           </div>
         </div>
@@ -305,26 +314,54 @@ export default function Dashboard() {
 
         <div className="rounded-xl border bg-card p-5">
           <h3 className="font-semibold mb-4">{t('dash.catBreakdown')}</h3>
-          <div className="space-y-3">
-            {categories.map(c => {
+          {(() => {
+            const PIE_COLORS = ['hsl(var(--primary))', 'hsl(142 71% 45%)', 'hsl(38 92% 50%)', 'hsl(262 83% 58%)', 'hsl(0 84% 60%)', 'hsl(199 89% 48%)'];
+            const catData = categories.map(c => {
               const catProducts = products.filter(p => p.category === c.name);
-              const catStock = catProducts.reduce((s, p) => s + p.stock, 0);
-              const catValue = catProducts.reduce((s, p) => s + p.price * p.stock, 0);
-              return (
-                <div key={c.id} className="rounded-lg bg-muted/50 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm flex items-center gap-1.5"><span>{c.icon}</span> {c.name}</span>
-                    <span className="text-xs text-muted-foreground">{t('dash.nProducts', { n: catProducts.length })}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{t('dash.unitsInStock', { n: catStock })}</span>
-                    <span className="font-medium text-foreground">৳{catValue.toFixed(0)}</span>
-                  </div>
+              const value = catProducts.reduce((s, p) => s + p.price * p.stock, 0);
+              return { name: c.name, value, icon: c.icon, count: catProducts.length };
+            }).filter(c => c.value > 0);
+            return catData.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-8 text-center">কোনো ডেটা নেই</p>
+            ) : (
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width={160} height={160}>
+                  <PieChart>
+                    <Pie data={catData} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} strokeWidth={0}>
+                      {catData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip formatter={(v: number) => `৳${v.toFixed(0)}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex-1 space-y-1.5">
+                  {catData.map((c, i) => (
+                    <div key={c.name} className="flex items-center gap-2 text-xs">
+                      <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                      <span className="flex-1 truncate">{c.icon} {c.name}</span>
+                      <span className="font-medium">৳{c.value.toFixed(0)}</span>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })()}
         </div>
+      </div>
+
+      {/* Order Type Comparison Bar Chart */}
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> মাসিক অর্ডার তুলনা (Online vs POS)</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={stats.monthly} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+            <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} />
+            <Bar dataKey="revenue" name="রেভিনিউ" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="profit" name="লাভ" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

@@ -159,6 +159,7 @@ interface StoreState {
 
   // Order actions
   placeOrder: (type: 'online' | 'pos', data?: OrderData) => string;
+  deleteOrder: (orderId: string) => void;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
 
   // Product actions
@@ -289,6 +290,7 @@ export const useStore = create<StoreState>((set, get) => ({
     }));
     return id;
   },
+  deleteOrder: (orderId) => set(s => ({ orders: s.orders.filter(o => o.id !== orderId) })),
   updateOrderStatus: (orderId, status) => set(s => ({ orders: s.orders.map(o => o.id === orderId ? { ...o, status } : o) })),
 
   // ─── Products ───

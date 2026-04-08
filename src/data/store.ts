@@ -46,6 +46,14 @@ export interface Order {
   paymentStatus?: 'pending' | 'paid';
 }
 
+export interface Banner {
+  id: string;
+  image: string;
+  title: string;
+  link: string;
+  active: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -117,6 +125,12 @@ interface StoreState {
   cart: CartItem[];
   posCart: CartItem[];
   categories: Category[];
+  banners: Banner[];
+
+  // Banner actions
+  addBanner: (banner: Omit<Banner, 'id'>) => void;
+  updateBanner: (id: string, updates: Partial<Banner>) => void;
+  deleteBanner: (id: string) => void;
 
   // Category actions
   addCategory: (name: string, icon?: string) => void;

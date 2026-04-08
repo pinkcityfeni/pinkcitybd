@@ -100,28 +100,42 @@ export default function Home() {
 
 function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] }) {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const next = useCallback(() => setCurrent(i => (i + 1) % banners.length), [banners.length]);
-  const prev = useCallback(() => setCurrent(i => (i - 1 + banners.length) % banners.length), [banners.length]);
+  const pauseRef = useRef(false);
+  const touchStartX = useRef(0);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const goTo = useCallback((idx: number) => {
+    setCurrent(idx);
+    pauseRef.current = true;
+    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+    pauseTimerRef.current = setTimeout(() => { pauseRef.current = false; }, 3000);
+  }, []);
 
   useEffect(() => {
-    if (banners.length <= 1 || paused) return;
-    const timer = setInterval(next, 4000);
+    if (banners.length <= 1) return;
+    const timer = setInterval(() => {
+      if (!pauseRef.current) {
+        setCurrent(i => (i + 1) % banners.length);
+      }
+    }, 4000);
     return () => clearInterval(timer);
-  }, [banners.length, next, paused]);
+  }, [banners.length]);
 
-  // Touch/swipe support
-  const touchStartX = useRef(0);
+  useEffect(() => {
+    return () => { if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current); };
+  }, []);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
-    setPaused(true);
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) {
-      diff > 0 ? next() : prev();
+      const nextIdx = diff > 0
+        ? (current + 1) % banners.length
+        : (current - 1 + banners.length) % banners.length;
+      goTo(nextIdx);
     }
-    setTimeout(() => setPaused(false), 3000);
   };
 
   const banner = banners[current];
@@ -132,7 +146,6 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Banner content — click left/right halves to navigate */}
       <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full">
         {banner.image ? (
           <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
@@ -144,16 +157,15 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
           </Link>
         )}
 
-        {/* Tap zones — left half goes prev, right half goes next */}
         {banners.length > 1 && banner.image && (
           <>
             <button
-              onClick={(e) => { e.preventDefault(); prev(); setPaused(true); setTimeout(() => setPaused(false), 3000); }}
+              onClick={() => goTo((current - 1 + banners.length) % banners.length)}
               className="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
               aria-label="আগের ব্যানার"
             />
             <button
-              onClick={(e) => { e.preventDefault(); next(); setPaused(true); setTimeout(() => setPaused(false), 3000); }}
+              onClick={() => goTo((current + 1) % banners.length)}
               className="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
               aria-label="পরের ব্যানার"
             />
@@ -161,11 +173,10 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
         )}
       </div>
 
-      {/* Dots */}
       {banners.length > 1 && (
         <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
           {banners.map((_, i) => (
-            <button key={i} onClick={() => { setCurrent(i); setPaused(true); setTimeout(() => setPaused(false), 3000); }} className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-white' : 'w-2 bg-white/50'}`} />
+            <button key={i} onClick={() => goTo(i)} className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-white' : 'w-2 bg-white/50'}`} />
           ))}
         </div>
       )}

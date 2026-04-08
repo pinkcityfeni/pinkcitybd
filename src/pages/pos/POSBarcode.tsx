@@ -6,7 +6,8 @@ import { Barcode, Package } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function POSBarcode() {
-  const { products, addToPosCart } = useStore();
+  const products = useStore(s => s.products);
+  const addToPosCart = useStore(s => s.addToPosCart);
   const [barcode, setBarcode] = useState('');
   const [result, setResult] = useState<typeof products[0] | null>(null);
   const [notFound, setNotFound] = useState(false);

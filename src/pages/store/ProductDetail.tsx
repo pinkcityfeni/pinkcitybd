@@ -10,7 +10,15 @@ import { toast } from 'sonner';
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { products, categories, addToCart, buyNow, wishlist, toggleWishlist, reviews, addReview, getProductRating } = useStore();
+  const products = useStore(s => s.products);
+  const categories = useStore(s => s.categories);
+  const addToCart = useStore(s => s.addToCart);
+  const buyNow = useStore(s => s.buyNow);
+  const wishlist = useStore(s => s.wishlist);
+  const toggleWishlist = useStore(s => s.toggleWishlist);
+  const reviews = useStore(s => s.reviews);
+  const addReview = useStore(s => s.addReview);
+  const getProductRating = useStore(s => s.getProductRating);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const product = products.find(p => p.id === id);

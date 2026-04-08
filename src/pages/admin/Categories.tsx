@@ -9,7 +9,13 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
 export default function Categories() {
-  const { categories, products, addCategory, updateCategory, deleteCategory, addSubcategory, removeSubcategory } = useStore();
+  const categories = useStore(s => s.categories);
+  const products = useStore(s => s.products);
+  const addCategory = useStore(s => s.addCategory);
+  const updateCategory = useStore(s => s.updateCategory);
+  const deleteCategory = useStore(s => s.deleteCategory);
+  const addSubcategory = useStore(s => s.addSubcategory);
+  const removeSubcategory = useStore(s => s.removeSubcategory);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCat, setEditCat] = useState<Category | null>(null);
   const [catName, setCatName] = useState('');

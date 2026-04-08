@@ -2,7 +2,8 @@ import { useStore } from '@/data/store';
 import { Star, Trash2 } from 'lucide-react';
 
 export default function Reviews() {
-  const { reviews, products } = useStore();
+  const reviews = useStore(s => s.reviews);
+  const products = useStore(s => s.products);
 
   return (
     <div className="p-6 animate-fade-in">

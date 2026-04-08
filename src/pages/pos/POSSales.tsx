@@ -6,7 +6,12 @@ import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart } 
 import { toast } from 'sonner';
 
 export default function POSSales() {
-  const { products, posCart, addToPosCart, removeFromPosCart, updatePosCartQty, placeOrder } = useStore();
+  const products = useStore(s => s.products);
+  const posCart = useStore(s => s.posCart);
+  const addToPosCart = useStore(s => s.addToPosCart);
+  const removeFromPosCart = useStore(s => s.removeFromPosCart);
+  const updatePosCartQty = useStore(s => s.updatePosCartQty);
+  const placeOrder = useStore(s => s.placeOrder);
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ id: string; total: number; profit: number; itemCount: number } | null>(null);

@@ -8,7 +8,11 @@ import { ShoppingCart, Search, SlidersHorizontal, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Shop() {
-  const { products, categories, addToCart, wishlist, toggleWishlist } = useStore();
+  const products = useStore(s => s.products);
+  const categories = useStore(s => s.categories);
+  const addToCart = useStore(s => s.addToCart);
+  const wishlist = useStore(s => s.wishlist);
+  const toggleWishlist = useStore(s => s.toggleWishlist);
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');

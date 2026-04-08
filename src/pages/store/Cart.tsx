@@ -6,7 +6,10 @@ import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Cart() {
-  const { cart, removeFromCart, updateCartQty, products } = useStore();
+  const cart = useStore(s => s.cart);
+  const removeFromCart = useStore(s => s.removeFromCart);
+  const updateCartQty = useStore(s => s.updateCartQty);
+  const products = useStore(s => s.products);
   const { t } = useLanguage();
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const points = Math.floor(total);

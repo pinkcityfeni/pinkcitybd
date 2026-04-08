@@ -6,7 +6,9 @@ import { toast } from 'sonner';
 import { Plus, Minus, Search } from 'lucide-react';
 
 export default function Inventory() {
-  const { products, categories, updateStock } = useStore();
+  const products = useStore(s => s.products);
+  const categories = useStore(s => s.categories);
+  const updateStock = useStore(s => s.updateStock);
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
   const [amounts, setAmounts] = useState<Record<string, string>>({});

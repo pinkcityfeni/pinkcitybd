@@ -144,13 +144,15 @@ export default function StoreLayout() {
                 <Link to="/signup" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.newAccount')}</Link>
               </div>
             </div>
-            <div>
-              <h4 className="font-display font-semibold text-sm mb-3">{t('footer.admin')}</h4>
-              <div className="space-y-2">
-                <Link to="/admin" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.dashboard')}</Link>
-                <Link to="/pos" className="block text-xs text-muted-foreground hover:text-primary transition-colors">POS</Link>
+            {user?.role === 'admin' && (
+              <div>
+                <h4 className="font-display font-semibold text-sm mb-3">{t('footer.admin')}</h4>
+                <div className="space-y-2">
+                  <Link to="/admin" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.dashboard')}</Link>
+                  <Link to="/pos" className="block text-xs text-muted-foreground hover:text-primary transition-colors">POS</Link>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div className="border-t pt-6 text-center text-xs text-muted-foreground">© 2026 PINK CITY. All rights reserved.</div>
         </div>

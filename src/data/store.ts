@@ -153,7 +153,7 @@ interface StoreState {
   deleteBanner: (id: string) => void;
 
   // Category actions
-  addCategory: (name: string, icon?: string) => void;
+  addCategory: (name: string, icon?: string, image?: string) => void;
   updateCategory: (id: string, updates: Partial<Omit<Category, 'id'>>) => void;
   deleteCategory: (id: string) => void;
   addSubcategory: (categoryId: string, subcategory: string) => void;
@@ -221,8 +221,8 @@ export const useStore = create<StoreState>((set, get) => ({
     banners: s.banners.filter(b => b.id !== id),
   })),
 
-  addCategory: (name, icon = '📦') => set(s => ({
-    categories: [...s.categories, { id: `cat-${Date.now()}`, name, icon, subcategories: [] }],
+  addCategory: (name, icon = '📦', image) => set(s => ({
+    categories: [...s.categories, { id: `cat-${Date.now()}`, name, icon, image, subcategories: [] }],
   })),
   updateCategory: (id, updates) => set(s => ({
     categories: s.categories.map(c => c.id === id ? { ...c, ...updates } : c),

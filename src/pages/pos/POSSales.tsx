@@ -1,18 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
-
-const PAYMENT_METHODS: { value: PaymentMethod; label: string; color: string }[] = [
-  { value: 'cash', label: 'নগদ', color: 'bg-green-600' },
-  { value: 'bkash', label: 'বিকাশ', color: 'bg-pink-600' },
-  { value: 'nagad', label: 'নগদ (Nagad)', color: 'bg-orange-600' },
-  { value: 'bank', label: 'ব্যাংক ট্রান্সফার', color: 'bg-blue-600' },
-];
 
 export default function POSSales() {
   const products = useStore(s => s.products);
@@ -21,6 +15,7 @@ export default function POSSales() {
   const removeFromPosCart = useStore(s => s.removeFromPosCart);
   const updatePosCartQty = useStore(s => s.updatePosCartQty);
   const placeOrder = useStore(s => s.placeOrder);
+  const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number } | null>(null);
@@ -28,16 +23,21 @@ export default function POSSales() {
   const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
-  // Payment state
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [isSplit, setIsSplit] = useState(false);
   const [splitMethod1, setSplitMethod1] = useState<PaymentMethod>('cash');
   const [splitMethod2, setSplitMethod2] = useState<PaymentMethod>('bkash');
   const [splitAmount1, setSplitAmount1] = useState('');
 
-  // Discount state
   const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
   const [discountValue, setDiscountValue] = useState('');
+
+  const PAYMENT_METHODS: { value: PaymentMethod; label: string; color: string }[] = [
+    { value: 'cash', label: t('pos.cash'), color: 'bg-green-600' },
+    { value: 'bkash', label: t('pos.bkash'), color: 'bg-pink-600' },
+    { value: 'nagad', label: t('pos.nagad'), color: 'bg-orange-600' },
+    { value: 'bank', label: t('pos.bank'), color: 'bg-blue-600' },
+  ];
 
   const focusBarcode = useCallback(() => {
     setTimeout(() => barcodeRef.current?.focus(), 50);
@@ -63,35 +63,25 @@ export default function POSSales() {
     if (!code) return;
     const p = products.find(prod => prod.barcode === code);
     if (p) {
-      if (p.stock <= 0) { toast.error(`Out of stock: ${p.name}`); }
+      if (p.stock <= 0) { toast.error(`${t('pos.outOfStock')}: ${p.name}`); }
       else {
         const inCart = posCart.find(i => i.product.id === p.id);
-        if (inCart && inCart.quantity >= p.stock) { toast.error(`Max stock reached: ${p.name}`); }
+        if (inCart && inCart.quantity >= p.stock) { toast.error(`${t('pos.maxStock')}: ${p.name}`); }
         else { addToPosCart(p); toast.success(`✓ ${p.name}`, { duration: 1500 }); }
       }
-    } else { toast.error(`No product found for barcode: ${code}`); }
+    } else { toast.error(`${t('posBarcode.notFound')}: ${code}`); }
     setBarcode('');
     focusBarcode();
   };
 
   const handleCompleteSale = () => {
     if (posCart.length === 0) return;
-
-    if (isSplit && splitAmt1 <= 0) {
-      toast.error('স্প্লিট পেমেন্টে প্রথম অংশের টাকা দিন');
-      return;
-    }
-    if (isSplit && splitAmt1 >= total) {
-      toast.error('স্প্লিট পেমেন্টে প্রথম অংশ মোট এর কম হতে হবে');
-      return;
-    }
+    if (isSplit && splitAmt1 <= 0) { toast.error(t('pos.splitError1')); return; }
+    if (isSplit && splitAmt1 >= total) { toast.error(t('pos.splitError2')); return; }
 
     const saleProfit = profit;
     const splitPayment: SplitPayment | undefined = isSplit ? {
-      method1: splitMethod1,
-      amount1: splitAmt1,
-      method2: splitMethod2,
-      amount2: splitAmt2,
+      method1: splitMethod1, amount1: splitAmt1, method2: splitMethod2, amount2: splitAmt2,
     } : undefined;
 
     const id = placeOrder('pos', {
@@ -103,15 +93,8 @@ export default function POSSales() {
     });
     const orders = useStore.getState().orders;
     const completedOrder = orders.find(o => o.id === id);
-    if (completedOrder) {
-      setSaleComplete({ order: completedOrder, profit: saleProfit });
-    }
-    // Reset payment state
-    setPaymentMethod('cash');
-    setIsSplit(false);
-    setSplitAmount1('');
-    setDiscountValue('');
-    setDiscountType('fixed');
+    if (completedOrder) { setSaleComplete({ order: completedOrder, profit: saleProfit }); }
+    setPaymentMethod('cash'); setIsSplit(false); setSplitAmount1(''); setDiscountValue(''); setDiscountType('fixed');
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };
@@ -119,12 +102,8 @@ export default function POSSales() {
   const handlePrintInvoice = () => {
     if (!invoiceRef.current) return;
     const printWindow = window.open('', '_blank', 'width=400,height=600');
-    if (!printWindow) { toast.error('Popup blocked! Please allow popups.'); return; }
-    printWindow.document.write(`
-      <html><head><title>Invoice - ${saleComplete?.order.id}</title>
-      <style>body{margin:0;font-family:monospace;}</style></head>
-      <body>${invoiceRef.current.innerHTML}</body></html>
-    `);
+    if (!printWindow) { toast.error(t('pos.popupBlocked')); return; }
+    printWindow.document.write(`<html><head><title>Invoice - ${saleComplete?.order.id}</title><style>body{margin:0;font-family:monospace;}</style></head><body>${invoiceRef.current.innerHTML}</body></html>`);
     printWindow.document.close();
     printWindow.print();
   };
@@ -142,32 +121,32 @@ export default function POSSales() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="text-center animate-fade-in">
           <CheckCircle2 className="h-20 w-20 mx-auto mb-4 text-success" />
-          <h2 className="text-2xl font-bold mb-2">বিক্রি সম্পন্ন!</h2>
+          <h2 className="text-2xl font-bold mb-2">{t('pos.saleComplete')}</h2>
           <p className="text-sm opacity-70 mb-1">Order: {saleComplete.order.id}</p>
-          <p className="text-sm opacity-70 mb-1">{saleItemCount}টি আইটেম বিক্রি হয়েছে</p>
+          <p className="text-sm opacity-70 mb-1">{t('pos.nItemsSold', { n: saleItemCount })}</p>
           <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
-          <p className="text-sm text-success font-medium mb-2">লাভ: ৳{saleComplete.profit.toFixed(0)}</p>
+          <p className="text-sm text-success font-medium mb-2">{t('pos.profitLabel')}: ৳{saleComplete.profit.toFixed(0)}</p>
           {saleComplete.order.splitPayment ? (
             <div className="text-xs opacity-70 mb-4 space-y-0.5">
               <p>{getMethodLabel(saleComplete.order.splitPayment.method1)}: ৳{saleComplete.order.splitPayment.amount1.toFixed(0)}</p>
               <p>{getMethodLabel(saleComplete.order.splitPayment.method2)}: ৳{saleComplete.order.splitPayment.amount2.toFixed(0)}</p>
             </div>
           ) : (
-            <p className="text-xs opacity-70 mb-4">পেমেন্ট: {getMethodLabel(saleComplete.order.paymentMethod || 'cash')}</p>
+            <p className="text-xs opacity-70 mb-4">{t('pos.payment')}: {getMethodLabel(saleComplete.order.paymentMethod || 'cash')}</p>
           )}
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={handlePrintInvoice}>
-              <Printer className="h-4 w-4 mr-2" /> প্রিন্ট ইনভয়েস
+              <Printer className="h-4 w-4 mr-2" /> {t('pos.printInvoice')}
             </Button>
             <Button size="lg" onClick={handleNewSale}>
-              <RotateCcw className="h-4 w-4 mr-2" /> নতুন বিক্রি
+              <RotateCcw className="h-4 w-4 mr-2" /> {t('pos.newSale')}
             </Button>
           </div>
         </div>
       </div>
 
       <div className="md:w-96 border-l p-4 overflow-auto" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-        <h3 className="text-sm font-semibold mb-3 text-center opacity-60">ইনভয়েস প্রিভিউ</h3>
+        <h3 className="text-sm font-semibold mb-3 text-center opacity-60">{t('pos.invoicePreview')}</h3>
         <div className="rounded-xl overflow-hidden shadow-lg">
           <POSInvoice ref={invoiceRef} order={saleComplete.order} />
         </div>
@@ -186,24 +165,24 @@ export default function POSSales() {
         <form onSubmit={handleBarcodeScan}>
           <div className="pos-panel flex gap-2 items-center">
             <ScanBarcode className="h-5 w-5 text-primary shrink-0" />
-            <Input ref={barcodeRef} value={barcode} onChange={e => setBarcode(e.target.value)} placeholder="Scan barcode or type code + Enter..." className="bg-transparent border-pos-border font-mono text-lg" autoFocus />
-            <Button type="submit" size="sm">Add</Button>
+            <Input ref={barcodeRef} value={barcode} onChange={e => setBarcode(e.target.value)} placeholder={t('pos.scanBarcode')} className="bg-transparent border-pos-border font-mono text-lg" autoFocus />
+            <Button type="submit" size="sm">{t('pos.addBtn')}</Button>
           </div>
         </form>
 
         <div className="pos-panel">
           <div className="flex items-center gap-2 mb-3">
             <Search className="h-4 w-4 opacity-50" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, barcode, or category..." className="bg-transparent border-pos-border" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('pos.searchPlaceholder')} className="bg-transparent border-pos-border" />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {filteredProducts.map(p => (
-              <button key={p.id} onClick={() => { if (p.stock <= 0) { toast.error('Out of stock'); return; } addToPosCart(p); toast.success(`✓ ${p.name}`, { duration: 1500 }); focusBarcode(); }} className="p-3 rounded-lg text-left transition-all hover:bg-primary/10 hover:scale-[1.02] disabled:opacity-40" style={{ background: 'hsl(var(--pos-bg))' }} disabled={p.stock === 0}>
+              <button key={p.id} onClick={() => { if (p.stock <= 0) { toast.error(t('pos.outOfStock')); return; } addToPosCart(p); toast.success(`✓ ${p.name}`, { duration: 1500 }); focusBarcode(); }} className="p-3 rounded-lg text-left transition-all hover:bg-primary/10 hover:scale-[1.02] disabled:opacity-40" style={{ background: 'hsl(var(--pos-bg))' }} disabled={p.stock === 0}>
                 <p className="text-xs truncate font-medium">{p.name}</p>
                 <p className="text-sm font-bold text-primary mt-1">৳{p.price.toFixed(0)}</p>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-[10px] font-mono opacity-50">#{p.barcode}</span>
-                  <span className={`text-[10px] font-medium ${p.stock < 10 ? 'text-destructive' : 'text-success'}`}>{p.stock} left</span>
+                  <span className={`text-[10px] font-medium ${p.stock < 10 ? 'text-destructive' : 'text-success'}`}>{t('pos.left', { n: p.stock })}</span>
                 </div>
               </button>
             ))}
@@ -213,8 +192,8 @@ export default function POSSales() {
 
       <div className={`${showCart ? 'fixed inset-0 z-40 flex flex-col' : 'hidden'} md:relative md:flex md:w-80 lg:w-96 border-l md:flex-col`} style={{ borderColor: 'hsl(var(--pos-border))', background: 'hsl(var(--pos-card))' }}>
         <div className="p-4 border-b font-semibold text-sm flex items-center justify-between" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-          <div className="flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> Cart ({itemCount} items)</div>
-          <button className="md:hidden text-xs opacity-60" onClick={() => setShowCart(false)}>✕ Close</button>
+          <div className="flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> {t('pos.cart')} ({t('pos.items', { n: itemCount })})</div>
+          <button className="md:hidden text-xs opacity-60" onClick={() => setShowCart(false)}>{t('pos.close')}</button>
         </div>
 
         <div className="flex-1 overflow-auto p-3 space-y-1">
@@ -222,14 +201,14 @@ export default function POSSales() {
             <div key={item.product.id} className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: 'hsl(var(--pos-bg))' }}>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate">{item.product.name}</p>
-                <p className="text-[10px] opacity-50">#{item.product.barcode} · ৳{item.product.price.toFixed(0)} each</p>
+                <p className="text-[10px] opacity-50">#{item.product.barcode} · {t('pos.each', { price: item.product.price.toFixed(0) })}</p>
               </div>
               <div className="flex items-center gap-0.5">
                 <button className="h-6 w-6 rounded flex items-center justify-center hover:bg-primary/20 transition-colors" onClick={() => { if (item.quantity <= 1) removeFromPosCart(item.product.id); else updatePosCartQty(item.product.id, item.quantity - 1); }}>
                   <Minus className="h-3 w-3" />
                 </button>
                 <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                <button className="h-6 w-6 rounded flex items-center justify-center hover:bg-primary/20 transition-colors" onClick={() => { if (item.quantity >= item.product.stock) { toast.error('Max stock'); return; } updatePosCartQty(item.product.id, item.quantity + 1); }}>
+                <button className="h-6 w-6 rounded flex items-center justify-center hover:bg-primary/20 transition-colors" onClick={() => { if (item.quantity >= item.product.stock) { toast.error(t('pos.maxStock')); return; } updatePosCartQty(item.product.id, item.quantity + 1); }}>
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
@@ -240,120 +219,72 @@ export default function POSSales() {
           {posCart.length === 0 && (
             <div className="text-center py-16 opacity-40">
               <ScanBarcode className="h-10 w-10 mx-auto mb-2" />
-              <p className="text-sm">Scan a barcode to start</p>
+              <p className="text-sm">{t('pos.scanToStart')}</p>
             </div>
           )}
         </div>
 
         <div className="p-4 border-t space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-          <div className="flex justify-between text-xs opacity-70"><span>সাবটোটাল ({itemCount} items)</span><span>৳{subtotal.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs opacity-70"><span>{t('pos.subtotal')} ({t('pos.items', { n: itemCount })})</span><span>৳{subtotal.toFixed(0)}</span></div>
 
-          {/* Discount Section */}
           <div className="flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-primary shrink-0" />
             <div className="flex rounded-lg overflow-hidden flex-1" style={{ background: 'hsl(var(--pos-bg))' }}>
-              <button
-                onClick={() => setDiscountType('fixed')}
-                className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'fixed' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}
-              >৳</button>
-              <button
-                onClick={() => setDiscountType('percent')}
-                className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'percent' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}
-              ><Percent className="h-3 w-3" /></button>
-              <Input
-                type="number"
-                placeholder={discountType === 'fixed' ? 'ছাড় (৳)...' : 'ছাড় (%)...'}
-                value={discountValue}
-                onChange={e => setDiscountValue(e.target.value)}
-                className="h-7 text-xs bg-transparent border-0 focus-visible:ring-0 flex-1"
-              />
+              <button onClick={() => setDiscountType('fixed')} className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'fixed' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}>৳</button>
+              <button onClick={() => setDiscountType('percent')} className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'percent' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}><Percent className="h-3 w-3" /></button>
+              <Input type="number" placeholder={discountType === 'fixed' ? t('pos.discountFixed') : t('pos.discountPercent')} value={discountValue} onChange={e => setDiscountValue(e.target.value)} className="h-7 text-xs bg-transparent border-0 focus-visible:ring-0 flex-1" />
             </div>
           </div>
           {discountAmount > 0 && (
             <div className="flex justify-between text-xs font-medium text-destructive">
-              <span>ছাড় {discountType === 'percent' ? `(${discountNum}%)` : ''}</span>
+              <span>{t('pos.discount')} {discountType === 'percent' ? `(${discountNum}%)` : ''}</span>
               <span>-৳{discountAmount.toFixed(0)}</span>
             </div>
           )}
 
-          <div className="flex justify-between text-xs opacity-70"><span>খরচ</span><span>৳{totalCost.toFixed(0)}</span></div>
-          <div className="flex justify-between text-xs font-medium text-success"><span>লাভ</span><span>৳{profit.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs opacity-70"><span>{t('pos.costLabel')}</span><span>৳{totalCost.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs font-medium text-success"><span>{t('pos.profitLabel')}</span><span>৳{profit.toFixed(0)}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-            <span>মোট</span><span className="text-primary">৳{total.toFixed(0)}</span>
+            <span>{t('pos.total')}</span><span className="text-primary">৳{total.toFixed(0)}</span>
           </div>
 
-          {/* Payment Method Selection */}
           <div className="border-t pt-2 space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium opacity-70">পেমেন্ট মেথড</span>
-              <button
-                onClick={() => setIsSplit(!isSplit)}
-                className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${isSplit ? 'bg-primary text-primary-foreground' : 'opacity-60 hover:opacity-100'}`}
-              >
-                <Split className="h-3 w-3" /> স্প্লিট
+              <span className="text-xs font-medium opacity-70">{t('pos.paymentMethod')}</span>
+              <button onClick={() => setIsSplit(!isSplit)} className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${isSplit ? 'bg-primary text-primary-foreground' : 'opacity-60 hover:opacity-100'}`}>
+                <Split className="h-3 w-3" /> {t('pos.split')}
               </button>
             </div>
 
             {!isSplit ? (
               <div className="grid grid-cols-2 gap-1.5">
                 {PAYMENT_METHODS.map(pm => (
-                  <button
-                    key={pm.value}
-                    onClick={() => setPaymentMethod(pm.value)}
-                    className={`text-[11px] py-1.5 px-2 rounded-lg font-medium transition-all ${
-                      paymentMethod === pm.value
-                        ? `${pm.color} text-white scale-[1.02]`
-                        : 'opacity-50 hover:opacity-80'
-                    }`}
-                    style={paymentMethod !== pm.value ? { background: 'hsl(var(--pos-bg))' } : {}}
-                  >
+                  <button key={pm.value} onClick={() => setPaymentMethod(pm.value)} className={`text-[11px] py-1.5 px-2 rounded-lg font-medium transition-all ${paymentMethod === pm.value ? `${pm.color} text-white scale-[1.02]` : 'opacity-50 hover:opacity-80'}`} style={paymentMethod !== pm.value ? { background: 'hsl(var(--pos-bg))' } : {}}>
                     {pm.label}
                   </button>
                 ))}
               </div>
             ) : (
               <div className="space-y-2 rounded-lg p-2" style={{ background: 'hsl(var(--pos-bg))' }}>
-                {/* Method 1 */}
                 <div>
-                  <p className="text-[10px] opacity-50 mb-1">১ম পেমেন্ট</p>
+                  <p className="text-[10px] opacity-50 mb-1">{t('pos.firstPayment')}</p>
                   <div className="flex gap-1">
                     {PAYMENT_METHODS.map(pm => (
-                      <button
-                        key={pm.value}
-                        onClick={() => setSplitMethod1(pm.value)}
-                        className={`text-[10px] py-1 px-1.5 rounded font-medium transition-all flex-1 ${
-                          splitMethod1 === pm.value ? `${pm.color} text-white` : 'opacity-40 hover:opacity-70'
-                        }`}
-                        style={splitMethod1 !== pm.value ? { background: 'hsl(var(--pos-card))' } : {}}
-                      >
+                      <button key={pm.value} onClick={() => setSplitMethod1(pm.value)} className={`text-[10px] py-1 px-1.5 rounded font-medium transition-all flex-1 ${splitMethod1 === pm.value ? `${pm.color} text-white` : 'opacity-40 hover:opacity-70'}`} style={splitMethod1 !== pm.value ? { background: 'hsl(var(--pos-card))' } : {}}>
                         {pm.label}
                       </button>
                     ))}
                   </div>
-                  <Input
-                    type="number"
-                    placeholder="টাকার পরিমাণ..."
-                    value={splitAmount1}
-                    onChange={e => setSplitAmount1(e.target.value)}
-                    className="mt-1 h-8 text-xs bg-transparent border-pos-border"
-                  />
+                  <Input type="number" placeholder={t('pos.amountPlaceholder')} value={splitAmount1} onChange={e => setSplitAmount1(e.target.value)} className="mt-1 h-8 text-xs bg-transparent border-pos-border" />
                 </div>
-                {/* Method 2 */}
                 <div>
                   <div className="flex justify-between items-center">
-                    <p className="text-[10px] opacity-50 mb-1">২য় পেমেন্ট</p>
+                    <p className="text-[10px] opacity-50 mb-1">{t('pos.secondPayment')}</p>
                     <p className="text-[10px] font-medium text-primary">৳{splitAmt2.toFixed(0)}</p>
                   </div>
                   <div className="flex gap-1">
                     {PAYMENT_METHODS.map(pm => (
-                      <button
-                        key={pm.value}
-                        onClick={() => setSplitMethod2(pm.value)}
-                        className={`text-[10px] py-1 px-1.5 rounded font-medium transition-all flex-1 ${
-                          splitMethod2 === pm.value ? `${pm.color} text-white` : 'opacity-40 hover:opacity-70'
-                        }`}
-                        style={splitMethod2 !== pm.value ? { background: 'hsl(var(--pos-card))' } : {}}
-                      >
+                      <button key={pm.value} onClick={() => setSplitMethod2(pm.value)} className={`text-[10px] py-1 px-1.5 rounded font-medium transition-all flex-1 ${splitMethod2 === pm.value ? `${pm.color} text-white` : 'opacity-40 hover:opacity-70'}`} style={splitMethod2 !== pm.value ? { background: 'hsl(var(--pos-card))' } : {}}>
                         {pm.label}
                       </button>
                     ))}
@@ -364,7 +295,7 @@ export default function POSSales() {
           </div>
 
           <Button className="w-full" size="lg" disabled={posCart.length === 0} onClick={handleCompleteSale}>
-            বিক্রি সম্পন্ন করুন — ৳{total.toFixed(0)}
+            {t('pos.completeSale')} — ৳{total.toFixed(0)}
           </Button>
         </div>
       </div>

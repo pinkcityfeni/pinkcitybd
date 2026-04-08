@@ -95,33 +95,72 @@ export default function Home() {
 
 function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] }) {
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
   const next = useCallback(() => setCurrent(i => (i + 1) % banners.length), [banners.length]);
+  const prev = useCallback(() => setCurrent(i => (i - 1 + banners.length) % banners.length), [banners.length]);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (banners.length <= 1 || paused) return;
     const timer = setInterval(next, 4000);
     return () => clearInterval(timer);
-  }, [banners.length, next]);
+  }, [banners.length, next, paused]);
+
+  // Touch/swipe support
+  const touchStartX = useRef(0);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setPaused(true);
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? next() : prev();
+    }
+    setTimeout(() => setPaused(false), 3000);
+  };
 
   const banner = banners[current];
 
   return (
-    <section className="relative w-full overflow-hidden">
-      <Link to={banner.link} className="block">
-        <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full">
-          {banner.image ? (
-            <img src={banner.image} alt={banner.title} className="w-full h-full object-cover" />
-          ) : (
+    <section
+      className="relative w-full overflow-hidden group"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Banner content — click left/right halves to navigate */}
+      <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full">
+        {banner.image ? (
+          <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
+        ) : (
+          <Link to={banner.link} className="block w-full h-full">
             <div className="w-full h-full bg-gradient-to-br from-primary via-primary/85 to-accent flex items-center justify-center px-8">
               <h2 className="text-primary-foreground text-xl sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
             </div>
-          )}
-        </div>
-      </Link>
+          </Link>
+        )}
+
+        {/* Tap zones — left half goes prev, right half goes next */}
+        {banners.length > 1 && banner.image && (
+          <>
+            <button
+              onClick={(e) => { e.preventDefault(); prev(); setPaused(true); setTimeout(() => setPaused(false), 3000); }}
+              className="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
+              aria-label="আগের ব্যানার"
+            />
+            <button
+              onClick={(e) => { e.preventDefault(); next(); setPaused(true); setTimeout(() => setPaused(false), 3000); }}
+              className="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
+              aria-label="পরের ব্যানার"
+            />
+          </>
+        )}
+      </div>
+
+      {/* Dots */}
       {banners.length > 1 && (
-        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5">
+        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
           {banners.map((_, i) => (
-            <button key={i} onClick={() => setCurrent(i)} className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-white' : 'w-2 bg-white/50'}`} />
+            <button key={i} onClick={() => { setCurrent(i); setPaused(true); setTimeout(() => setPaused(false), 3000); }} className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-white' : 'w-2 bg-white/50'}`} />
           ))}
         </div>
       )}

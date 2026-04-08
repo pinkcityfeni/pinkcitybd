@@ -30,6 +30,7 @@ export default function Orders() {
   const orders = useStore(s => s.orders);
   const updateOrderStatus = useStore(s => s.updateOrderStatus);
   const deleteOrder = useStore(s => s.deleteOrder);
+  const { t } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const advance = (o: Order) => {

@@ -11,7 +11,7 @@ interface AuthState {
 
 // Demo accounts for testing protected routes
 const DEMO_ACCOUNTS = [
-  { id: 'u1', email: 'admin@shop.com', password: 'admin123', name: 'Admin User', role: 'admin' as const },
+  { id: 'u1', email: 'pinkcity.feni@gmail.com', password: 'rihan56', name: 'Admin User', role: 'admin' as const },
   { id: 'u2', email: 'cashier@shop.com', password: 'cashier123', name: 'Cashier', role: 'cashier' as const },
   { id: 'u3', email: 'user@shop.com', password: 'user123', name: 'Demo Customer', role: 'customer' as const },
 ];

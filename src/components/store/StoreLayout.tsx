@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Phone, Mail } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -124,13 +124,18 @@ export default function StoreLayout() {
 
       <footer className="border-t bg-gradient-to-b from-card/50 to-muted/30 mt-16">
         <div className="container mx-auto px-4 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand + Address */}
+            <div className="sm:col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
                 <img src={logoImg} alt="PINK CITY" className="h-8 w-8 rounded-full object-cover ring-2 ring-primary/20" />
                 <span className="font-display font-semibold text-gradient-pink">PINK CITY</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{t('footer.tagline')}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">{t('footer.tagline')}</p>
+              <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                <MapPin className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                <span>Appayon Afroz Tower (1st floor, Shop 11-12), College Road, Feni 3900, Bangladesh</span>
+              </div>
               <div className="flex gap-2 mt-3">
                 <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">📱</span>
                 <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">💬</span>

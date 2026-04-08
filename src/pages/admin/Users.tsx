@@ -5,7 +5,7 @@ const MOCK_USERS = [
   { id: '1', name: 'Alice Chen', email: 'alice@email.com', role: 'customer', points: 245, orders: 3 },
   { id: '2', name: 'Bob Smith', email: 'bob@email.com', role: 'customer', points: 120, orders: 1 },
   { id: '3', name: 'Carol Davis', email: 'carol@email.com', role: 'customer', points: 89, orders: 2 },
-  { id: '4', name: 'Admin User', email: 'admin@shop.com', role: 'admin', points: 0, orders: 0 },
+  { id: '4', name: 'Admin User', email: 'pinkcity.feni@gmail.com', role: 'admin', points: 0, orders: 0 },
   { id: '5', name: 'Cashier 1', email: 'cashier@shop.com', role: 'cashier', points: 0, orders: 0 },
 ];
 

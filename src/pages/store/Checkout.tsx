@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, CreditCard, Building2, Banknote, Smartphone, Copy, Check, Lock } from 'lucide-react';
-import type { PaymentMethod } from '@/data/store';
+import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, CreditCard, Building2, Banknote, Smartphone, Copy, Check, Lock, Truck } from 'lucide-react';
+import type { PaymentMethod, DeliveryZone } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
 
@@ -19,6 +19,11 @@ const paymentMethods: { id: PaymentMethod; label: string; labelBn: string; icon:
   { id: 'bank', label: 'Bank Transfer', labelBn: 'ব্যাংক ট্রান্সফার', icon: <Building2 className="h-5 w-5" />, description: 'ব্যাংক অ্যাকাউন্ট থেকে পাঠান' },
 ];
 
+const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
+  dhaka: 60,
+  outside: 120,
+};
+
 export default function Checkout() {
   const { cart, placeOrder } = useStore();
   const { isAuthenticated, user } = useAuth();
@@ -29,6 +34,7 @@ export default function Checkout() {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>('dhaka');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
   const [cardNumber, setCardNumber] = useState('');
@@ -41,8 +47,8 @@ export default function Checkout() {
   const [orderPoints, setOrderPoints] = useState(0);
 
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const shipping = total > 50 ? 0 : 5;
-  const grandTotal = total + shipping;
+  const deliveryCharge = DELIVERY_CHARGES[deliveryZone];
+  const grandTotal = total + deliveryCharge;
   const points = Math.floor(total);
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -93,6 +99,10 @@ export default function Checkout() {
       customerEmail: email || undefined,
       customerPhone: phone,
       deliveryAddress: address,
+      deliveryZone,
+      deliveryCharge,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
     });
     setOrderId(id);
     setOrderTotal(savedTotal);
@@ -123,7 +133,7 @@ export default function Checkout() {
             <ShoppingBag className="h-4 w-4 text-primary shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">মোট</p>
-              <p className="text-sm font-bold text-primary">৳{orderTotal.toFixed(2)}</p>
+              <p className="text-sm font-bold text-primary">৳{orderTotal.toFixed(0)}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
@@ -138,7 +148,7 @@ export default function Checkout() {
               <Gift className="h-4 w-4 text-accent shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">পয়েন্ট</p>
-                <p className="text-sm font-bold text-accent">{orderPoints} points</p>
+                <p className="text-sm font-bold text-accent">{orderPoints} পয়েন্ট</p>
               </div>
             </div>
           )}
@@ -152,13 +162,9 @@ export default function Checkout() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Button asChild size="lg">
-            <Link to="/shop">আরো শপিং করুন</Link>
-          </Button>
+          <Button asChild size="lg"><Link to="/shop">আরো শপিং করুন</Link></Button>
           {isAuthenticated && (
-            <Button asChild variant="outline" size="sm">
-              <Link to="/account">আমার অর্ডার দেখুন</Link>
-            </Button>
+            <Button asChild variant="outline" size="sm"><Link to="/account">আমার অর্ডার দেখুন</Link></Button>
           )}
         </div>
       </div>
@@ -173,16 +179,15 @@ export default function Checkout() {
       </button>
       <h1 className="text-xl font-bold mb-6">অর্ডার রিভিউ</h1>
 
-      {/* Customer info */}
       <div className="rounded-2xl border bg-card p-4 mb-4 space-y-2 text-sm">
         <h3 className="font-semibold text-base mb-2">ডেলিভারি তথ্য</h3>
         {name && <div className="flex items-center gap-2"><User className="h-3.5 w-3.5 text-muted-foreground" /><span>{name}</span></div>}
         <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
         {email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-muted-foreground" /><span>{email}</span></div>}
         <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span>{address}</span></div>
+        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryZone === 'dhaka' ? 'ঢাকার ভিতরে' : 'ঢাকার বাইরে'} — ৳{deliveryCharge}</span></div>
       </div>
 
-      {/* Payment info */}
       <div className="rounded-2xl border bg-card p-4 mb-4 text-sm">
         <h3 className="font-semibold text-base mb-2">পেমেন্ট মেথড</h3>
         <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
@@ -197,28 +202,27 @@ export default function Checkout() {
         )}
       </div>
 
-      {/* Items */}
       <div className="rounded-2xl border bg-card p-4 mb-4 space-y-3">
         <h3 className="font-semibold text-base">পণ্য ({itemCount})</h3>
         {cart.map(i => (
           <div key={i.product.id} className="flex justify-between text-sm">
             <span className="text-muted-foreground">{i.product.name} × {i.quantity}</span>
-            <span className="font-medium">৳{(i.product.price * i.quantity).toFixed(2)}</span>
+            <span className="font-medium">৳{(i.product.price * i.quantity).toFixed(0)}</span>
           </div>
         ))}
         <div className="border-t pt-2 space-y-1 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">সাবটোটাল</span><span>৳{total.toFixed(2)}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">শিপিং</span><span>{shipping === 0 ? 'ফ্রি' : `৳${shipping.toFixed(2)}`}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">সাবটোটাল</span><span>৳{total.toFixed(0)}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি ({deliveryZone === 'dhaka' ? 'ঢাকা' : 'ঢাকার বাইরে'})</span><span>৳{deliveryCharge}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">পয়েন্ট</span><span className="text-accent">+{points} pts</span></div>
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">
           <span>মোট</span>
-          <span className="text-primary">৳{grandTotal.toFixed(2)}</span>
+          <span className="text-primary">৳{grandTotal.toFixed(0)}</span>
         </div>
       </div>
 
       <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder}>
-        অর্ডার কনফার্ম করুন — ৳{grandTotal.toFixed(2)}
+        অর্ডার কনফার্ম করুন — ৳{grandTotal.toFixed(0)}
       </Button>
     </div>
   );
@@ -238,11 +242,9 @@ export default function Checkout() {
       </p>
 
       <form onSubmit={handleContinueToReview} className="space-y-4">
-        {/* Contact */}
         <div className="rounded-2xl border bg-card p-4 space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <User className="h-4 w-4 text-primary" /> যোগাযোগ
-            {!isAuthenticated && <span className="text-xs text-muted-foreground font-normal">(গেস্টের জন্য ঐচ্ছিক)</span>}
           </h3>
           <div>
             <Label htmlFor="name">নাম</Label>
@@ -254,7 +256,6 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Delivery */}
         <div className="rounded-2xl border bg-card p-4 space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" /> ডেলিভারি তথ্য
@@ -274,6 +275,39 @@ export default function Checkout() {
               className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none"
             />
           </div>
+
+          {/* Delivery Zone */}
+          <div>
+            <Label className="mb-2 block">ডেলিভারি এলাকা <span className="text-destructive">*</span></Label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setDeliveryZone('dhaka')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'dhaka' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Truck className={`h-4 w-4 ${deliveryZone === 'dhaka' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <div>
+                    <p className="font-medium text-sm">ঢাকার ভিতরে</p>
+                    <p className="text-xs text-primary font-bold">৳৬০</p>
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeliveryZone('outside')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'outside' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Truck className={`h-4 w-4 ${deliveryZone === 'outside' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <div>
+                    <p className="font-medium text-sm">ঢাকার বাইরে</p>
+                    <p className="text-xs text-primary font-bold">৳১২০</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Payment Method */}
@@ -288,28 +322,21 @@ export default function Checkout() {
                 type="button"
                 onClick={() => { setPaymentMethod(pm.id); setTrxId(''); setCardNumber(''); setCardExpiry(''); setCardCvv(''); setCardName(''); }}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                  paymentMethod === pm.id
-                    ? 'border-primary bg-primary/5 shadow-sm'
-                    : 'border-transparent bg-muted/30 hover:bg-muted/50'
+                  paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'
                 }`}
               >
-                <span className={paymentMethod === pm.id ? 'text-primary' : 'text-muted-foreground'}>
-                  {pm.icon}
-                </span>
+                <span className={paymentMethod === pm.id ? 'text-primary' : 'text-muted-foreground'}>{pm.icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{pm.label}</p>
                   <p className="text-xs text-muted-foreground">{pm.description}</p>
                 </div>
-                <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  paymentMethod === pm.id ? 'border-primary' : 'border-muted-foreground/30'
-                }`}>
+                <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === pm.id ? 'border-primary' : 'border-muted-foreground/30'}`}>
                   {paymentMethod === pm.id && <div className="h-2 w-2 rounded-full bg-primary" />}
                 </div>
               </button>
             ))}
           </div>
 
-          {/* bKash/Nagad/Bank info with copy */}
           {needsTrxId && (
             <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
               {paymentMethod === 'bkash' && (
@@ -363,14 +390,13 @@ export default function Checkout() {
                 </div>
               )}
               <div className="pt-1 border-t border-accent/20">
-                <p className="text-xs text-muted-foreground mb-2">৳{grandTotal.toFixed(2)} পাঠিয়ে নিচে Transaction ID দিন</p>
+                <p className="text-xs text-muted-foreground mb-2">৳{grandTotal.toFixed(0)} পাঠিয়ে নিচে Transaction ID দিন</p>
                 <Label htmlFor="trxId" className="text-xs">Transaction ID <span className="text-destructive">*</span></Label>
                 <Input id="trxId" value={trxId} onChange={e => setTrxId(e.target.value)} placeholder="TrxID লিখুন" className="mt-1" />
               </div>
             </div>
           )}
 
-          {/* Card payment form */}
           {paymentMethod === 'card' && (
             <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
               <div className="flex items-center gap-2 mb-1">
@@ -398,26 +424,11 @@ export default function Checkout() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="cardExpiry" className="text-xs">মেয়াদ <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="cardExpiry"
-                    value={cardExpiry}
-                    onChange={e => setCardExpiry(formatExpiry(e.target.value))}
-                    placeholder="MM/YY"
-                    className="mt-1 font-mono"
-                    maxLength={5}
-                  />
+                  <Input id="cardExpiry" value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/YY" className="mt-1 font-mono" maxLength={5} />
                 </div>
                 <div>
                   <Label htmlFor="cardCvv" className="text-xs">CVV <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="cardCvv"
-                    type="password"
-                    value={cardCvv}
-                    onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    placeholder="•••"
-                    className="mt-1 font-mono"
-                    maxLength={4}
-                  />
+                  <Input id="cardCvv" type="password" value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} />
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -429,10 +440,10 @@ export default function Checkout() {
 
         {/* Quick summary */}
         <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">{itemCount} পণ্য</span><span>৳{total.toFixed(2)}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">শিপিং</span><span>{shipping === 0 ? 'ফ্রি' : `৳${shipping.toFixed(2)}`}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{itemCount}টি পণ্য</span><span>৳{total.toFixed(0)}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি ({deliveryZone === 'dhaka' ? 'ঢাকা' : 'ঢাকার বাইরে'})</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base">
-            <span>মোট</span><span className="text-primary">৳{grandTotal.toFixed(2)}</span>
+            <span>মোট</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span>
           </div>
         </div>
 

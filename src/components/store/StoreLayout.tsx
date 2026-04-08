@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Heart, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3 } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { Badge } from '@/components/ui/badge';
@@ -121,9 +121,12 @@ export default function StoreLayout() {
         )}
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         <Outlet />
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav cartCount={cartCount} />
 
       {/* Footer */}
       <footer className="border-t bg-card/50 mt-16">

@@ -53,7 +53,7 @@ export default function Users() {
               <th className="pb-3 font-medium">{t('user.role')}</th>
               <th className="pb-3 font-medium text-right">{t('user.points')}</th>
               <th className="pb-3 font-medium text-right">{t('user.orders')}</th>
-              <th className="pb-3 font-medium text-right">{t('common.actions') || 'Actions'}</th>
+              <th className="pb-3 font-medium text-right">{t('user.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -86,15 +86,15 @@ export default function Users() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('common.confirmDelete') || 'Confirm Delete'}</AlertDialogTitle>
+            <AlertDialogTitle>{t('user.confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget?.name} ({deleteTarget?.email}) — {t('common.deleteWarning') || 'This action cannot be undone.'}
+              {deleteTarget?.name} ({deleteTarget?.email}) — {t('user.deleteWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel') || 'Cancel'}</AlertDialogCancel>
+            <AlertDialogCancel>{t('user.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {t('common.delete') || 'Delete'}
+              {t('user.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

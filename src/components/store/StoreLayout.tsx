@@ -42,11 +42,13 @@ export default function StoreLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 border-b bg-card/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-xl shadow-sm">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logoImg} alt="PINK CITY" className="h-8 w-8 rounded-lg object-cover" />
-            <span className="font-display text-lg font-semibold tracking-tight">PINK CITY</span>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img src={logoImg} alt="PINK CITY" className="h-8 w-8 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" />
+            <span className="font-display text-lg font-semibold tracking-tight">
+              <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>
+            </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -120,15 +122,20 @@ export default function StoreLayout() {
 
       <MobileBottomNav cartCount={cartCount} wishlistCount={wishlist.length} />
 
-      <footer className="border-t bg-card/50 mt-16">
+      <footer className="border-t bg-gradient-to-b from-card/50 to-muted/30 mt-16">
         <div className="container mx-auto px-4 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <img src={logoImg} alt="PINK CITY" className="h-7 w-7 rounded-lg object-cover" />
-                <span className="font-display font-semibold">PINK CITY</span>
+                <img src={logoImg} alt="PINK CITY" className="h-8 w-8 rounded-full object-cover ring-2 ring-primary/20" />
+                <span className="font-display font-semibold text-gradient-pink">PINK CITY</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{t('footer.tagline')}</p>
+              <div className="flex gap-2 mt-3">
+                <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">📱</span>
+                <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">💬</span>
+                <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">📷</span>
+              </div>
             </div>
             <div>
               <h4 className="font-display font-semibold text-sm mb-3">{t('footer.shop')}</h4>
@@ -154,7 +161,9 @@ export default function StoreLayout() {
               </div>
             )}
           </div>
-          <div className="border-t pt-6 text-center text-xs text-muted-foreground">© 2026 PINK CITY. All rights reserved.</div>
+          <div className="border-t pt-6 text-center">
+            <p className="text-xs text-muted-foreground">© 2026 <span className="text-gradient-pink font-semibold">PINK CITY</span>. All rights reserved. 💕</p>
+          </div>
         </div>
       </footer>
     </div>

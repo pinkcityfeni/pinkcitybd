@@ -2,6 +2,7 @@ import { useState } from 'react';
 import logoImg from '@/assets/logo.jpg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/data/auth';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +15,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { signup, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   if (isAuthenticated) {
@@ -24,9 +26,9 @@ export default function Signup() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
+    if (password.length < 6) { setError(t('auth.passwordShort')); return; }
     if (signup(name, email, password)) {
-      toast.success('Account created! Welcome! 🎉');
+      toast.success(t('auth.accountCreated'));
       navigate('/');
     } else {
       setError('Could not create account');
@@ -42,11 +44,11 @@ export default function Signup() {
         </Link>
 
         <div className="rounded-2xl border bg-card/90 backdrop-blur-sm p-6 shadow-lg">
-          <h1 className="font-display text-xl font-bold mb-1">Create an account</h1>
+          <h1 className="font-display text-xl font-bold mb-1">{t('auth.createAccount')}</h1>
           <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-            <Gift className="h-3 w-3 text-primary" /> Start earning reward points today
+            <Gift className="h-3 w-3 text-primary" /> {t('auth.earnRewards')}
           </p>
-          <p className="text-xs text-muted-foreground mb-5">Join for exclusive offers & track your orders</p>
+          <p className="text-xs text-muted-foreground mb-5">{t('auth.joinDesc')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
@@ -56,23 +58,23 @@ export default function Signup() {
               </div>
             )}
             <div>
-              <Label htmlFor="name" className="text-xs">Full Name</Label>
-              <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required className="rounded-xl" />
+              <Label htmlFor="name" className="text-xs">{t('auth.fullName')}</Label>
+              <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder={t('auth.fullName')} required className="rounded-xl" />
             </div>
             <div>
-              <Label htmlFor="email" className="text-xs">Email</Label>
+              <Label htmlFor="email" className="text-xs">{t('auth.emailLabel')}</Label>
               <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-xl" />
             </div>
             <div>
-              <Label htmlFor="password" className="text-xs">Password</Label>
+              <Label htmlFor="password" className="text-xs">{t('auth.passwordLabel')}</Label>
               <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-xl" />
             </div>
-            <Button type="submit" className="w-full rounded-full shadow-lg shadow-primary/20">Create Account</Button>
+            <Button type="submit" className="w-full rounded-full shadow-lg shadow-primary/20">{t('auth.createBtn')}</Button>
           </form>
 
           <p className="text-xs text-center mt-4 text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>
+            {t('auth.haveAccount')}{' '}
+            <Link to="/login" className="text-primary font-medium hover:underline">{t('auth.signIn')}</Link>
           </p>
         </div>
       </div>

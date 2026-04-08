@@ -1,31 +1,30 @@
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
-import { Star, Package, Heart, ChevronDown, ChevronUp, CheckCircle2, Clock, Truck, XCircle } from 'lucide-react';
+import { useLanguage } from '@/data/language';
+import { Star, Package, Heart, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-
-const ORDER_STEPS = [
-  { status: 'pending', label: 'অর্ডার রিসিভ', icon: Clock },
-  { status: 'processing', label: 'প্রসেসিং', icon: Package },
-  { status: 'completed', label: 'ডেলিভারি সম্পন্ন', icon: CheckCircle2 },
-];
 
 export default function Account() {
   const allOrders = useStore(s => s.orders);
   const wishlist = useStore(s => s.wishlist);
   const products = useStore(s => s.products);
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);
   const wishedProducts = useMemo(() => products.filter(p => wishlist.includes(p.id)), [products, wishlist]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const ORDER_STEPS = [
+    { status: 'pending', label: t('account.orderReceived'), icon: Clock },
+    { status: 'processing', label: t('account.processing'), icon: Package },
+    { status: 'completed', label: t('account.delivered'), icon: CheckCircle2 },
+  ];
+
+  const handleLogout = () => { logout(); navigate('/'); };
 
   const getStepIndex = (status: string) => {
     if (status === 'cancelled') return -1;
@@ -34,20 +33,20 @@ export default function Account() {
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
-      <h1 className="page-header">আমার অ্যাকাউন্ট</h1>
+      <h1 className="page-header">{t('account.title')}</h1>
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="stat-card flex items-center gap-3">
           <Star className="h-8 w-8 text-accent" />
           <div>
             <p className="text-2xl font-bold">245</p>
-            <p className="text-sm text-muted-foreground">রিওয়ার্ড পয়েন্ট</p>
+            <p className="text-sm text-muted-foreground">{t('account.rewardPoints')}</p>
           </div>
         </div>
         <div className="stat-card flex items-center gap-3">
           <Package className="h-8 w-8 text-primary" />
           <div>
             <p className="text-2xl font-bold">{orders.length}</p>
-            <p className="text-sm text-muted-foreground">অর্ডার</p>
+            <p className="text-sm text-muted-foreground">{t('account.orders')}</p>
           </div>
         </div>
         <div className="stat-card flex items-center justify-between">
@@ -55,14 +54,13 @@ export default function Account() {
             <p className="text-sm font-medium">{user?.name || 'Guest'}</p>
             <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout}>লগআউট</Button>
+          <Button variant="outline" size="sm" onClick={handleLogout}>{t('account.logout')}</Button>
         </div>
       </div>
 
-      {/* Wishlist */}
       {wishedProducts.length > 0 && (
         <>
-          <h2 className="font-bold mt-8 mb-4 flex items-center gap-2"><Heart className="h-4 w-4 text-destructive" /> উইশলিস্ট ({wishedProducts.length})</h2>
+          <h2 className="font-bold mt-8 mb-4 flex items-center gap-2"><Heart className="h-4 w-4 text-destructive" /> {t('account.wishlist')} ({wishedProducts.length})</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
             {wishedProducts.map(p => (
               <Link key={p.id} to={`/product/${p.id}`} className="rounded-xl border bg-card overflow-hidden hover:shadow-md transition-all">
@@ -79,8 +77,7 @@ export default function Account() {
         </>
       )}
 
-      {/* Orders with tracking */}
-      <h2 className="font-bold mt-8 mb-4">সাম্প্রতিক অর্ডার</h2>
+      <h2 className="font-bold mt-8 mb-4">{t('account.recentOrders')}</h2>
       <div className="space-y-3">
         {orders.map(o => {
           const expanded = expandedOrder === o.id;
@@ -106,7 +103,6 @@ export default function Account() {
 
               {expanded && (
                 <div className="border-t p-4 space-y-4 animate-fade-in">
-                  {/* Order Tracking */}
                   {o.status !== 'cancelled' ? (
                     <div className="flex items-center justify-between relative">
                       <div className="absolute top-4 left-6 right-6 h-0.5 bg-muted" />
@@ -126,11 +122,10 @@ export default function Account() {
                   ) : (
                     <div className="flex items-center gap-2 text-destructive">
                       <XCircle className="h-5 w-5" />
-                      <span className="text-sm font-medium">অর্ডার বাতিল হয়েছে</span>
+                      <span className="text-sm font-medium">{t('account.orderCancelled')}</span>
                     </div>
                   )}
 
-                  {/* Items */}
                   <div className="space-y-1 pt-2 border-t">
                     {o.items.map((item, idx) => (
                       <div key={idx} className="flex justify-between text-sm">
@@ -140,7 +135,7 @@ export default function Account() {
                     ))}
                     {o.deliveryCharge !== undefined && o.deliveryCharge > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">ডেলিভারি চার্জ</span>
+                        <span className="text-muted-foreground">{t('cart.deliveryCharge')}</span>
                         <span>৳{o.deliveryCharge}</span>
                       </div>
                     )}
@@ -150,7 +145,7 @@ export default function Account() {
             </div>
           );
         })}
-        {orders.length === 0 && <p className="text-sm text-muted-foreground">এখনো কোনো অর্ডার নেই</p>}
+        {orders.length === 0 && <p className="text-sm text-muted-foreground">{t('account.noOrders')}</p>}
       </div>
     </div>
   );

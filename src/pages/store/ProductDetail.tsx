@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, ArrowLeft, Package, Zap, Star, Sparkles, Heart, Send } from 'lucide-react';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 export default function ProductDetail() {
   const { id } = useParams();
   const { products, categories, addToCart, buyNow, wishlist, toggleWishlist, reviews, addReview, getProductRating } = useStore();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);
@@ -19,8 +21,8 @@ export default function ProductDetail() {
 
   if (!product) return (
     <div className="container mx-auto px-4 py-20 text-center">
-      <p className="text-muted-foreground">পণ্য পাওয়া যায়নি</p>
-      <Button asChild className="mt-4 rounded-full"><Link to="/shop">শপে ফিরুন</Link></Button>
+      <p className="text-muted-foreground">{t('product.notFound')}</p>
+      <Button asChild className="mt-4 rounded-full"><Link to="/shop">{t('product.backToShop')}</Link></Button>
     </div>
   );
 
@@ -31,22 +33,22 @@ export default function ProductDetail() {
   const rating = getProductRating(product.id);
 
   const handleAddToCart = () => {
-    if (qty > product.stock) { toast.error(`মাত্র ${product.stock}টি স্টকে আছে`); return; }
+    if (qty > product.stock) { toast.error(t('product.stockLimitError', { n: product.stock })); return; }
     addToCart(product, qty);
-    toast.success(`${qty}× ${product.name} কার্টে যোগ হয়েছে`);
+    toast.success(t('product.addedToCart', { qty, name: product.name }));
   };
 
   const handleBuyNow = () => {
-    if (qty > product.stock) { toast.error(`মাত্র ${product.stock}টি স্টকে আছে`); return; }
+    if (qty > product.stock) { toast.error(t('product.stockLimitError', { n: product.stock })); return; }
     buyNow(product, qty);
     navigate('/checkout');
   };
 
   const handleSubmitReview = () => {
-    if (!reviewName.trim()) { toast.error('আপনার নাম দিন'); return; }
-    if (!reviewComment.trim()) { toast.error('রিভিউ লিখুন'); return; }
+    if (!reviewName.trim()) { toast.error(t('product.enterName')); return; }
+    if (!reviewComment.trim()) { toast.error(t('product.enterReview')); return; }
     addReview({ productId: product.id, customerName: reviewName, rating: reviewRating, comment: reviewComment });
-    toast.success('রিভিউ সংযুক্ত হয়েছে!');
+    toast.success(t('product.reviewSubmitted'));
     setReviewName('');
     setReviewComment('');
     setReviewRating(5);
@@ -55,7 +57,7 @@ export default function ProductDetail() {
   return (
     <div className="container mx-auto px-4 py-6 md:py-10 animate-fade-in">
       <Link to="/shop" className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-6 transition-colors">
-        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> শপে ফিরুন
+        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> {t('product.backToShop')}
       </Link>
 
       <div className="grid md:grid-cols-2 gap-6 md:gap-10">
@@ -81,7 +83,6 @@ export default function ProductDetail() {
           <h1 className="font-display text-2xl md:text-3xl font-bold mb-2">{product.name}</h1>
           <p className="text-muted-foreground text-sm leading-relaxed mb-4">{product.description}</p>
 
-          {/* Rating display */}
           {rating.count > 0 && (
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center gap-0.5">
@@ -89,7 +90,7 @@ export default function ProductDetail() {
                   <Star key={s} className={`h-4 w-4 ${s <= Math.round(rating.avg) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />
                 ))}
               </div>
-              <span className="text-sm text-muted-foreground">({rating.avg.toFixed(1)}) · {rating.count}টি রিভিউ</span>
+              <span className="text-sm text-muted-foreground">({rating.avg.toFixed(1)}) · {t('product.reviews', { n: rating.count })}</span>
             </div>
           )}
 
@@ -99,15 +100,15 @@ export default function ProductDetail() {
             <div className="flex items-center gap-1">
               <Package className="h-3.5 w-3.5" />
               {product.stock > 0 ? (
-                <span className="text-success text-xs">{product.stock}টি স্টকে আছে</span>
+                <span className="text-success text-xs">{t('product.inStock', { n: product.stock })}</span>
               ) : (
-                <span className="text-destructive text-xs">স্টক শেষ</span>
+                <span className="text-destructive text-xs">{t('home.outOfStock')}</span>
               )}
             </div>
             <span className="text-border">|</span>
             <div className="flex items-center gap-1">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs">{Math.floor(product.price * qty)} পয়েন্ট পাবেন</span>
+              <span className="text-xs">{t('product.earnPoints', { n: Math.floor(product.price * qty) })}</span>
             </div>
           </div>
 
@@ -122,27 +123,26 @@ export default function ProductDetail() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 rounded-full h-11">
-                <ShoppingCart className="h-4 w-4 mr-2" /> কার্টে যোগ করুন
+                <ShoppingCart className="h-4 w-4 mr-2" /> {t('product.addToCart')}
               </Button>
               <Button onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1 rounded-full h-11 shadow-lg shadow-primary/20">
-                <Zap className="h-4 w-4 mr-2" /> এখনই কিনুন
+                <Zap className="h-4 w-4 mr-2" /> {t('product.buyNow')}
               </Button>
             </div>
           </div>
 
           <p className="text-[11px] text-muted-foreground mt-4">
-            বারকোড: <span className="font-mono">{product.barcode}</span>
+            {t('product.barcode')}: <span className="font-mono">{product.barcode}</span>
           </p>
         </div>
       </div>
 
       {/* Reviews Section */}
       <div className="mt-14">
-        <h2 className="font-display text-xl font-bold mb-5">রিভিউ ও রেটিং</h2>
+        <h2 className="font-display text-xl font-bold mb-5">{t('product.reviewRating')}</h2>
 
-        {/* Submit review */}
         <div className="rounded-2xl border bg-card p-4 mb-6 space-y-3">
-          <h3 className="font-semibold text-sm">আপনার রিভিউ দিন</h3>
+          <h3 className="font-semibold text-sm">{t('product.writeReview')}</h3>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map(s => (
               <button key={s} onClick={() => setReviewRating(s)}>
@@ -150,19 +150,18 @@ export default function ProductDetail() {
               </button>
             ))}
           </div>
-          <Input value={reviewName} onChange={e => setReviewName(e.target.value)} placeholder="আপনার নাম" />
+          <Input value={reviewName} onChange={e => setReviewName(e.target.value)} placeholder={t('product.yourName')} />
           <textarea
             value={reviewComment}
             onChange={e => setReviewComment(e.target.value)}
-            placeholder="আপনার মতামত লিখুন..."
+            placeholder={t('product.yourReview')}
             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[60px] resize-none"
           />
           <Button size="sm" onClick={handleSubmitReview} className="rounded-full">
-            <Send className="h-3.5 w-3.5 mr-1.5" /> জমা দিন
+            <Send className="h-3.5 w-3.5 mr-1.5" /> {t('product.submit')}
           </Button>
         </div>
 
-        {/* Reviews list */}
         {productReviews.length > 0 ? (
           <div className="space-y-3">
             {productReviews.map(r => (
@@ -181,14 +180,13 @@ export default function ProductDetail() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">এখনো কোনো রিভিউ নেই</p>
+          <p className="text-sm text-muted-foreground">{t('product.noReviews')}</p>
         )}
       </div>
 
-      {/* Related products */}
       {related.length > 0 && (
         <div className="mt-14">
-          <h2 className="font-display text-xl font-bold mb-5">আপনার পছন্দ হতে পারে</h2>
+          <h2 className="font-display text-xl font-bold mb-5">{t('product.youMayLike')}</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {related.map(r => (
               <Link key={r.id} to={`/product/${r.id}`} className="group rounded-2xl border bg-card overflow-hidden hover:shadow-lg transition-all duration-300">

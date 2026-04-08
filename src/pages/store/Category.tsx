@@ -1,25 +1,24 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { ChevronRight, Grid3X3 } from 'lucide-react';
 
 export default function Category() {
   const { categories, products } = useStore();
+  const { t } = useLanguage();
 
   return (
     <div className="container mx-auto px-4 py-6 animate-fade-in">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-6">
         <Grid3X3 className="h-5 w-5 text-primary" />
-        <h1 className="font-display text-xl font-bold">All Categories</h1>
+        <h1 className="font-display text-xl font-bold">{t('category.title')}</h1>
       </div>
 
-      {/* Category Grid - Chardike style */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map(c => {
           const catProducts = products.filter(p => p.category === c.name);
           return (
             <div key={c.id} className="rounded-2xl border bg-card overflow-hidden hover:shadow-lg transition-all duration-300 group">
-              {/* Category Header */}
               <Link
                 to={`/shop?category=${encodeURIComponent(c.name)}`}
                 className="flex items-center gap-3 p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-b group-hover:from-primary/10 group-hover:to-primary/15 transition-colors"
@@ -29,12 +28,11 @@ export default function Category() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-display font-semibold text-base truncate">{c.name}</h2>
-                  <p className="text-[11px] text-muted-foreground">{catProducts.length} products</p>
+                  <p className="text-[11px] text-muted-foreground">{t('category.products', { n: catProducts.length })}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
               </Link>
 
-              {/* Subcategories List */}
               <div className="p-3">
                 {c.subcategories.length > 0 ? (
                   <div className="space-y-0.5">
@@ -56,7 +54,7 @@ export default function Category() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground text-center py-3 italic">No subcategories</p>
+                  <p className="text-xs text-muted-foreground text-center py-3 italic">{t('category.noSub')}</p>
                 )}
               </div>
             </div>
@@ -67,7 +65,7 @@ export default function Category() {
       {categories.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
           <Grid3X3 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="font-display text-lg">No categories yet</p>
+          <p className="font-display text-lg">{t('category.noCat')}</p>
         </div>
       )}
     </div>

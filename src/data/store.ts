@@ -28,7 +28,14 @@ export interface CartItem {
   quantity: number;
 }
 
-export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'card' | 'bank';
+export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'card' | 'bank' | 'cash';
+
+export interface SplitPayment {
+  method1: PaymentMethod;
+  amount1: number;
+  method2: PaymentMethod;
+  amount2: number;
+}
 
 export type DeliveryZone = 'feni' | 'outside';
 
@@ -57,6 +64,7 @@ export interface Order {
   pointsEarned?: number;
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
+  splitPayment?: SplitPayment;
 }
 
 export interface Banner {
@@ -121,6 +129,7 @@ interface OrderData {
   deliveryCharge?: number;
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
+  splitPayment?: SplitPayment;
 }
 
 interface StoreState {
@@ -279,6 +288,7 @@ export const useStore = create<StoreState>((set, get) => ({
       pointsEarned,
       paymentMethod: data?.paymentMethod,
       paymentStatus: data?.paymentStatus || (data?.paymentMethod === 'cod' ? 'pending' : 'paid'),
+      splitPayment: data?.splitPayment,
     };
     set(state => ({
       orders: [order, ...state.orders],

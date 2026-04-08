@@ -20,9 +20,9 @@ export default function Wishlist() {
       <div className="h-20 w-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-5">
         <Heart className="h-9 w-9 text-muted-foreground/40" />
       </div>
-      <h2 className="font-display text-xl font-bold mb-2">{t('wishlist.empty')}</h2>
-      <p className="text-sm text-muted-foreground mb-6">{t('wishlist.emptyDesc')}</p>
-      <Button asChild className="rounded-full px-6"><Link to="/shop">{t('wishlist.browseProd')}</Link></Button>
+      <h2 className="font-display text-xl font-bold mb-2">{t('account.wishlist')}</h2>
+      <p className="text-sm text-muted-foreground mb-6">{t('cart.emptyDesc')}</p>
+      <Button asChild className="rounded-full px-6"><Link to="/shop">{t('cart.startShopping')}</Link></Button>
     </div>
   );
 
@@ -45,7 +45,7 @@ export default function Wishlist() {
               </Link>
               <p className="text-base font-bold text-primary">৳{p.price.toFixed(0)}</p>
               <div className="flex gap-1.5">
-                <Button size="sm" className="flex-1 rounded-full text-xs h-8" onClick={() => { addToCart(p); toast.success(t('home.addedToCart')); }}>
+                <Button size="sm" className="flex-1 rounded-full text-xs h-8" onClick={() => { addToCart(p); toast.success('Added to cart'); }}>
                   <ShoppingCart className="h-3 w-3 mr-1" /> {t('product.addToCart')}
                 </Button>
                 <Button size="sm" variant="ghost" className="rounded-full h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => toggleWishlist(p.id)}>

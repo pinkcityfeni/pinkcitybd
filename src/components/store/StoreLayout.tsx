@@ -180,7 +180,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
   const { t } = useLanguage();
 
   const tabs = [
-    { to: '/account?tab=wishlist', icon: Heart, label: t('nav.wishlist'), badge: wishlistCount },
+    { to: '/wishlist', icon: Heart, label: t('nav.wishlist'), badge: wishlistCount },
     { to: '/category', icon: Grid3X3, label: t('nav.category') },
     { to: '/', icon: Home, label: t('nav.home') },
     { to: '/cart', icon: ShoppingCart, label: t('nav.cart'), badge: cartCount },

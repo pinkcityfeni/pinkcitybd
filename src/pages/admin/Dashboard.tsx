@@ -14,13 +14,7 @@ import {
 
 type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
 
-const DATE_FILTERS: { value: DateFilter; label: string }[] = [
-  { value: 'today', label: 'আজ' },
-  { value: 'yesterday', label: 'গতকাল' },
-  { value: 'week', label: 'এই সপ্তাহ' },
-  { value: 'month', label: 'এই মাস' },
-  { value: 'all', label: 'সর্বমোট' },
-];
+// DATE_FILTERS moved inside component to use t()
 
 function getDateRange(filter: DateFilter): { start: Date; end: Date } {
   const now = new Date();

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
+import type { Order } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import POSInvoice from '@/components/pos/POSInvoice';
 
 export default function POSSales() {
   const products = useStore(s => s.products);
@@ -14,7 +16,8 @@ export default function POSSales() {
   const placeOrder = useStore(s => s.placeOrder);
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
-  const [saleComplete, setSaleComplete] = useState<{ id: string; total: number; profit: number; itemCount: number } | null>(null);
+  const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number } | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
@@ -48,29 +51,64 @@ export default function POSSales() {
 
   const handleCompleteSale = () => {
     if (posCart.length === 0) return;
-    const saleTotal = total;
     const saleProfit = profit;
-    const saleItems = itemCount;
     const id = placeOrder('pos');
-    setSaleComplete({ id, total: saleTotal, profit: saleProfit, itemCount: saleItems });
+    const orders = useStore.getState().orders;
+    const completedOrder = orders.find(o => o.id === id);
+    if (completedOrder) {
+      setSaleComplete({ order: completedOrder, profit: saleProfit });
+    }
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };
+
+  const handlePrintInvoice = () => {
+    if (!invoiceRef.current) return;
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    if (!printWindow) { toast.error('Popup blocked! Please allow popups.'); return; }
+    printWindow.document.write(`
+      <html><head><title>Invoice - ${saleComplete?.order.id}</title>
+      <style>body{margin:0;font-family:monospace;}</style></head>
+      <body>${invoiceRef.current.innerHTML}</body></html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   const filteredProducts = search
     ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search) || p.category.toLowerCase().includes(search.toLowerCase()))
     : products.slice(0, 12);
 
+  const saleItemCount = saleComplete ? saleComplete.order.items.reduce((s, i) => s + i.quantity, 0) : 0;
+
   if (saleComplete) return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="text-center animate-fade-in">
-        <CheckCircle2 className="h-20 w-20 mx-auto mb-4 text-success" />
-        <h2 className="text-2xl font-bold mb-2">বিক্রি সম্পন্ন!</h2>
-        <p className="text-sm opacity-70 mb-1">Order: {saleComplete.id}</p>
-        <p className="text-sm opacity-70 mb-1">{saleComplete.itemCount}টি আইটেম বিক্রি হয়েছে</p>
-        <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.total.toFixed(0)}</p>
-        <p className="text-sm text-success font-medium mb-6">লাভ: ৳{saleComplete.profit.toFixed(0)}</p>
-        <Button size="lg" onClick={handleNewSale}>নতুন বিক্রি</Button>
+    <div className="flex-1 flex flex-col md:flex-row overflow-auto">
+      {/* Left: Success Summary */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="text-center animate-fade-in">
+          <CheckCircle2 className="h-20 w-20 mx-auto mb-4 text-success" />
+          <h2 className="text-2xl font-bold mb-2">বিক্রি সম্পন্ন!</h2>
+          <p className="text-sm opacity-70 mb-1">Order: {saleComplete.order.id}</p>
+          <p className="text-sm opacity-70 mb-1">{saleItemCount}টি আইটেম বিক্রি হয়েছে</p>
+          <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
+          <p className="text-sm text-success font-medium mb-6">লাভ: ৳{saleComplete.profit.toFixed(0)}</p>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" onClick={handlePrintInvoice}>
+              <Printer className="h-4 w-4 mr-2" /> প্রিন্ট ইনভয়েস
+            </Button>
+            <Button size="lg" onClick={handleNewSale}>
+              <RotateCcw className="h-4 w-4 mr-2" /> নতুন বিক্রি
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Right: Invoice Preview */}
+      <div className="md:w-96 border-l p-4 overflow-auto" style={{ borderColor: 'hsl(var(--pos-border))' }}>
+        <h3 className="text-sm font-semibold mb-3 text-center opacity-60">ইনভয়েস প্রিভিউ</h3>
+        <div className="rounded-xl overflow-hidden shadow-lg">
+          <POSInvoice ref={invoiceRef} order={saleComplete.order} />
+        </div>
       </div>
     </div>
   );

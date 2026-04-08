@@ -131,7 +131,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  const maxRevenue = Math.max(...stats.monthly.map(m => m.revenue), 1);
+  
 
   return (
     <div className="p-4 md:p-6 animate-fade-in space-y-6">

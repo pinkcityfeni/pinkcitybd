@@ -233,13 +233,40 @@ export default function Checkout() {
       <button onClick={() => navigate('/cart')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
         <ArrowLeft className="h-4 w-4 mr-1" /> কার্টে ফিরুন
       </button>
-      <h1 className="text-xl font-bold mb-1">চেকআউট</h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        {isAuthenticated ? `${user?.name} হিসেবে লগইন আছেন` : 'গেস্ট হিসেবে কিনছেন'}
-        {!isAuthenticated && (
-          <> · <Link to="/login" className="text-primary hover:underline">লগইন</Link> করে পয়েন্ট পান</>
-        )}
-      </p>
+      <h1 className="text-xl font-bold mb-4">চেকআউট</h1>
+
+      {/* Guest / Login prompt */}
+      {!isAuthenticated && (
+        <div className="rounded-2xl border bg-card p-4 mb-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <User className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium text-sm">গেস্ট হিসেবে অর্ডার করছেন</p>
+              <p className="text-xs text-muted-foreground">লগইন ছাড়াই অর্ডার করতে পারবেন</p>
+            </div>
+          </div>
+          <Link
+            to="/login"
+            state={{ from: '/checkout' }}
+            className="block w-full text-center py-2.5 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 transition-colors"
+          >
+            লগইন করুন — পয়েন্ট ও ট্র্যাকিং সুবিধা পান
+          </Link>
+        </div>
+      )}
+      {isAuthenticated && (
+        <div className="rounded-2xl border bg-card p-3 mb-4 flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center">
+            <Gift className="h-4 w-4 text-accent" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">{user?.name} হিসেবে লগইন আছেন</p>
+            <p className="text-xs text-muted-foreground">এই অর্ডার থেকে পয়েন্ট পাবেন</p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleContinueToReview} className="space-y-4">
         <div className="rounded-2xl border bg-card p-4 space-y-3">

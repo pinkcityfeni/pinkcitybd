@@ -4,7 +4,7 @@ import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Sales() {
-  const { orders } = useStore();
+  const orders = useStore(s => s.orders);
   const completed = orders.filter(o => o.status === 'completed');
   const totalRevenue = completed.reduce((s, o) => s + o.total, 0);
   const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);

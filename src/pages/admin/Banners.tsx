@@ -8,7 +8,10 @@ import { Plus, Trash2, Image as ImageIcon, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminBanners() {
-  const { banners, addBanner, updateBanner, deleteBanner } = useStore();
+  const banners = useStore(s => s.banners);
+  const addBanner = useStore(s => s.addBanner);
+  const updateBanner = useStore(s => s.updateBanner);
+  const deleteBanner = useStore(s => s.deleteBanner);
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newLink, setNewLink] = useState('/shop');

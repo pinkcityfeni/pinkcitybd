@@ -4,7 +4,8 @@ import { useLanguage } from '@/data/language';
 import { ChevronRight, Grid3X3 } from 'lucide-react';
 
 export default function Category() {
-  const { categories, products } = useStore();
+  const categories = useStore(s => s.categories);
+  const products = useStore(s => s.products);
   const { t } = useLanguage();
 
   return (

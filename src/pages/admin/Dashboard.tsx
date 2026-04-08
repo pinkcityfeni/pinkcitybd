@@ -7,7 +7,9 @@ import {
 import { toast } from 'sonner';
 
 export default function Dashboard() {
-  const { products, orders, categories } = useStore();
+  const products = useStore(s => s.products);
+  const orders = useStore(s => s.orders);
+  const categories = useStore(s => s.categories);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);

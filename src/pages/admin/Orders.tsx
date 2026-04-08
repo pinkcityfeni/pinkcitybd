@@ -26,7 +26,8 @@ const STATUS_COLORS: Record<Order['status'], string> = {
 };
 
 export default function Orders() {
-  const { orders, updateOrderStatus } = useStore();
+  const orders = useStore(s => s.orders);
+  const updateOrderStatus = useStore(s => s.updateOrderStatus);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const advance = (o: Order) => {

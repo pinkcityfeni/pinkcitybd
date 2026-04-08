@@ -26,7 +26,8 @@ const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
 };
 
 export default function Checkout() {
-  const { cart, placeOrder } = useStore();
+  const cart = useStore(s => s.cart);
+  const placeOrder = useStore(s => s.placeOrder);
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 

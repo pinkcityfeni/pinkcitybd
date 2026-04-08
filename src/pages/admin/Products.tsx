@@ -40,7 +40,11 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 export default function Products() {
-  const { products, addProduct, updateProduct, deleteProduct, categories } = useStore();
+  const products = useStore(s => s.products);
+  const addProduct = useStore(s => s.addProduct);
+  const updateProduct = useStore(s => s.updateProduct);
+  const deleteProduct = useStore(s => s.deleteProduct);
+  const categories = useStore(s => s.categories);
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
   const [editProduct, setEditProduct] = useState<Product | null>(null);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, SlidersHorizontal, Heart } from 'lucide-react';
@@ -8,6 +9,7 @@ import { toast } from 'sonner';
 
 export default function Shop() {
   const { products, categories, addToCart, wishlist, toggleWishlist } = useStore();
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const activeCategory = searchParams.get('category') || '';
@@ -37,18 +39,18 @@ export default function Shop() {
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold">সকল পণ্য</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">{filtered.length}টি পণ্য পাওয়া গেছে</p>
+        <h1 className="font-display text-2xl font-bold">{t('shop.title')}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{t('shop.found', { n: filtered.length })}</p>
       </div>
 
       <div className="flex flex-col gap-3 mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="পণ্য খুঁজুন..." className="pl-9 rounded-full bg-muted/50 border-0" value={search} onChange={e => setSearch(e.target.value)} />
+            <Input placeholder={t('nav.search')} className="pl-9 rounded-full bg-muted/50 border-0" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-1.5 flex-wrap">
-            <Button variant={!activeCategory ? 'default' : 'outline'} size="sm" className="rounded-full text-xs h-8" onClick={() => setCategory('')}>All</Button>
+            <Button variant={!activeCategory ? 'default' : 'outline'} size="sm" className="rounded-full text-xs h-8" onClick={() => setCategory('')}>{t('shop.all')}</Button>
             {categories.map(c => (
               <Button key={c.id} variant={activeCategory === c.name ? 'default' : 'outline'} size="sm" className="rounded-full text-xs h-8" onClick={() => setCategory(c.name)}>
                 {c.icon} {c.name}
@@ -60,7 +62,7 @@ export default function Shop() {
         {activeCategory && activeSubcategories.length > 0 && (
           <div className="flex gap-1.5 flex-wrap items-center">
             <SlidersHorizontal className="h-3 w-3 text-muted-foreground" />
-            <Button variant={!activeSub ? 'default' : 'ghost'} size="sm" className="rounded-full text-[11px] h-7 px-3" onClick={() => setSubcategory('')}>All</Button>
+            <Button variant={!activeSub ? 'default' : 'ghost'} size="sm" className="rounded-full text-[11px] h-7 px-3" onClick={() => setSubcategory('')}>{t('shop.all')}</Button>
             {activeSubcategories.map(sc => (
               <Button key={sc} variant={activeSub === sc ? 'default' : 'ghost'} size="sm" className="rounded-full text-[11px] h-7 px-3" onClick={() => setSubcategory(sc)}>{sc}</Button>
             ))}
@@ -83,11 +85,11 @@ export default function Shop() {
                   )}
                   {p.stock === 0 && (
                     <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                      <span className="text-xs font-medium text-muted-foreground">স্টক শেষ</span>
+                      <span className="text-xs font-medium text-muted-foreground">{t('home.outOfStock')}</span>
                     </div>
                   )}
                   {p.stock > 0 && p.stock < 10 && (
-                    <span className="absolute top-2 right-2 text-[9px] bg-destructive/90 text-destructive-foreground px-1.5 py-0.5 rounded-full">Low stock</span>
+                    <span className="absolute top-2 right-2 text-[9px] bg-destructive/90 text-destructive-foreground px-1.5 py-0.5 rounded-full">{t('shop.lowStock')}</span>
                   )}
                 </div>
               </Link>
@@ -110,7 +112,7 @@ export default function Shop() {
                       size="sm"
                       variant="ghost"
                       className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 hover:text-primary"
-                      onClick={() => { addToCart(p); toast.success(`যোগ হয়েছে: ${p.name}`); }}
+                      onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
                       disabled={p.stock === 0}
                     >
                       <ShoppingCart className="h-3.5 w-3.5" />
@@ -123,8 +125,8 @@ export default function Shop() {
         })}
         {filtered.length === 0 && (
           <div className="col-span-full text-center py-16 text-muted-foreground">
-            <p className="font-display text-lg">কোনো পণ্য পাওয়া যায়নি</p>
-            <p className="text-sm mt-1">ফিল্টার পরিবর্তন করুন</p>
+            <p className="font-display text-lg">{t('shop.noProducts')}</p>
+            <p className="text-sm mt-1">{t('shop.changeFilter')}</p>
           </div>
         )}
       </div>

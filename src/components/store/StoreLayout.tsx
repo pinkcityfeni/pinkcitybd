@@ -1,7 +1,8 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Heart } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
+import { useLanguage } from '@/data/language';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,14 +16,15 @@ export default function StoreLayout() {
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
+  const { t, lang, setLang } = useLanguage();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const navLinks = [
-    { to: '/', label: 'হোম' },
-    { to: '/shop', label: 'শপ' },
-    { to: '/category', label: 'ক্যাটাগরি' },
+    { to: '/', label: t('nav.home') },
+    { to: '/shop', label: t('nav.shop') },
+    { to: '/category', label: t('nav.category') },
   ];
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -35,6 +37,8 @@ export default function StoreLayout() {
       setMobileMenuOpen(false);
     }
   };
+
+  const toggleLang = () => setLang(lang === 'bn' ? 'en' : 'bn');
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -54,10 +58,20 @@ export default function StoreLayout() {
           </nav>
 
           <div className="flex items-center gap-1.5">
+            {/* Language toggle */}
+            <button
+              onClick={toggleLang}
+              className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground flex items-center gap-1"
+              title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold">{lang === 'bn' ? 'EN' : 'বা'}</span>
+            </button>
+
             <form onSubmit={handleSearch} className="hidden sm:block relative w-44">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="পণ্য খুঁজুন..."
+                placeholder={t('nav.search')}
                 className="pl-8 h-9 text-xs rounded-full bg-muted/50 border-0 focus-visible:ring-primary/30"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
@@ -75,7 +89,7 @@ export default function StoreLayout() {
                 <button onClick={handleLogout} className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"><LogOut className="h-3.5 w-3.5" /></button>
               </>
             ) : (
-              <Button asChild variant="outline" size="sm" className="rounded-full text-xs h-8 px-3"><Link to="/login">Sign In</Link></Button>
+              <Button asChild variant="outline" size="sm" className="rounded-full text-xs h-8 px-3"><Link to="/login">{t('nav.signIn')}</Link></Button>
             )}
             <button className="md:hidden p-2 rounded-full hover:bg-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -94,7 +108,7 @@ export default function StoreLayout() {
               <div className="pt-2 px-4">
                 <form onSubmit={handleSearch} className="relative">
                   <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input placeholder="পণ্য খুঁজুন..." className="pl-9 rounded-full bg-muted/50 border-0 text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                  <Input placeholder={t('nav.search')} className="pl-9 rounded-full bg-muted/50 border-0 text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </form>
               </div>
             </div>
@@ -114,27 +128,27 @@ export default function StoreLayout() {
                 <img src={logoImg} alt="PINK CITY" className="h-7 w-7 rounded-lg object-cover" />
                 <span className="font-display font-semibold">PINK CITY</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">আপনার সৌন্দর্য পণ্যের ঠিকানা।</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{t('footer.tagline')}</p>
             </div>
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">শপ</h4>
+              <h4 className="font-display font-semibold text-sm mb-3">{t('footer.shop')}</h4>
               <div className="space-y-2">
-                <Link to="/shop" className="block text-xs text-muted-foreground hover:text-primary transition-colors">সকল পণ্য</Link>
-                <Link to="/category" className="block text-xs text-muted-foreground hover:text-primary transition-colors">ক্যাটাগরি</Link>
+                <Link to="/shop" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.allProducts')}</Link>
+                <Link to="/category" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.categories')}</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">অ্যাকাউন্ট</h4>
+              <h4 className="font-display font-semibold text-sm mb-3">{t('footer.accountSection')}</h4>
               <div className="space-y-2">
-                <Link to="/login" className="block text-xs text-muted-foreground hover:text-primary transition-colors">লগইন</Link>
-                <Link to="/signup" className="block text-xs text-muted-foreground hover:text-primary transition-colors">নতুন অ্যাকাউন্ট</Link>
+                <Link to="/login" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.login')}</Link>
+                <Link to="/signup" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.newAccount')}</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">অ্যাডমিন</h4>
+              <h4 className="font-display font-semibold text-sm mb-3">{t('footer.admin')}</h4>
               <div className="space-y-2">
-                <Link to="/admin" className="block text-xs text-muted-foreground hover:text-primary transition-colors">ড্যাশবোর্ড</Link>
-                <Link to="/pos" className="block text-xs text-muted-foreground hover:text-primary transition-colors">POS টার্মিনাল</Link>
+                <Link to="/admin" className="block text-xs text-muted-foreground hover:text-primary transition-colors">{t('footer.dashboard')}</Link>
+                <Link to="/pos" className="block text-xs text-muted-foreground hover:text-primary transition-colors">POS</Link>
               </div>
             </div>
           </div>
@@ -147,12 +161,13 @@ export default function StoreLayout() {
 
 function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wishlistCount: number }) {
   const location = useLocation();
+  const { t } = useLanguage();
 
   const tabs = [
-    { to: '/', icon: Home, label: 'হোম' },
-    { to: '/category', icon: Grid3X3, label: 'ক্যাটাগরি' },
-    { to: '/cart', icon: ShoppingCart, label: 'কার্ট', badge: cartCount },
-    { to: '/account', icon: User, label: 'অ্যাকাউন্ট' },
+    { to: '/', icon: Home, label: t('nav.home') },
+    { to: '/category', icon: Grid3X3, label: t('nav.category') },
+    { to: '/cart', icon: ShoppingCart, label: t('nav.cart'), badge: cartCount },
+    { to: '/account', icon: User, label: t('nav.account') },
   ];
 
   return (

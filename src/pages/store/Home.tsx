@@ -1,5 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { ShoppingCart, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -12,6 +13,7 @@ export default function Home() {
   const banners = useStore(s => s.banners);
   const wishlist = useStore(s => s.wishlist);
   const toggleWishlist = useStore(s => s.toggleWishlist);
+  const { t } = useLanguage();
   const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
   const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
 
@@ -36,9 +38,9 @@ export default function Home() {
 
       <section className="px-2.5 py-4">
         <div className="flex items-center justify-between mb-3 px-1">
-          <h2 className="font-display text-lg font-bold">আপনার জন্য</h2>
+          <h2 className="font-display text-lg font-bold">{t('home.forYou')}</h2>
           <Link to="/shop" className="text-[11px] text-primary font-semibold flex items-center gap-0.5">
-            সব দেখুন <ChevronRight className="h-3 w-3" />
+            {t('home.viewAll')} <ChevronRight className="h-3 w-3" />
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
@@ -55,11 +57,11 @@ export default function Home() {
                       <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{cat?.icon || '📦'}</span>
                     )}
                     {p.stock < 5 && p.stock > 0 && (
-                      <span className="absolute bottom-1 left-1 text-[8px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded-full font-bold">মাত্র {p.stock}টি বাকি</span>
+                      <span className="absolute bottom-1 left-1 text-[8px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded-full font-bold">{t('home.onlyLeft', { n: p.stock })}</span>
                     )}
                     {p.stock === 0 && (
                       <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                        <span className="text-[10px] font-semibold text-muted-foreground">স্টক শেষ</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground">{t('home.outOfStock')}</span>
                       </div>
                     )}
                   </div>
@@ -81,7 +83,7 @@ export default function Home() {
                         size="sm"
                         variant="ghost"
                         className="h-7 w-7 p-0 rounded-full hover:bg-primary/10 hover:text-primary"
-                        onClick={() => { addToCart(p); toast.success(`যোগ হয়েছে: ${p.name}`); }}
+                        onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
                         disabled={p.stock === 0}
                       >
                         <ShoppingCart className="h-3.5 w-3.5" />
@@ -162,12 +164,12 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
             <button
               onClick={() => goTo((current - 1 + banners.length) % banners.length)}
               className="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
-              aria-label="আগের ব্যানার"
+              aria-label="Previous"
             />
             <button
               onClick={() => goTo((current + 1) % banners.length)}
               className="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
-              aria-label="পরের ব্যানার"
+              aria-label="Next"
             />
           </>
         )}

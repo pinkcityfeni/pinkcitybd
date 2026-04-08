@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { LanguageProvider } from "@/data/language";
 
 // Layouts
 import StoreLayout from "@/components/store/StoreLayout";
@@ -44,66 +45,68 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* ─── Public: Customer Storefront ─── */}
-          <Route element={<StoreLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/category" element={<Category />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/account" element={<Account />} />
-          </Route>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* ─── Public: Customer Storefront ─── */}
+            <Route element={<StoreLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/category" element={<Category />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/account" element={<Account />} />
+            </Route>
 
-          {/* ─── Public: Auth ─── */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+            {/* ─── Public: Auth ─── */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* ─── Protected: POS (cashier or admin) ─── */}
-          <Route
-            path="/pos"
-            element={
-              <ProtectedRoute requiredRole="cashier">
-                <POSLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<POSSales />} />
-            <Route path="sales" element={<POSSalesHistory />} />
-            <Route path="barcode" element={<POSBarcode />} />
-          </Route>
+            {/* ─── Protected: POS (cashier or admin) ─── */}
+            <Route
+              path="/pos"
+              element={
+                <ProtectedRoute requiredRole="cashier">
+                  <POSLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<POSSales />} />
+              <Route path="sales" element={<POSSalesHistory />} />
+              <Route path="barcode" element={<POSBarcode />} />
+            </Route>
 
-          {/* ─── Protected: Admin (admin only) ─── */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="products" element={<Products />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="banners" element={<AdminBanners />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="inventory" element={<Inventory />} />
-            <Route path="sales" element={<Sales />} />
-            <Route path="reviews" element={<AdminReviews />} />
-            <Route path="users" element={<Users />} />
-          </Route>
+            {/* ─── Protected: Admin (admin only) ─── */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="products" element={<Products />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="banners" element={<AdminBanners />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="sales" element={<Sales />} />
+              <Route path="reviews" element={<AdminReviews />} />
+              <Route path="users" element={<Users />} />
+            </Route>
 
-          {/* ─── Catch-all ─── */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            {/* ─── Catch-all ─── */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

@@ -206,7 +206,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
           }
 
           return (
-            <Link key={t.to} to={t.to} className={`flex flex-col items-center gap-0.5 px-3 py-1 relative transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Link key={t.to} to={t.to} className={`flex flex-col items-center gap-0.5 py-1 relative transition-colors justify-self-center ${active ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className="relative">
                 <t.icon className="h-5 w-5" />
                 {t.badge !== undefined && t.badge > 0 && (

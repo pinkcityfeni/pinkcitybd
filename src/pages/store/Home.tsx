@@ -3,7 +3,7 @@ import { useStore } from '@/data/store';
 import { ShoppingCart, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 export default function Home() {
   const { products, categories, addToCart, banners, wishlist, toggleWishlist } = useStore();

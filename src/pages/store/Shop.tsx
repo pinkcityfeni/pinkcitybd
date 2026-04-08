@@ -145,7 +145,7 @@ export default function Shop() {
                 className={`rounded-full text-xs h-8 ${activeCategory === c.name ? 'shadow-md shadow-primary/20' : 'border-primary/20 hover:border-primary/40'}`}
                 onClick={() => setCategory(c.name)}
               >
-                {c.icon} {c.name}
+                {c.image ? <img src={c.image} alt="" className="h-4 w-4 rounded-full object-cover inline-block mr-1" /> : c.icon} {c.name}
               </Button>
             ))}
           </div>

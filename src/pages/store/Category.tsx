@@ -24,8 +24,8 @@ export default function Category() {
                 to={`/shop?category=${encodeURIComponent(c.name)}`}
                 className="flex items-center gap-3 p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-b group-hover:from-primary/10 group-hover:to-primary/15 transition-colors"
               >
-                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0">
-                  {c.icon}
+                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                  {c.image ? <img src={c.image} alt={c.name} className="h-full w-full object-cover" /> : c.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-display font-semibold text-base truncate">{c.name}</h2>

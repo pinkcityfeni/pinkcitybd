@@ -57,8 +57,8 @@ export default function Home() {
           <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
             {categories.map(c => (
               <Link key={c.id} to={`/shop?category=${encodeURIComponent(c.name)}`} className="flex flex-col items-center gap-1.5 min-w-[60px] group">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:from-primary/20 group-hover:to-accent/20 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                  <span className="text-xl">{c.icon}</span>
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:from-primary/20 group-hover:to-accent/20 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md overflow-hidden">
+                  {c.image ? <img src={c.image} alt={c.name} className="h-full w-full object-cover" /> : <span className="text-xl">{c.icon}</span>}
                 </div>
                 <span className="text-[9px] font-semibold text-muted-foreground group-hover:text-primary text-center leading-tight whitespace-nowrap transition-colors">{c.name}</span>
               </Link>

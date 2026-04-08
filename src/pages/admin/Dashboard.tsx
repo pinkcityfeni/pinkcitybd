@@ -178,26 +178,31 @@ export default function Dashboard() {
             <h3 className="font-semibold flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> {t('dash.monthlyReport')}</h3>
             <span className="text-xs text-muted-foreground">{t('dash.last6Months')}</span>
           </div>
-          <div className="space-y-3">
-            {stats.monthly.map(m => (
-              <div key={m.month} className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground w-14 shrink-0">{m.month}</span>
-                <div className="flex-1 flex items-center gap-2">
-                  <div className="flex-1 h-6 bg-muted rounded-md overflow-hidden relative">
-                    <div className="h-full bg-primary/20 rounded-md transition-all" style={{ width: `${(m.revenue / maxRevenue) * 100}%` }} />
-                    <div className="h-full bg-success/40 rounded-md absolute top-0 left-0 transition-all" style={{ width: `${(m.profit / maxRevenue) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="text-right shrink-0 w-28">
-                  <span className="text-xs font-medium">৳{m.revenue.toFixed(0)}</span>
-                  <span className="text-[10px] text-success ml-1.5">+৳{m.profit.toFixed(0)}</span>
-                </div>
-                <span className="text-[10px] text-muted-foreground w-12 text-right">{m.orders} ord</span>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={stats.monthly} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(142 71% 45%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(142 71% 45%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <Tooltip
+                contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                formatter={(value: number, name: string) => [`৳${value.toFixed(0)}`, name === 'revenue' ? 'রেভিনিউ' : 'লাভ']}
+              />
+              <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="url(#colorRevenue)" strokeWidth={2} />
+              <Area type="monotone" dataKey="profit" stroke="hsl(142 71% 45%)" fill="url(#colorProfit)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
           <div className="flex gap-4 mt-3 pt-3 border-t text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-primary/20" /> {t('dash.revenueLabel')}</span>
+            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-primary/40" /> {t('dash.revenueLabel')}</span>
             <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-success/40" /> {t('dash.profitLabel')}</span>
           </div>
         </div>

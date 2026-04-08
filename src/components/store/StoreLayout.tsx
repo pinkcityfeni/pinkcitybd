@@ -137,7 +137,7 @@ export default function StoreLayout() {
                 <span>Appayon Afroz Tower (1st floor, Shop 11-12), College Road, Feni 3900, Bangladesh</span>
               </div>
               <div className="flex gap-2 mt-3">
-                <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">📱</span>
+                <a href="https://www.facebook.com/share/17KZiPoqUF/" target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">📱</a>
                 <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">💬</span>
                 <span className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs hover:bg-primary/20 transition-colors cursor-pointer">📷</span>
               </div>

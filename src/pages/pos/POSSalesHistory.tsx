@@ -1,6 +1,12 @@
 import { useStore } from '@/data/store';
+import type { PaymentMethod } from '@/data/store';
 import { Badge } from '@/components/ui/badge';
 import { useMemo } from 'react';
+
+const getMethodLabel = (m: PaymentMethod): string => {
+  const map: Record<PaymentMethod, string> = { cash: 'নগদ', cod: 'নগদ', bkash: 'বিকাশ', nagad: 'নগদ (Nagad)', bank: 'ব্যাংক', card: 'কার্ড' };
+  return map[m] || m;
+};
 
 export default function POSSalesHistory() {
   const allOrders = useStore(s => s.orders);
@@ -36,6 +42,7 @@ export default function POSSalesHistory() {
               <th className="pb-3 font-medium">তারিখ</th>
               <th className="pb-3 font-medium">আইটেম</th>
               <th className="pb-3 font-medium text-right">মোট</th>
+              <th className="pb-3 font-medium">পেমেন্ট</th>
               <th className="pb-3 font-medium text-right">লাভ</th>
               <th className="pb-3 font-medium">স্ট্যাটাস</th>
             </tr>
@@ -49,6 +56,16 @@ export default function POSSalesHistory() {
                   <td className="py-3 text-xs">{new Date(o.date).toLocaleString()}</td>
                   <td className="py-3">{o.items.length}</td>
                   <td className="py-3 text-right font-medium">৳{o.total.toFixed(0)}</td>
+                  <td className="py-3 text-xs">
+                    {o.splitPayment ? (
+                      <span className="space-y-0.5">
+                        <span className="block">{getMethodLabel(o.splitPayment.method1)}: ৳{o.splitPayment.amount1.toFixed(0)}</span>
+                        <span className="block">{getMethodLabel(o.splitPayment.method2)}: ৳{o.splitPayment.amount2.toFixed(0)}</span>
+                      </span>
+                    ) : (
+                      getMethodLabel(o.paymentMethod || 'cash')
+                    )}
+                  </td>
                   <td className="py-3 text-right text-success">৳{(o.total - cost).toFixed(0)}</td>
                   <td className="py-3"><Badge variant="outline" className="text-xs capitalize">{o.status}</Badge></td>
                 </tr>

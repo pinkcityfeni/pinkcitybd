@@ -1,9 +1,21 @@
 import { forwardRef } from 'react';
-import type { Order } from '@/data/store';
+import type { Order, PaymentMethod } from '@/data/store';
 
 interface POSInvoiceProps {
   order: Order;
 }
+
+const getMethodLabel = (m: PaymentMethod): string => {
+  const map: Record<PaymentMethod, string> = {
+    cash: 'নগদ',
+    cod: 'নগদ',
+    bkash: 'বিকাশ',
+    nagad: 'নগদ (Nagad)',
+    bank: 'ব্যাংক ট্রান্সফার',
+    card: 'কার্ড',
+  };
+  return map[m] || m;
+};
 
 const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) => {
   const subtotal = order.items.reduce((s, i) => s + i.product.price * i.quantity, 0);
@@ -76,7 +88,15 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
 
       {/* Payment */}
       <div className="mt-3 pt-2 border-t border-dashed border-gray-400 text-center text-[10px] text-gray-500">
-        <p>পেমেন্ট: {order.paymentMethod === 'cod' ? 'নগদ' : order.paymentMethod || 'নগদ'}</p>
+        {order.splitPayment ? (
+          <div className="space-y-0.5 mb-1">
+            <p className="font-semibold text-gray-700">স্প্লিট পেমেন্ট</p>
+            <p>{getMethodLabel(order.splitPayment.method1)}: ৳{order.splitPayment.amount1.toFixed(0)}</p>
+            <p>{getMethodLabel(order.splitPayment.method2)}: ৳{order.splitPayment.amount2.toFixed(0)}</p>
+          </div>
+        ) : (
+          <p>পেমেন্ট: {getMethodLabel(order.paymentMethod || 'cash')}</p>
+        )}
         <p className="mt-2">ধন্যবাদ! আবার আসবেন 💕</p>
         <p className="mt-1 text-[8px] text-gray-400">Powered by PINK CITY POS</p>
       </div>

@@ -1,11 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
-import type { Order } from '@/data/store';
+import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw } from 'lucide-react';
+import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
+
+const PAYMENT_METHODS: { value: PaymentMethod; label: string; color: string }[] = [
+  { value: 'cash', label: 'নগদ', color: 'bg-green-600' },
+  { value: 'bkash', label: 'বিকাশ', color: 'bg-pink-600' },
+  { value: 'nagad', label: 'নগদ (Nagad)', color: 'bg-orange-600' },
+  { value: 'bank', label: 'ব্যাংক ট্রান্সফার', color: 'bg-blue-600' },
+];
 
 export default function POSSales() {
   const products = useStore(s => s.products);
@@ -21,6 +28,13 @@ export default function POSSales() {
   const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [isSplit, setIsSplit] = useState(false);
+  const [splitMethod1, setSplitMethod1] = useState<PaymentMethod>('cash');
+  const [splitMethod2, setSplitMethod2] = useState<PaymentMethod>('bkash');
+  const [splitAmount1, setSplitAmount1] = useState('');
+
   const focusBarcode = useCallback(() => {
     setTimeout(() => barcodeRef.current?.focus(), 50);
   }, []);
@@ -31,6 +45,9 @@ export default function POSSales() {
   const totalCost = posCart.reduce((sum, i) => sum + i.product.buyingPrice * i.quantity, 0);
   const profit = total - totalCost;
   const itemCount = posCart.reduce((sum, i) => sum + i.quantity, 0);
+
+  const splitAmt1 = parseFloat(splitAmount1) || 0;
+  const splitAmt2 = Math.max(0, total - splitAmt1);
 
   const handleBarcodeScan = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +68,38 @@ export default function POSSales() {
 
   const handleCompleteSale = () => {
     if (posCart.length === 0) return;
+
+    if (isSplit && splitAmt1 <= 0) {
+      toast.error('স্প্লিট পেমেন্টে প্রথম অংশের টাকা দিন');
+      return;
+    }
+    if (isSplit && splitAmt1 >= total) {
+      toast.error('স্প্লিট পেমেন্টে প্রথম অংশ মোট এর কম হতে হবে');
+      return;
+    }
+
     const saleProfit = profit;
-    const id = placeOrder('pos');
+    const splitPayment: SplitPayment | undefined = isSplit ? {
+      method1: splitMethod1,
+      amount1: splitAmt1,
+      method2: splitMethod2,
+      amount2: splitAmt2,
+    } : undefined;
+
+    const id = placeOrder('pos', {
+      paymentMethod: isSplit ? splitMethod1 : paymentMethod,
+      paymentStatus: 'paid',
+      splitPayment,
+    });
     const orders = useStore.getState().orders;
     const completedOrder = orders.find(o => o.id === id);
     if (completedOrder) {
       setSaleComplete({ order: completedOrder, profit: saleProfit });
     }
+    // Reset payment state
+    setPaymentMethod('cash');
+    setIsSplit(false);
+    setSplitAmount1('');
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };
@@ -81,9 +123,10 @@ export default function POSSales() {
 
   const saleItemCount = saleComplete ? saleComplete.order.items.reduce((s, i) => s + i.quantity, 0) : 0;
 
+  const getMethodLabel = (m: PaymentMethod) => PAYMENT_METHODS.find(pm => pm.value === m)?.label || m;
+
   if (saleComplete) return (
     <div className="flex-1 flex flex-col md:flex-row overflow-auto">
-      {/* Left: Success Summary */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="text-center animate-fade-in">
           <CheckCircle2 className="h-20 w-20 mx-auto mb-4 text-success" />
@@ -91,7 +134,15 @@ export default function POSSales() {
           <p className="text-sm opacity-70 mb-1">Order: {saleComplete.order.id}</p>
           <p className="text-sm opacity-70 mb-1">{saleItemCount}টি আইটেম বিক্রি হয়েছে</p>
           <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
-          <p className="text-sm text-success font-medium mb-6">লাভ: ৳{saleComplete.profit.toFixed(0)}</p>
+          <p className="text-sm text-success font-medium mb-2">লাভ: ৳{saleComplete.profit.toFixed(0)}</p>
+          {saleComplete.order.splitPayment ? (
+            <div className="text-xs opacity-70 mb-4 space-y-0.5">
+              <p>{getMethodLabel(saleComplete.order.splitPayment.method1)}: ৳{saleComplete.order.splitPayment.amount1.toFixed(0)}</p>
+              <p>{getMethodLabel(saleComplete.order.splitPayment.method2)}: ৳{saleComplete.order.splitPayment.amount2.toFixed(0)}</p>
+            </div>
+          ) : (
+            <p className="text-xs opacity-70 mb-4">পেমেন্ট: {getMethodLabel(saleComplete.order.paymentMethod || 'cash')}</p>
+          )}
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={handlePrintInvoice}>
               <Printer className="h-4 w-4 mr-2" /> প্রিন্ট ইনভয়েস
@@ -103,7 +154,6 @@ export default function POSSales() {
         </div>
       </div>
 
-      {/* Right: Invoice Preview */}
       <div className="md:w-96 border-l p-4 overflow-auto" style={{ borderColor: 'hsl(var(--pos-border))' }}>
         <h3 className="text-sm font-semibold mb-3 text-center opacity-60">ইনভয়েস প্রিভিউ</h3>
         <div className="rounded-xl overflow-hidden shadow-lg">
@@ -190,6 +240,88 @@ export default function POSSales() {
           <div className="flex justify-between font-bold text-lg border-t pt-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
             <span>মোট</span><span className="text-primary">৳{total.toFixed(0)}</span>
           </div>
+
+          {/* Payment Method Selection */}
+          <div className="border-t pt-2 space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium opacity-70">পেমেন্ট মেথড</span>
+              <button
+                onClick={() => setIsSplit(!isSplit)}
+                className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${isSplit ? 'bg-primary text-primary-foreground' : 'opacity-60 hover:opacity-100'}`}
+              >
+                <Split className="h-3 w-3" /> স্প্লিট
+              </button>
+            </div>
+
+            {!isSplit ? (
+              <div className="grid grid-cols-2 gap-1.5">
+                {PAYMENT_METHODS.map(pm => (
+                  <button
+                    key={pm.value}
+                    onClick={() => setPaymentMethod(pm.value)}
+                    className={`text-[11px] py-1.5 px-2 rounded-lg font-medium transition-all ${
+                      paymentMethod === pm.value
+                        ? `${pm.color} text-white scale-[1.02]`
+                        : 'opacity-50 hover:opacity-80'
+                    }`}
+                    style={paymentMethod !== pm.value ? { background: 'hsl(var(--pos-bg))' } : {}}
+                  >
+                    {pm.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2 rounded-lg p-2" style={{ background: 'hsl(var(--pos-bg))' }}>
+                {/* Method 1 */}
+                <div>
+                  <p className="text-[10px] opacity-50 mb-1">১ম পেমেন্ট</p>
+                  <div className="flex gap-1">
+                    {PAYMENT_METHODS.map(pm => (
+                      <button
+                        key={pm.value}
+                        onClick={() => setSplitMethod1(pm.value)}
+                        className={`text-[10px] py-1 px-1.5 rounded font-medium transition-all flex-1 ${
+                          splitMethod1 === pm.value ? `${pm.color} text-white` : 'opacity-40 hover:opacity-70'
+                        }`}
+                        style={splitMethod1 !== pm.value ? { background: 'hsl(var(--pos-card))' } : {}}
+                      >
+                        {pm.label}
+                      </button>
+                    ))}
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder="টাকার পরিমাণ..."
+                    value={splitAmount1}
+                    onChange={e => setSplitAmount1(e.target.value)}
+                    className="mt-1 h-8 text-xs bg-transparent border-pos-border"
+                  />
+                </div>
+                {/* Method 2 */}
+                <div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-[10px] opacity-50 mb-1">২য় পেমেন্ট</p>
+                    <p className="text-[10px] font-medium text-primary">৳{splitAmt2.toFixed(0)}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    {PAYMENT_METHODS.map(pm => (
+                      <button
+                        key={pm.value}
+                        onClick={() => setSplitMethod2(pm.value)}
+                        className={`text-[10px] py-1 px-1.5 rounded font-medium transition-all flex-1 ${
+                          splitMethod2 === pm.value ? `${pm.color} text-white` : 'opacity-40 hover:opacity-70'
+                        }`}
+                        style={splitMethod2 !== pm.value ? { background: 'hsl(var(--pos-card))' } : {}}
+                      >
+                        {pm.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <Button className="w-full" size="lg" disabled={posCart.length === 0} onClick={handleCompleteSale}>
             বিক্রি সম্পন্ন করুন — ৳{total.toFixed(0)}
           </Button>

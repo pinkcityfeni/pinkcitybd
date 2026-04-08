@@ -31,8 +31,8 @@ export default function StoreLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top banner */}
-      <div className="bg-primary/5 text-center py-1.5 text-xs text-muted-foreground border-b">
-        ✨ Free shipping on orders over $50 · Earn points on every purchase
+      <div className="bg-primary text-primary-foreground text-center py-1.5 text-[11px] font-medium">
+        ✨ ৳৫০০+ অর্ডারে ফ্রি শিপিং · প্রতিটি কেনাকাটায় পয়েন্ট অর্জন করুন
       </div>
 
       {/* Header */}

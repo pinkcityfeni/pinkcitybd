@@ -65,6 +65,8 @@ export interface Order {
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
   splitPayment?: SplitPayment;
+  discount?: number;
+  discountType?: 'fixed' | 'percent';
 }
 
 export interface Banner {
@@ -130,6 +132,8 @@ interface OrderData {
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
   splitPayment?: SplitPayment;
+  discount?: number;
+  discountType?: 'fixed' | 'percent';
 }
 
 interface StoreState {
@@ -269,7 +273,10 @@ export const useStore = create<StoreState>((set, get) => ({
     const items = type === 'pos' ? s.posCart : s.cart;
     const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
     const deliveryCharge = data?.deliveryCharge || 0;
-    const total = subtotal + deliveryCharge;
+    const discountAmount = data?.discount
+      ? (data.discountType === 'percent' ? Math.round(subtotal * data.discount / 100) : data.discount)
+      : 0;
+    const total = Math.max(0, subtotal - discountAmount) + deliveryCharge;
     const pointsEarned = type === 'online' ? Math.floor(subtotal) : 0;
     const id = `ord-${Date.now()}`;
     const order: Order = {
@@ -289,6 +296,8 @@ export const useStore = create<StoreState>((set, get) => ({
       paymentMethod: data?.paymentMethod,
       paymentStatus: data?.paymentStatus || (data?.paymentMethod === 'cod' ? 'pending' : 'paid'),
       splitPayment: data?.splitPayment,
+      discount: data?.discount,
+      discountType: data?.discountType,
     };
     set(state => ({
       orders: [order, ...state.orders],

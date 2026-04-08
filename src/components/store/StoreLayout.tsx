@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Heart, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3 } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { Badge } from '@/components/ui/badge';
@@ -121,9 +121,12 @@ export default function StoreLayout() {
         )}
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         <Outlet />
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav cartCount={cartCount} />
 
       {/* Footer */}
       <footer className="border-t bg-card/50 mt-16">
@@ -166,5 +169,43 @@ export default function StoreLayout() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function MobileBottomNav({ cartCount }: { cartCount: number }) {
+  const location = useLocation();
+
+  const tabs = [
+    { to: '/', icon: Home, label: 'হোম' },
+    { to: '/category', icon: Grid3X3, label: 'ক্যাটাগরি' },
+    { to: '/cart', icon: ShoppingCart, label: 'কার্ট', badge: cartCount },
+    { to: '/account', icon: User, label: 'অ্যাকাউন্ট' },
+  ];
+
+  return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t safe-area-bottom">
+      <div className="flex items-center justify-around h-14">
+        {tabs.map(t => {
+          const active = t.to === '/' ? location.pathname === '/' : location.pathname.startsWith(t.to);
+          return (
+            <Link
+              key={t.to}
+              to={t.to}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 relative transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <div className="relative">
+                <t.icon className="h-5 w-5" />
+                {t.badge && t.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center text-[9px] font-bold bg-primary text-primary-foreground rounded-full">
+                    {t.badge}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] font-medium">{t.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

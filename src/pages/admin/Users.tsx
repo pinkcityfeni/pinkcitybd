@@ -1,3 +1,4 @@
+import { useLanguage } from '@/data/language';
 import { Badge } from '@/components/ui/badge';
 
 const MOCK_USERS = [
@@ -9,19 +10,21 @@ const MOCK_USERS = [
 ];
 
 export default function Users() {
+  const { t } = useLanguage();
+
   return (
     <div className="p-6 animate-fade-in">
-      <h1 className="page-header">Users</h1>
-      <p className="page-subheader mb-6">{MOCK_USERS.length} registered users</p>
+      <h1 className="page-header">{t('user.title')}</h1>
+      <p className="page-subheader mb-6">{t('user.nUsers', { n: MOCK_USERS.length })}</p>
       <div className="stat-card overflow-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-muted-foreground">
-              <th className="pb-3 font-medium">Name</th>
-              <th className="pb-3 font-medium">Email</th>
-              <th className="pb-3 font-medium">Role</th>
-              <th className="pb-3 font-medium text-right">Points</th>
-              <th className="pb-3 font-medium text-right">Orders</th>
+              <th className="pb-3 font-medium">{t('user.name')}</th>
+              <th className="pb-3 font-medium">{t('user.email')}</th>
+              <th className="pb-3 font-medium">{t('user.role')}</th>
+              <th className="pb-3 font-medium text-right">{t('user.points')}</th>
+              <th className="pb-3 font-medium text-right">{t('user.orders')}</th>
             </tr>
           </thead>
           <tbody>

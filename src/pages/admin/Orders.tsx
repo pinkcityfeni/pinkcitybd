@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore, Order } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -28,6 +29,7 @@ const STATUS_COLORS: Record<Order['status'], string> = {
 export default function Orders() {
   const orders = useStore(s => s.orders);
   const updateOrderStatus = useStore(s => s.updateOrderStatus);
+  const { t } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const advance = (o: Order) => {
@@ -38,11 +40,11 @@ export default function Orders() {
 
   return (
     <div className="p-6 animate-fade-in">
-      <h1 className="text-xl font-bold">অর্ডার</h1>
-      <p className="text-sm text-muted-foreground mb-6">{orders.length}টি অর্ডার</p>
+      <h1 className="text-xl font-bold">{t('order.title')}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('order.nOrders', { n: orders.length })}</p>
 
       {orders.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-12">কোনো অর্ডার নেই</p>
+        <p className="text-sm text-muted-foreground text-center py-12">{t('order.noOrders')}</p>
       ) : (
         <div className="space-y-3">
           {orders.map(o => {
@@ -62,7 +64,7 @@ export default function Orders() {
                       )}
                       {o.paymentStatus && (
                         <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${PAYMENT_STATUS_COLORS[o.paymentStatus] || ''}`}>
-                          {o.paymentStatus === 'paid' ? '✓ Paid' : '⏳ Unpaid'}
+                          {o.paymentStatus === 'paid' ? t('order.paid') : t('order.unpaid')}
                         </span>
                       )}
                     </div>
@@ -79,19 +81,13 @@ export default function Orders() {
                 {expanded && (
                   <div className="border-t p-4 space-y-4 animate-fade-in">
                     <div className="grid sm:grid-cols-2 gap-3 text-sm">
-                      {o.customerPhone && (
-                        <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5" /> {o.customerPhone}</div>
-                      )}
-                      {o.customerEmail && (
-                        <div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> {o.customerEmail}</div>
-                      )}
-                      {o.deliveryAddress && (
-                        <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2"><MapPin className="h-3.5 w-3.5 shrink-0" /> {o.deliveryAddress}</div>
-                      )}
+                      {o.customerPhone && <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5" /> {o.customerPhone}</div>}
+                      {o.customerEmail && <div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> {o.customerEmail}</div>}
+                      {o.deliveryAddress && <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2"><MapPin className="h-3.5 w-3.5 shrink-0" /> {o.deliveryAddress}</div>}
                       {o.deliveryZone && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Truck className="h-3.5 w-3.5 shrink-0" />
-                          <span>{o.deliveryZone === 'feni' ? 'ফেনী' : 'ফেনীর বাইরে'} — ৳{o.deliveryCharge || 0}</span>
+                          <span>{o.deliveryZone === 'feni' ? t('order.feni') : t('order.outsideFeni')} — ৳{o.deliveryCharge || 0}</span>
                         </div>
                       )}
                       {o.paymentMethod && (
@@ -108,7 +104,7 @@ export default function Orders() {
                     </div>
 
                     <div className="space-y-1">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Items</p>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('order.items')}</p>
                       {o.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-sm py-1">
                           <span>{item.product.name} × {item.quantity}</span>
@@ -117,7 +113,7 @@ export default function Orders() {
                       ))}
                       {o.deliveryCharge !== undefined && o.deliveryCharge > 0 && (
                         <div className="flex justify-between text-sm py-1">
-                          <span className="text-muted-foreground">ডেলিভারি চার্জ</span>
+                          <span className="text-muted-foreground">{t('order.deliveryCharge')}</span>
                           <span>৳{o.deliveryCharge}</span>
                         </div>
                       )}
@@ -125,13 +121,13 @@ export default function Orders() {
 
                     <div className="flex items-center justify-between pt-2 border-t">
                       <div className="text-xs text-muted-foreground">
-                        {o.pointsEarned ? `${o.pointsEarned} পয়েন্ট অর্জিত` : ''}
+                        {o.pointsEarned ? t('order.pointsEarned', { n: o.pointsEarned }) : ''}
                       </div>
                       <div className="flex gap-2">
                         {o.status !== 'completed' && o.status !== 'cancelled' && (
                           <>
-                            <Button size="sm" variant="outline" onClick={() => { updateOrderStatus(o.id, 'cancelled'); toast.success('অর্ডার বাতিল হয়েছে'); }}>বাতিল</Button>
-                            <Button size="sm" onClick={() => advance(o)}>{o.status === 'pending' ? 'প্রসেস' : 'সম্পন্ন'}</Button>
+                            <Button size="sm" variant="outline" onClick={() => { updateOrderStatus(o.id, 'cancelled'); toast.success(t('order.cancelled')); }}>{t('order.cancel')}</Button>
+                            <Button size="sm" onClick={() => advance(o)}>{o.status === 'pending' ? t('order.process') : t('order.complete')}</Button>
                           </>
                         )}
                       </div>

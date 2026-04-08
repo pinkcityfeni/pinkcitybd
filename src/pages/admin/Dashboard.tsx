@@ -1,5 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import { useStore } from '@/data/store';
+import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
   Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const products = useStore(s => s.products);
   const orders = useStore(s => s.orders);
   const categories = useStore(s => s.categories);
+  const { t } = useLanguage();
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -39,11 +41,10 @@ export default function Dashboard() {
     return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly };
   }, [orders, products]);
 
-  // Low stock alerts on mount
   useEffect(() => {
     const critical = stats.lowStock.filter(p => p.stock <= 5);
     if (critical.length > 0) {
-      toast.warning(`⚠️ ${critical.length}টি পণ্যের স্টক খুব কম!`, { duration: 5000 });
+      toast.warning(t('dash.lowStockAlert', { n: critical.length }), { duration: 5000 });
     }
   }, []);
 
@@ -52,29 +53,29 @@ export default function Dashboard() {
   return (
     <div className="p-4 md:p-6 animate-fade-in space-y-6">
       <div>
-        <h1 className="text-xl font-bold">ড্যাশবোর্ড</h1>
-        <p className="text-sm text-muted-foreground">শপ পারফর্ম্যান্স ওভারভিউ</p>
+        <h1 className="text-xl font-bold">{t('dash.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('dash.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={TrendingUp} label="আজকের বিক্রি" value={`৳${stats.todaySales.toFixed(0)}`} sub={`${stats.todayOrders.length}টি অর্ডার`} color="text-primary" bgColor="bg-primary/10" />
-        <StatCard icon={Monitor} label="অনলাইন অর্ডার" value={stats.allOnline.length.toString()} sub={`আজ ${stats.todayOnline.length}টি`} color="text-blue-500" bgColor="bg-blue-500/10" />
-        <StatCard icon={ScanBarcode} label="POS বিক্রি" value={stats.allPos.length.toString()} sub={`আজ ${stats.todayPos.length}টি`} color="text-violet-500" bgColor="bg-violet-500/10" />
-        <StatCard icon={TrendingUp} label="মোট লাভ" value={`৳${stats.totalProfit.toFixed(0)}`} sub={`রেভিনিউ: ৳${stats.totalRevenue.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={TrendingUp} label={t('dash.todaySales')} value={`৳${stats.todaySales.toFixed(0)}`} sub={t('dash.orders', { n: stats.todayOrders.length })} color="text-primary" bgColor="bg-primary/10" />
+        <StatCard icon={Monitor} label={t('dash.onlineOrders')} value={stats.allOnline.length.toString()} sub={t('dash.today', { n: stats.todayOnline.length })} color="text-blue-500" bgColor="bg-blue-500/10" />
+        <StatCard icon={ScanBarcode} label={t('dash.posSales')} value={stats.allPos.length.toString()} sub={t('dash.today', { n: stats.todayPos.length })} color="text-violet-500" bgColor="bg-violet-500/10" />
+        <StatCard icon={TrendingUp} label={t('dash.totalProfit')} value={`৳${stats.totalProfit.toFixed(0)}`} sub={t('dash.revenue', { n: stats.totalRevenue.toFixed(0) })} color="text-success" bgColor="bg-success/10" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={Package} label="মোট পণ্য" value={products.length.toString()} sub={`${categories.length}টি ক্যাটাগরি`} color="text-accent" bgColor="bg-accent/10" />
-        <StatCard icon={AlertTriangle} label="লো স্টক" value={stats.lowStock.length.toString()} sub={stats.lowStock.length > 0 ? 'রিস্টক দরকার' : 'সব ঠিক আছে'} color={stats.lowStock.length > 0 ? 'text-destructive' : 'text-success'} bgColor={stats.lowStock.length > 0 ? 'bg-destructive/10' : 'bg-success/10'} />
-        <StatCard icon={ArrowUpRight} label="আজকের লাভ" value={`৳${stats.todayProfit.toFixed(0)}`} sub={`${stats.todayOrders.length}টি বিক্রি থেকে`} color="text-success" bgColor="bg-success/10" />
-        <StatCard icon={ShoppingCart} label="পেন্ডিং অর্ডার" value={orders.filter(o => o.status === 'pending').length.toString()} sub="প্রসেসিং এ অপেক্ষমাণ" color="text-warning" bgColor="bg-warning/10" />
+        <StatCard icon={Package} label={t('dash.totalProducts')} value={products.length.toString()} sub={t('dash.nCategories', { n: categories.length })} color="text-accent" bgColor="bg-accent/10" />
+        <StatCard icon={AlertTriangle} label={t('dash.lowStock')} value={stats.lowStock.length.toString()} sub={stats.lowStock.length > 0 ? t('dash.needRestock') : t('dash.allGood')} color={stats.lowStock.length > 0 ? 'text-destructive' : 'text-success'} bgColor={stats.lowStock.length > 0 ? 'bg-destructive/10' : 'bg-success/10'} />
+        <StatCard icon={ArrowUpRight} label={t('dash.todayProfit')} value={`৳${stats.todayProfit.toFixed(0)}`} sub={t('dash.fromSales', { n: stats.todayOrders.length })} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={ShoppingCart} label={t('dash.pendingOrders')} value={orders.filter(o => o.status === 'pending').length.toString()} sub={t('dash.waitingProcess')} color="text-warning" bgColor="bg-warning/10" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-xl border bg-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> মাসিক রিপোর্ট</h3>
-            <span className="text-xs text-muted-foreground">শেষ ৬ মাস</span>
+            <h3 className="font-semibold flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> {t('dash.monthlyReport')}</h3>
+            <span className="text-xs text-muted-foreground">{t('dash.last6Months')}</span>
           </div>
           <div className="space-y-3">
             {stats.monthly.map(m => (
@@ -95,15 +96,15 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="flex gap-4 mt-3 pt-3 border-t text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-primary/20" /> রেভিনিউ</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-success/40" /> লাভ</span>
+            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-primary/20" /> {t('dash.revenueLabel')}</span>
+            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-success/40" /> {t('dash.profitLabel')}</span>
           </div>
         </div>
 
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" /> লো স্টক আইটেম</h3>
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" /> {t('dash.lowStockItems')}</h3>
           {stats.lowStock.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">সব পণ্য স্টকে আছে ✓</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('dash.allInStock')}</p>
           ) : (
             <div className="space-y-2">
               {stats.lowStock.map(p => (
@@ -125,9 +126,9 @@ export default function Dashboard() {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold mb-4">সাম্প্রতিক অর্ডার</h3>
+          <h3 className="font-semibold mb-4">{t('dash.recentOrders')}</h3>
           {orders.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">কোনো অর্ডার নেই</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('dash.noOrders')}</p>
           ) : (
             <div className="space-y-2">
               {orders.slice(0, 6).map(o => (
@@ -150,7 +151,7 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold mb-4">ক্যাটাগরি ব্রেকডাউন</h3>
+          <h3 className="font-semibold mb-4">{t('dash.catBreakdown')}</h3>
           <div className="space-y-3">
             {categories.map(c => {
               const catProducts = products.filter(p => p.category === c.name);
@@ -160,10 +161,10 @@ export default function Dashboard() {
                 <div key={c.id} className="rounded-lg bg-muted/50 p-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-sm flex items-center gap-1.5"><span>{c.icon}</span> {c.name}</span>
-                    <span className="text-xs text-muted-foreground">{catProducts.length}টি পণ্য</span>
+                    <span className="text-xs text-muted-foreground">{t('dash.nProducts', { n: catProducts.length })}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{catStock} ইউনিট স্টকে</span>
+                    <span>{t('dash.unitsInStock', { n: catStock })}</span>
                     <span className="font-medium text-foreground">৳{catValue.toFixed(0)}</span>
                   </div>
                 </div>

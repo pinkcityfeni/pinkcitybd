@@ -1,17 +1,19 @@
 import { useStore } from '@/data/store';
-import { Star, Trash2 } from 'lucide-react';
+import { useLanguage } from '@/data/language';
+import { Star } from 'lucide-react';
 
 export default function Reviews() {
   const reviews = useStore(s => s.reviews);
   const products = useStore(s => s.products);
+  const { t } = useLanguage();
 
   return (
     <div className="p-6 animate-fade-in">
-      <h1 className="page-header">রিভিউ ম্যানেজমেন্ট</h1>
-      <p className="page-subheader mb-6">{reviews.length}টি রিভিউ</p>
+      <h1 className="page-header">{t('review.title')}</h1>
+      <p className="page-subheader mb-6">{t('review.nReviews', { n: reviews.length })}</p>
 
       {reviews.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-12">কোনো রিভিউ নেই</p>
+        <p className="text-sm text-muted-foreground text-center py-12">{t('review.noReviews')}</p>
       ) : (
         <div className="space-y-3">
           {reviews.map(r => {

@@ -1,17 +1,41 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
-  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown
+  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown, CalendarDays
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { startOfDay, startOfWeek, startOfMonth, subDays, isAfter, format } from 'date-fns';
+
+type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
+
+const DATE_FILTERS: { value: DateFilter; label: string }[] = [
+  { value: 'today', label: 'আজ' },
+  { value: 'yesterday', label: 'গতকাল' },
+  { value: 'week', label: 'এই সপ্তাহ' },
+  { value: 'month', label: 'এই মাস' },
+  { value: 'all', label: 'সর্বমোট' },
+];
+
+function getDateRange(filter: DateFilter): { start: Date; end: Date } {
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  switch (filter) {
+    case 'today': return { start: todayStart, end: now };
+    case 'yesterday': { const ys = subDays(todayStart, 1); return { start: ys, end: todayStart }; }
+    case 'week': return { start: startOfWeek(now, { weekStartsOn: 6 }), end: now };
+    case 'month': return { start: startOfMonth(now), end: now };
+    case 'all': return { start: new Date(0), end: now };
+  }
+}
 
 export default function Dashboard() {
   const products = useStore(s => s.products);
   const orders = useStore(s => s.orders);
   const categories = useStore(s => s.categories);
   const { t } = useLanguage();
+  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -68,6 +92,34 @@ export default function Dashboard() {
     return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly, topProducts, todayTopProducts };
   }, [orders, products]);
 
+  // Filtered stats based on selected date range
+  const filtered = useMemo(() => {
+    const { start, end } = getDateRange(dateFilter);
+    const fOrders = orders.filter(o => {
+      const d = new Date(o.date);
+      return d >= start && d <= end;
+    });
+    const sales = fOrders.reduce((s, o) => s + o.total, 0);
+    const cost = fOrders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+    const profit = sales - cost;
+    const online = fOrders.filter(o => o.type === 'online');
+    const pos = fOrders.filter(o => o.type === 'pos');
+
+    const productSales: Record<string, { name: string; category: string; qty: number; revenue: number }> = {};
+    fOrders.forEach(o => {
+      o.items.forEach(i => {
+        if (!productSales[i.product.id]) {
+          productSales[i.product.id] = { name: i.product.name, category: i.product.category, qty: 0, revenue: 0 };
+        }
+        productSales[i.product.id].qty += i.quantity;
+        productSales[i.product.id].revenue += i.product.price * i.quantity;
+      });
+    });
+    const topProducts = Object.values(productSales).sort((a, b) => b.qty - a.qty).slice(0, 8);
+
+    return { sales, profit, cost, orders: fOrders, online, pos, topProducts };
+  }, [orders, dateFilter]);
+
   useEffect(() => {
     const critical = stats.lowStock.filter(p => p.stock <= 5);
     if (critical.length > 0) {
@@ -79,16 +131,34 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-6 animate-fade-in space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t('dash.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('dash.subtitle')}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold">{t('dash.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('dash.subtitle')}</p>
+        </div>
+        <div className="flex items-center gap-1 rounded-lg border bg-card p-1">
+          {DATE_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setDateFilter(f.value)}
+              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                dateFilter === f.value
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Filtered Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={TrendingUp} label={t('dash.todaySales')} value={`৳${stats.todaySales.toFixed(0)}`} sub={t('dash.orders', { n: stats.todayOrders.length })} color="text-primary" bgColor="bg-primary/10" />
-        <StatCard icon={Monitor} label={t('dash.onlineOrders')} value={stats.allOnline.length.toString()} sub={t('dash.today', { n: stats.todayOnline.length })} color="text-blue-500" bgColor="bg-blue-500/10" />
-        <StatCard icon={ScanBarcode} label={t('dash.posSales')} value={stats.allPos.length.toString()} sub={t('dash.today', { n: stats.todayPos.length })} color="text-violet-500" bgColor="bg-violet-500/10" />
-        <StatCard icon={TrendingUp} label={t('dash.totalProfit')} value={`৳${stats.totalProfit.toFixed(0)}`} sub={t('dash.revenue', { n: stats.totalRevenue.toFixed(0) })} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={TrendingUp} label="বিক্রি" value={`৳${filtered.sales.toFixed(0)}`} sub={`${filtered.orders.length}টি অর্ডার`} color="text-primary" bgColor="bg-primary/10" />
+        <StatCard icon={ArrowUpRight} label="লাভ" value={`৳${filtered.profit.toFixed(0)}`} sub={`খরচ: ৳${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={Monitor} label="অনলাইন অর্ডার" value={filtered.online.length.toString()} sub={`৳${filtered.online.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-blue-500" bgColor="bg-blue-500/10" />
+        <StatCard icon={ScanBarcode} label="POS বিক্রি" value={filtered.pos.length.toString()} sub={`৳${filtered.pos.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-violet-500" bgColor="bg-violet-500/10" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -151,19 +221,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Today's Top + All Time Top */}
+      {/* Filtered Top Products + All Time Top */}
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-warning" /> আজকের টপ প্রোডাক্ট</h3>
-          {stats.todayTopProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">আজ কোনো বিক্রি নেই</p>
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Crown className="h-4 w-4 text-warning" /> টপ প্রোডাক্ট
+            <span className="text-[10px] font-normal text-muted-foreground ml-1">({DATE_FILTERS.find(f => f.value === dateFilter)?.label})</span>
+          </h3>
+          {filtered.topProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">কোনো বিক্রি নেই</p>
           ) : (
             <div className="space-y-2">
-              {stats.todayTopProducts.map((p, i) => (
+              {filtered.topProducts.slice(0, 5).map((p, i) => (
                 <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
-                    <p className="text-sm font-medium truncate">{p.name}</p>
+                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{p.category}</p>
+                    </div>
                   </div>
                   <div className="text-right shrink-0 ml-2">
                     <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
@@ -184,7 +260,7 @@ export default function Dashboard() {
               {stats.topProducts.map((p, i) => (
                 <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
+                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{p.name}</p>
                       <p className="text-[10px] text-muted-foreground">{p.category}</p>

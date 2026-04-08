@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { MapPin, Phone, Mail, ChevronDown, ChevronUp, Wallet, Banknote, Smartphone, CreditCard, Building2, Truck, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const PAYMENT_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
   cod: { label: 'Cash on Delivery', icon: <Banknote className="h-3.5 w-3.5" /> },
@@ -32,6 +42,7 @@ export default function Orders() {
   const deleteOrder = useStore(s => s.deleteOrder);
   const { t } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const advance = (o: Order) => {
     const next: Record<string, Order['status']> = { pending: 'processing', processing: 'completed' };
@@ -131,7 +142,7 @@ export default function Orders() {
                              <Button size="sm" onClick={() => advance(o)}>{o.status === 'pending' ? t('order.process') : t('order.complete')}</Button>
                            </>
                          )}
-                         <Button size="sm" variant="destructive" onClick={() => { deleteOrder(o.id); toast.success('অর্ডার ডিলিট হয়েছে'); }}>
+                         <Button size="sm" variant="destructive" onClick={() => setDeleteId(o.id)}>
                            <Trash2 className="h-3.5 w-3.5 mr-1" /> ডিলিট
                          </Button>
                        </div>
@@ -143,6 +154,23 @@ export default function Orders() {
           })}
         </div>
       )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>অর্ডার ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              এই অর্ডারটি স্থায়ীভাবে মুছে যাবে। এটি আর ফিরিয়ে আনা যাবে না।
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrder(deleteId); toast.success('অর্ডার ডিলিট হয়েছে'); setDeleteId(null); } }}>
+              ডিলিট করুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

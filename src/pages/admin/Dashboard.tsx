@@ -3,10 +3,14 @@ import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
-  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown, CalendarDays
+  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { startOfDay, startOfWeek, startOfMonth, subDays, isAfter, format } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, subDays } from 'date-fns';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar, Legend
+} from 'recharts';
 
 type DateFilter = 'today' | 'yesterday' | 'week' | 'month' | 'all';
 

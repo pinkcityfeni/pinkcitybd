@@ -20,8 +20,8 @@ const paymentMethods: { id: PaymentMethod; label: string; labelBn: string; icon:
 ];
 
 const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
-  dhaka: 60,
-  outside: 120,
+  feni: 30,
+  outside: 150,
 };
 
 export default function Checkout() {
@@ -34,7 +34,7 @@ export default function Checkout() {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>('dhaka');
+  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>('feni');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
   const [cardNumber, setCardNumber] = useState('');
@@ -185,7 +185,7 @@ export default function Checkout() {
         <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
         {email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-muted-foreground" /><span>{email}</span></div>}
         <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span>{address}</span></div>
-        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryZone === 'dhaka' ? 'ঢাকার ভিতরে' : 'ঢাকার বাইরে'} — ৳{deliveryCharge}</span></div>
+        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryZone === 'feni' ? 'ফেনী' : 'ফেনীর বাইরে'} — ৳{deliveryCharge}</span></div>
       </div>
 
       <div className="rounded-2xl border bg-card p-4 mb-4 text-sm">
@@ -212,7 +212,7 @@ export default function Checkout() {
         ))}
         <div className="border-t pt-2 space-y-1 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">সাবটোটাল</span><span>৳{total.toFixed(0)}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি ({deliveryZone === 'dhaka' ? 'ঢাকা' : 'ঢাকার বাইরে'})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি ({deliveryZone === 'feni' ? 'ফেনী' : 'ফেনীর বাইরে'})</span><span>৳{deliveryCharge}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">পয়েন্ট</span><span className="text-accent">+{points} pts</span></div>
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">
@@ -282,14 +282,14 @@ export default function Checkout() {
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setDeliveryZone('dhaka')}
-                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'dhaka' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
+                onClick={() => setDeliveryZone('feni')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'feni' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
               >
                 <div className="flex items-center gap-2">
-                  <Truck className={`h-4 w-4 ${deliveryZone === 'dhaka' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <Truck className={`h-4 w-4 ${deliveryZone === 'feni' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <div>
-                    <p className="font-medium text-sm">ঢাকার ভিতরে</p>
-                    <p className="text-xs text-primary font-bold">৳৬০</p>
+                    <p className="font-medium text-sm">ফেনী</p>
+                    <p className="text-xs text-primary font-bold">৳৩০</p>
                   </div>
                 </div>
               </button>
@@ -301,8 +301,8 @@ export default function Checkout() {
                 <div className="flex items-center gap-2">
                   <Truck className={`h-4 w-4 ${deliveryZone === 'outside' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <div>
-                    <p className="font-medium text-sm">ঢাকার বাইরে</p>
-                    <p className="text-xs text-primary font-bold">৳১২০</p>
+                    <p className="font-medium text-sm">ফেনীর বাইরে</p>
+                    <p className="text-xs text-primary font-bold">৳১৫০</p>
                   </div>
                 </div>
               </button>
@@ -441,7 +441,7 @@ export default function Checkout() {
         {/* Quick summary */}
         <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{itemCount}টি পণ্য</span><span>৳{total.toFixed(0)}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি ({deliveryZone === 'dhaka' ? 'ঢাকা' : 'ঢাকার বাইরে'})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি ({deliveryZone === 'feni' ? 'ফেনী' : 'ফেনীর বাইরে'})</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base">
             <span>মোট</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span>
           </div>

@@ -221,19 +221,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Today's Top + All Time Top */}
+      {/* Filtered Top Products + All Time Top */}
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-warning" /> আজকের টপ প্রোডাক্ট</h3>
-          {stats.todayTopProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">আজ কোনো বিক্রি নেই</p>
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Crown className="h-4 w-4 text-warning" /> টপ প্রোডাক্ট
+            <span className="text-[10px] font-normal text-muted-foreground ml-1">({DATE_FILTERS.find(f => f.value === dateFilter)?.label})</span>
+          </h3>
+          {filtered.topProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">কোনো বিক্রি নেই</p>
           ) : (
             <div className="space-y-2">
-              {stats.todayTopProducts.map((p, i) => (
+              {filtered.topProducts.slice(0, 5).map((p, i) => (
                 <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
-                    <p className="text-sm font-medium truncate">{p.name}</p>
+                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{p.category}</p>
+                    </div>
                   </div>
                   <div className="text-right shrink-0 ml-2">
                     <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
@@ -254,7 +260,7 @@ export default function Dashboard() {
               {stats.topProducts.map((p, i) => (
                 <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
+                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{p.name}</p>
                       <p className="text-[10px] text-muted-foreground">{p.category}</p>

@@ -3,7 +3,7 @@ import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
-  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3
+  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,6 +27,33 @@ export default function Dashboard() {
     const totalCost = orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
     const totalProfit = totalRevenue - totalCost;
     const lowStock = products.filter(p => p.stock < 15).sort((a, b) => a.stock - b.stock);
+
+    // Top selling products
+    const productSales: Record<string, { name: string; category: string; qty: number; revenue: number }> = {};
+    orders.forEach(o => {
+      o.items.forEach(i => {
+        if (!productSales[i.product.id]) {
+          productSales[i.product.id] = { name: i.product.name, category: i.product.category, qty: 0, revenue: 0 };
+        }
+        productSales[i.product.id].qty += i.quantity;
+        productSales[i.product.id].revenue += i.product.price * i.quantity;
+      });
+    });
+    const topProducts = Object.values(productSales).sort((a, b) => b.qty - a.qty).slice(0, 8);
+
+    // Today's top products
+    const todayProductSales: Record<string, { name: string; qty: number; revenue: number }> = {};
+    todayOrders.forEach(o => {
+      o.items.forEach(i => {
+        if (!todayProductSales[i.product.id]) {
+          todayProductSales[i.product.id] = { name: i.product.name, qty: 0, revenue: 0 };
+        }
+        todayProductSales[i.product.id].qty += i.quantity;
+        todayProductSales[i.product.id].revenue += i.product.price * i.quantity;
+      });
+    });
+    const todayTopProducts = Object.values(todayProductSales).sort((a, b) => b.qty - a.qty).slice(0, 5);
+
     const monthly: { month: string; revenue: number; profit: number; orders: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
@@ -38,7 +65,7 @@ export default function Dashboard() {
       const cost = mo.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
       monthly.push({ month: label, revenue: rev, profit: rev - cost, orders: mo.length });
     }
-    return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly };
+    return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly, topProducts, todayTopProducts };
   }, [orders, products]);
 
   useEffect(() => {
@@ -116,6 +143,56 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <span className={`text-xs font-bold ${p.stock <= 5 ? 'text-destructive' : 'text-warning'}`}>{p.stock}</span>
                     {p.stock <= 5 && <ArrowDownRight className="h-3 w-3 text-destructive" />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Today's Top + All Time Top */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="rounded-xl border bg-card p-5">
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-warning" /> আজকের টপ প্রোডাক্ট</h3>
+          {stats.todayTopProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">আজ কোনো বিক্রি নেই</p>
+          ) : (
+            <div className="space-y-2">
+              {stats.todayTopProducts.map((p, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
+                    <p className="text-sm font-medium truncate">{p.name}</p>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">({p.qty}টি)</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-xl border bg-card p-5">
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> সর্বকালের টপ সেলিং</h3>
+          {stats.topProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">কোনো বিক্রি নেই</p>
+          ) : (
+            <div className="space-y-2">
+              {stats.topProducts.map((p, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'}`}>{i + 1}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{p.category}</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">({p.qty}টি)</span>
                   </div>
                 </div>
               ))}

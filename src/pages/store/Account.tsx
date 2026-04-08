@@ -1,22 +1,19 @@
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
-import { Star, Package, Heart, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 
 export default function Account() {
   const allOrders = useStore(s => s.orders);
-  const wishlist = useStore(s => s.wishlist);
-  const products = useStore(s => s.products);
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);
-  const wishedProducts = useMemo(() => products.filter(p => wishlist.includes(p.id)), [products, wishlist]);
 
   const ORDER_STEPS = [
     { status: 'pending', label: t('account.orderReceived'), icon: Clock },
@@ -34,14 +31,7 @@ export default function Account() {
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <h1 className="page-header">{t('account.title')}</h1>
-      <div className="grid md:grid-cols-3 gap-6 mt-6">
-        <div className="stat-card flex items-center gap-3">
-          <Star className="h-8 w-8 text-accent" />
-          <div>
-            <p className="text-2xl font-bold">245</p>
-            <p className="text-sm text-muted-foreground">{t('account.rewardPoints')}</p>
-          </div>
-        </div>
+      <div className="grid md:grid-cols-2 gap-6 mt-6">
         <div className="stat-card flex items-center gap-3">
           <Package className="h-8 w-8 text-primary" />
           <div>
@@ -58,24 +48,6 @@ export default function Account() {
         </div>
       </div>
 
-      {wishedProducts.length > 0 && (
-        <>
-          <h2 className="font-bold mt-8 mb-4 flex items-center gap-2"><Heart className="h-4 w-4 text-destructive" /> {t('account.wishlist')} ({wishedProducts.length})</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-            {wishedProducts.map(p => (
-              <Link key={p.id} to={`/product/${p.id}`} className="rounded-xl border bg-card overflow-hidden hover:shadow-md transition-all">
-                <div className="aspect-square bg-muted/30 flex items-center justify-center">
-                  {p.image ? <img src={p.image} alt={p.name} className="h-full w-full object-cover" /> : <span className="text-3xl">💎</span>}
-                </div>
-                <div className="p-2">
-                  <p className="text-xs font-medium line-clamp-1">{p.name}</p>
-                  <p className="text-sm font-bold text-primary">৳{p.price.toFixed(0)}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
 
       <h2 className="font-bold mt-8 mb-4">{t('account.recentOrders')}</h2>
       <div className="space-y-3">

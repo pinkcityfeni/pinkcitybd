@@ -12,7 +12,6 @@ export default function Cart() {
   const products = useStore(s => s.products);
   const { t } = useLanguage();
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const points = Math.floor(total);
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   if (cart.length === 0) return (
@@ -84,7 +83,7 @@ export default function Cart() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">{t('cart.subtotal')}</span><span className="font-medium">৳{total.toFixed(0)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">{t('cart.deliveryCharge')}</span><span className="text-xs text-muted-foreground">{t('cart.seeAtCheckout')}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">{t('cart.points')}</span><span className="text-primary font-medium">+{points} pts</span></div>
+            
           </div>
           <div className="border-t pt-3 flex justify-between font-bold">
             <span className="font-display">{t('cart.subtotal')}</span>

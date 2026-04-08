@@ -187,7 +187,7 @@ export default function ProductDetail() {
               </p>
             </div>
 
-            {/* Stock & Points */}
+            {/* Stock */}
             <div className="flex flex-wrap items-center gap-4 text-sm mb-6">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50">
                 <Package className="h-4 w-4 text-primary" />
@@ -196,10 +196,6 @@ export default function ProductDetail() {
                 ) : (
                   <span className="text-destructive font-medium text-xs">{t('home.outOfStock')}</span>
                 )}
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <span className="text-xs font-medium text-accent">{t('product.earnPoints', { n: Math.floor(product.price * qty) })}</span>
               </div>
             </div>
 

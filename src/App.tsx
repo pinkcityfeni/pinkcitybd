@@ -19,6 +19,7 @@ import ProductDetail from "@/pages/store/ProductDetail";
 import Cart from "@/pages/store/Cart";
 import Checkout from "@/pages/store/Checkout";
 import Account from "@/pages/store/Account";
+import Wishlist from "@/pages/store/Wishlist";
 
 // Auth pages
 import Login from "@/pages/auth/Login";
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/account" element={<Account />} />
+              <Route path="/wishlist" element={<Wishlist />} />
             </Route>
 
             {/* ─── Public: Auth ─── */}

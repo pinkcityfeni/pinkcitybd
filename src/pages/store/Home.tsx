@@ -261,30 +261,13 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full">
+      <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full cursor-pointer" onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
         {banner.image ? (
           <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
         ) : (
-          <Link to={banner.link} className="block w-full h-full">
-            <div className="w-full h-full bg-gradient-to-br from-primary via-primary/85 to-accent flex items-center justify-center px-8">
-              <h2 className="text-primary-foreground text-xl sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
-            </div>
-          </Link>
-        )}
-
-        {banners.length > 1 && banner.image && (
-          <>
-            <button
-              onClick={() => goTo((current - 1 + banners.length) % banners.length)}
-              className="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer"
-              aria-label="Previous"
-            />
-            <button
-              onClick={() => goTo((current + 1) % banners.length)}
-              className="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer"
-              aria-label="Next"
-            />
-          </>
+          <div className="w-full h-full bg-gradient-to-br from-primary via-primary/85 to-accent flex items-center justify-center px-8">
+            <h2 className="text-primary-foreground text-xl sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
+          </div>
         )}
       </div>
 

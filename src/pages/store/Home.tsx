@@ -16,7 +16,6 @@ export default function Home() {
   const { t } = useLanguage();
   const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
   const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
-  const newArrivals = useMemo(() => products.slice(0, 6), [products]);
   const trending = useMemo(() => [...products].sort((a, b) => a.stock - b.stock).slice(0, 4), [products]);
 
   return (
@@ -33,13 +32,13 @@ export default function Home() {
           </div>
           <div className="container mx-auto px-4 py-12 sm:py-16 text-center relative z-10">
             <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium mb-4">
-              <Sparkles className="h-3 w-3" /> New Collection 2026
+              <Sparkles className="h-3 w-3" /> {t('home.newCollection')}
             </div>
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-3">
-              <span className="text-gradient-pink">Beauty</span> & Elegance
+              <span className="text-gradient-pink">{t('home.heroTitle1')}</span> {t('home.heroTitle2')}
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-6">
-              আপনার সৌন্দর্যের সেরা সঙ্গী — জুয়েলারি ও কসমেটিক্স
+              {t('home.heroDesc')}
             </p>
             <div className="flex items-center justify-center gap-3">
               <Button asChild size="lg" className="rounded-full px-6 pink-glow">
@@ -74,7 +73,7 @@ export default function Home() {
           <div className="flex items-center gap-2 mb-3 px-1">
             <div className="flex items-center gap-1.5 bg-destructive/10 text-destructive px-2.5 py-1 rounded-full">
               <span className="text-xs animate-sparkle">🔥</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider">Trending</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">{t('home.trending')}</span>
             </div>
           </div>
           <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
@@ -112,7 +111,7 @@ export default function Home() {
                         onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
                         disabled={p.stock === 0}
                       >
-                        <ShoppingCart className="h-3 w-3 mr-1" /> Add
+                        <ShoppingCart className="h-3 w-3 mr-1" /> {t('home.addBtn')}
                       </Button>
                     </div>
                   </div>
@@ -201,11 +200,11 @@ export default function Home() {
             <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-white/5 animate-float" style={{ animationDelay: '3s' }} />
           </div>
           <div className="relative z-10">
-            <span className="text-primary-foreground/80 text-xs font-medium uppercase tracking-wider">✨ Special Offer</span>
-            <h3 className="font-display text-xl sm:text-2xl font-bold text-primary-foreground mt-2 mb-1">সেরা কালেকশন দেখুন</h3>
-            <p className="text-primary-foreground/70 text-xs mb-4">নতুন জুয়েলারি ও কসমেটিক্স এখনই অর্ডার করুন</p>
+            <span className="text-primary-foreground/80 text-xs font-medium uppercase tracking-wider">{t('home.specialOffer')}</span>
+            <h3 className="font-display text-xl sm:text-2xl font-bold text-primary-foreground mt-2 mb-1">{t('home.promoTitle')}</h3>
+            <p className="text-primary-foreground/70 text-xs mb-4">{t('home.promoDesc')}</p>
             <Button asChild variant="secondary" className="rounded-full px-6">
-              <Link to="/shop">Shop Now <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+              <Link to="/shop">{t('home.shopNow')} <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
             </Button>
           </div>
         </div>

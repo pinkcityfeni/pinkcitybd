@@ -10,6 +10,7 @@ const translations = {
   'nav.category': { bn: 'ক্যাটাগরি', en: 'Categories' },
   'nav.cart': { bn: 'কার্ট', en: 'Cart' },
   'nav.account': { bn: 'অ্যাকাউন্ট', en: 'Account' },
+  'nav.wishlist': { bn: 'উইশলিস্ট', en: 'Wishlist' },
   'nav.search': { bn: 'পণ্য খুঁজুন...', en: 'Search products...' },
   'nav.signIn': { bn: 'সাইন ইন', en: 'Sign In' },
 

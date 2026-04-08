@@ -196,7 +196,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
 
           if (isHome) {
             return (
-              <Link key={t.to} to={t.to} className="flex flex-col items-center -mt-6 relative z-10">
+              <Link key={t.to} to={t.to} className="flex flex-col items-center -mt-6 relative z-10 justify-self-center">
                 <div className={`h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${active ? 'bg-primary text-primary-foreground shadow-primary/40 scale-105' : 'bg-gradient-to-br from-primary to-accent text-white shadow-primary/30'}`}>
                   <t.icon className="h-6 w-6" />
                 </div>

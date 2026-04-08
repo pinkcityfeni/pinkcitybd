@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useUserRegistry } from './userRegistry';
 
 interface AuthState {
   user: { id: string; email: string; name: string; role: 'customer' | 'admin' | 'cashier' } | null;
@@ -31,22 +32,24 @@ export const useAuth = create<AuthState>((set, get) => ({
     );
 
     if (account) {
-      set({ user: { id: account.id, email: account.email, name: account.name, role: account.role }, isAuthenticated: true });
+      const userInfo = { id: account.id, email: account.email, name: account.name, role: account.role };
+      set({ user: userInfo, isAuthenticated: true });
+      // Register in user registry
+      useUserRegistry.getState().addUser(userInfo);
       return true;
     }
     return false;
   },
 
   signup: (name, email, password) => {
-    // In demo mode, just create a customer account
     const normalizedName = name.trim();
     const normalizedEmail = normalizeEmail(email);
     const normalizedPassword = normalizePassword(password);
     if (!normalizedName || !normalizedEmail || !normalizedPassword) return false;
-    set({
-      user: { id: `u-${Date.now()}`, email: normalizedEmail, name: normalizedName, role: 'customer' },
-      isAuthenticated: true,
-    });
+    const newUser = { id: `u-${Date.now()}`, email: normalizedEmail, name: normalizedName, role: 'customer' as const };
+    set({ user: newUser, isAuthenticated: true });
+    // Register in user registry
+    useUserRegistry.getState().addUser(newUser);
     return true;
   },
 
@@ -55,7 +58,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   hasRole: (role) => {
     const user = get().user;
     if (!user) return false;
-    if (user.role === 'admin') return true; // admin has all access
+    if (user.role === 'admin') return true;
     return user.role === role;
   },
 }));

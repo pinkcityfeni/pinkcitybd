@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/data/language';
+import { useUserRegistry } from '@/data/userRegistry';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
@@ -14,28 +15,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-
-interface UserItem {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  points: number;
-  orders: number;
-}
-
-const INITIAL_USERS: UserItem[] = [
-  { id: '4', name: 'Admin User', email: 'pinkcity.feni@gmail.com', role: 'admin', points: 0, orders: 0 },
-];
+import type { RegisteredUser } from '@/data/userRegistry';
 
 export default function Users() {
   const { t } = useLanguage();
-  const [users, setUsers] = useState<UserItem[]>(INITIAL_USERS);
-  const [deleteTarget, setDeleteTarget] = useState<UserItem | null>(null);
+  const users = useUserRegistry((s) => s.users);
+  const removeUser = useUserRegistry((s) => s.removeUser);
+  const [deleteTarget, setDeleteTarget] = useState<RegisteredUser | null>(null);
 
   const handleDelete = () => {
     if (!deleteTarget) return;
-    setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+    removeUser(deleteTarget.id);
     toast.success(`${deleteTarget.name} removed`);
     setDeleteTarget(null);
   };

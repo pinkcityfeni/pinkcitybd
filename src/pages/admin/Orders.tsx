@@ -133,8 +133,6 @@ export default function Orders() {
 
                     <div className="flex items-center justify-between pt-2 border-t">
                       <div className="text-xs text-muted-foreground">
-                        {o.pointsEarned ? t('order.pointsEarned', { n: o.pointsEarned }) : ''}
-                      </div>
                        <div className="flex gap-2">
                          {o.status !== 'completed' && o.status !== 'cancelled' && (
                            <>

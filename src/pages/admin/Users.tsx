@@ -41,7 +41,7 @@ export default function Users() {
               <th className="pb-3 font-medium">{t('user.name')}</th>
               <th className="pb-3 font-medium">{t('user.email')}</th>
               <th className="pb-3 font-medium">{t('user.role')}</th>
-              <th className="pb-3 font-medium text-right">{t('user.points')}</th>
+              
               <th className="pb-3 font-medium text-right">{t('user.orders')}</th>
               <th className="pb-3 font-medium text-right">{t('user.actions')}</th>
             </tr>
@@ -56,7 +56,7 @@ export default function Users() {
                     {u.role}
                   </Badge>
                 </td>
-                <td className="py-3 text-right">{u.points}</td>
+                
                 <td className="py-3 text-right">{u.orders}</td>
                 <td className="py-3 text-right">
                   {u.role !== 'admin' ? (

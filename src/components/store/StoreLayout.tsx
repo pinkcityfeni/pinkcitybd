@@ -31,9 +31,6 @@ export default function StoreLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top banner */}
-      <div className="bg-primary text-primary-foreground text-center py-1.5 text-[11px] font-medium">
-        ✨ ৳৫০০+ অর্ডারে ফ্রি শিপিং · প্রতিটি কেনাকাটায় পয়েন্ট অর্জন করুন
-      </div>
 
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-card/90 backdrop-blur-xl">
@@ -195,7 +192,7 @@ function MobileBottomNav({ cartCount }: { cartCount: number }) {
             >
               <div className="relative">
                 <t.icon className="h-5 w-5" />
-                {t.badge && t.badge > 0 && (
+                {t.badge !== undefined && t.badge > 0 && (
                   <span className="absolute -top-1.5 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center text-[9px] font-bold bg-primary text-primary-foreground rounded-full">
                     {t.badge}
                   </span>

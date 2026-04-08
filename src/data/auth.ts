@@ -9,11 +9,14 @@ interface AuthState {
   hasRole: (role: 'admin' | 'cashier' | 'customer') => boolean;
 }
 
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const normalizePassword = (value: string) => value.trim();
+
 // Demo accounts for testing protected routes
 const DEMO_ACCOUNTS = [
-  { id: 'u1', email: 'pinkcity.feni@gmail.com', password: 'rihan56', name: 'Admin User', role: 'admin' as const },
-  { id: 'u2', email: 'cashier@shop.com', password: 'cashier123', name: 'Cashier', role: 'cashier' as const },
-  { id: 'u3', email: 'user@shop.com', password: 'user123', name: 'Demo Customer', role: 'customer' as const },
+  { id: 'u1', email: normalizeEmail('pinkcity.feni@gmail.com'), password: normalizePassword('rihan56'), name: 'Admin User', role: 'admin' as const },
+  { id: 'u2', email: normalizeEmail('cashier@shop.com'), password: normalizePassword('cashier123'), name: 'Cashier', role: 'cashier' as const },
+  { id: 'u3', email: normalizeEmail('user@shop.com'), password: normalizePassword('user123'), name: 'Demo Customer', role: 'customer' as const },
 ];
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -21,7 +24,12 @@ export const useAuth = create<AuthState>((set, get) => ({
   isAuthenticated: false,
 
   login: (email, password) => {
-    const account = DEMO_ACCOUNTS.find(a => a.email === email && a.password === password);
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
+    const account = DEMO_ACCOUNTS.find(
+      (a) => a.email === normalizedEmail && a.password === normalizedPassword,
+    );
+
     if (account) {
       set({ user: { id: account.id, email: account.email, name: account.name, role: account.role }, isAuthenticated: true });
       return true;
@@ -31,9 +39,12 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   signup: (name, email, password) => {
     // In demo mode, just create a customer account
-    if (!name || !email || !password) return false;
+    const normalizedName = name.trim();
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
+    if (!normalizedName || !normalizedEmail || !normalizedPassword) return false;
     set({
-      user: { id: `u-${Date.now()}`, email, name, role: 'customer' },
+      user: { id: `u-${Date.now()}`, email: normalizedEmail, name: normalizedName, role: 'customer' },
       isAuthenticated: true,
     });
     return true;

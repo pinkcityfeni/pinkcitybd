@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Phone, Mail } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Phone, Mail, Heart } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -180,8 +180,9 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
   const { t } = useLanguage();
 
   const tabs = [
-    { to: '/', icon: Home, label: t('nav.home') },
+    { to: '/account?tab=wishlist', icon: Heart, label: t('nav.wishlist'), badge: wishlistCount },
     { to: '/category', icon: Grid3X3, label: t('nav.category') },
+    { to: '/', icon: Home, label: t('nav.home') },
     { to: '/cart', icon: ShoppingCart, label: t('nav.cart'), badge: cartCount },
     { to: '/account', icon: User, label: t('nav.account') },
   ];
@@ -190,7 +191,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t safe-area-bottom">
       <div className="flex items-center justify-around h-14">
         {tabs.map(t => {
-          const active = t.to === '/' ? location.pathname === '/' : location.pathname.startsWith(t.to);
+          const active = t.to === '/' ? location.pathname === '/' : location.pathname.startsWith(t.to.split('?')[0]) && (t.to.includes('?') ? location.search.includes('wishlist') : !location.search.includes('wishlist'));
           return (
             <Link key={t.to} to={t.to} className={`flex flex-col items-center gap-0.5 px-3 py-1 relative transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className="relative">

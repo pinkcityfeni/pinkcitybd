@@ -28,7 +28,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     if (login(email, password)) {
-      toast.success('Welcome back!');
+      toast.success(t('auth.welcomeBackToast'));
       navigate(from, { replace: true });
     } else {
       setError(t('auth.invalidCreds'));
@@ -36,33 +36,38 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center hero-gradient px-4">
+    <div className="min-h-screen flex items-center justify-center bg-secondary/30 px-4">
       <div className="w-full max-w-sm animate-fade-in">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-           <img src={logoImg} alt="PINK CITY" className="h-10 w-10 rounded-lg object-cover" />
-           <span className="font-display text-xl font-semibold">PINK CITY</span>
+        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <img src={logoImg} alt="PINK CITY" className="h-10 w-10 rounded-lg object-cover" />
+          <div className="leading-none">
+            <span className="font-display text-xl font-bold block">
+              <span className="text-gradient-pink">PINK</span> CITY
+            </span>
+            <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Beauty & Care</span>
+          </div>
         </Link>
 
-        <div className="rounded-2xl border bg-card/90 backdrop-blur-sm p-6 shadow-lg">
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
           <h1 className="font-display text-xl font-bold mb-1">{t('auth.welcomeBack')}</h1>
           <p className="text-xs text-muted-foreground mb-5">{t('auth.signInDesc')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
-              <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 rounded-lg px-3 py-2">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 {error}
               </div>
             )}
             <div>
               <Label htmlFor="email" className="text-xs">{t('auth.emailLabel')}</Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-xl" />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-lg" />
             </div>
             <div>
               <Label htmlFor="password" className="text-xs">{t('auth.passwordLabel')}</Label>
-              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-xl" />
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-lg" />
             </div>
-            <Button type="submit" className="w-full rounded-full shadow-lg shadow-primary/20">{t('auth.signInBtn')}</Button>
+            <Button type="submit" className="w-full rounded-lg h-10 font-semibold">{t('auth.signInBtn')}</Button>
           </form>
 
           <p className="text-xs text-center mt-4 text-muted-foreground">
@@ -70,7 +75,6 @@ export default function Login() {
             <Link to="/signup" className="text-primary font-medium hover:underline">{t('auth.signUp')}</Link>
           </p>
         </div>
-
       </div>
     </div>
   );

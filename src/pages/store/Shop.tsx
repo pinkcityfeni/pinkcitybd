@@ -4,7 +4,7 @@ import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Search, SlidersHorizontal, Heart, Star } from 'lucide-react';
+import { ShoppingCart, Search, SlidersHorizontal, Heart, Star, Grid2X2, LayoutList } from 'lucide-react';
 import { toast } from 'sonner';
 
 function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t }: any) {
@@ -12,38 +12,48 @@ function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t 
   const rating = getProductRating(product.id);
 
   return (
-    <div className="group rounded-2xl border bg-card overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="group product-card relative">
+      {/* Wishlist */}
+      <button
+        onClick={() => toggleWishlist(product.id)}
+        className={`absolute top-2.5 right-2.5 z-10 h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200 ${isWished ? 'bg-destructive/10 text-destructive' : 'bg-background/80 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100 hover:scale-110'}`}
+      >
+        <Heart className={`h-3.5 w-3.5 ${isWished ? 'fill-destructive' : ''}`} />
+      </button>
+
+      {/* Badges */}
+      {product.stock === 0 && (
+        <span className="absolute top-2.5 left-2.5 z-10 text-[9px] font-semibold bg-foreground text-background px-2 py-0.5 rounded">
+          {t('home.outOfStock')}
+        </span>
+      )}
+      {product.stock > 0 && product.stock < 10 && (
+        <span className="absolute top-2.5 left-2.5 z-10 text-[9px] font-semibold bg-destructive text-destructive-foreground px-2 py-0.5 rounded">
+          {t('shop.lowStock')}
+        </span>
+      )}
+
       <Link to={`/product/${product.id}`}>
-        <div className="aspect-square bg-gradient-to-br from-secondary/50 via-muted/30 to-accent/10 flex items-center justify-center overflow-hidden relative">
+        <div className="aspect-square bg-secondary/30 flex items-center justify-center overflow-hidden">
           {product.image ? (
-            <img src={product.image} alt={product.name} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+            <img src={product.image} alt={product.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
           ) : (
-            <span className="text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">{catIcon}</span>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-          {product.stock === 0 && (
-            <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px] flex items-center justify-center">
-              <span className="text-xs font-semibold text-muted-foreground bg-card/80 px-3 py-1 rounded-full">{t('home.outOfStock')}</span>
-            </div>
-          )}
-          {product.stock > 0 && product.stock < 10 && (
-            <span className="absolute top-2 left-2 text-[9px] font-semibold bg-destructive text-destructive-foreground px-2 py-0.5 rounded-full animate-pulse shadow-sm">
-              🔥 {t('shop.lowStock')}
-            </span>
+            <span className="text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-500">{catIcon}</span>
           )}
         </div>
       </Link>
+
       <div className="p-3">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{product.category} · {product.subcategory}</p>
+        <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">{product.category}</p>
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-semibold text-sm mt-1 line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+          <h3 className="font-medium text-sm mt-0.5 line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
         </Link>
 
         {rating.count > 0 && (
-          <div className="flex items-center gap-1 mt-1">
-            <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1 mt-1.5">
+            <div className="flex">
               {[1, 2, 3, 4, 5].map(s => (
-                <Star key={s} className={`h-3 w-3 ${s <= Math.round(rating.avg) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/20'}`} />
+                <Star key={s} className={`h-3 w-3 ${s <= Math.round(rating.avg) ? 'fill-warning text-warning' : 'text-border'}`} />
               ))}
             </div>
             <span className="text-[10px] text-muted-foreground">({rating.count})</span>
@@ -51,24 +61,15 @@ function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t 
         )}
 
         <div className="flex items-center justify-between mt-2.5">
-          <span className="font-display font-bold text-primary text-lg">৳{product.price.toFixed(0)}</span>
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => toggleWishlist(product.id)}
-              className={`h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200 ${isWished ? 'bg-destructive/10 text-destructive' : 'hover:bg-primary/10 text-muted-foreground hover:text-primary'}`}
-            >
-              <Heart className={`h-3.5 w-3.5 transition-transform ${isWished ? 'fill-destructive scale-110' : 'hover:scale-110'}`} />
-            </button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all"
-              onClick={() => { addToCart(product); toast.success(t('home.added', { name: product.name })); }}
-              disabled={product.stock === 0}
-            >
-              <ShoppingCart className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          <span className="font-bold text-base text-foreground" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{product.price.toFixed(0)}</span>
+          <Button
+            size="sm"
+            className="h-8 rounded-lg text-[10px] px-3 font-semibold"
+            onClick={() => { addToCart(product); toast.success(t('home.added', { name: product.name })); }}
+            disabled={product.stock === 0}
+          >
+            <ShoppingCart className="h-3 w-3 mr-1" /> {t('home.addBtn')}
+          </Button>
         </div>
       </div>
     </div>
@@ -109,61 +110,61 @@ export default function Shop() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
+    <div className="container mx-auto px-4 py-6 animate-fade-in">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="font-display text-2xl md:text-3xl font-bold">✨ {t('shop.title')}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t('shop.found', { n: filtered.length })}</p>
+      <div className="mb-5">
+        <h1 className="font-display text-2xl font-bold">{t('shop.title')}</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">{t('shop.found', { n: filtered.length })}</p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 mb-8">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t('nav.search')}
-              className="pl-10 rounded-full bg-card border-2 border-primary/10 focus:border-primary shadow-sm"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-1.5 flex-wrap">
+      <div className="space-y-3 mb-6">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t('nav.search')}
+            className="pl-10 rounded-lg h-10 border focus-visible:ring-1 focus-visible:ring-primary"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-1.5 flex-wrap">
+          <Button
+            variant={!activeCategory ? 'default' : 'outline'}
+            size="sm"
+            className="rounded-lg text-xs h-8"
+            onClick={() => setCategory('')}
+          >
+            {t('shop.all')}
+          </Button>
+          {categories.map(c => (
             <Button
-              variant={!activeCategory ? 'default' : 'outline'}
+              key={c.id}
+              variant={activeCategory === c.name ? 'default' : 'outline'}
               size="sm"
-              className={`rounded-full text-xs h-8 ${!activeCategory ? 'shadow-md shadow-primary/20' : 'border-primary/20'}`}
-              onClick={() => setCategory('')}
+              className="rounded-lg text-xs h-8"
+              onClick={() => setCategory(c.name)}
             >
-              {t('shop.all')}
+              {c.image ? <img src={c.image} alt="" className="h-4 w-4 rounded object-cover inline-block mr-1" /> : <span className="mr-1">{c.icon}</span>}
+              {c.name}
             </Button>
-            {categories.map(c => (
-              <Button
-                key={c.id}
-                variant={activeCategory === c.name ? 'default' : 'outline'}
-                size="sm"
-                className={`rounded-full text-xs h-8 ${activeCategory === c.name ? 'shadow-md shadow-primary/20' : 'border-primary/20 hover:border-primary/40'}`}
-                onClick={() => setCategory(c.name)}
-              >
-                {c.image ? <img src={c.image} alt="" className="h-4 w-4 rounded-full object-cover inline-block mr-1" /> : c.icon} {c.name}
-              </Button>
-            ))}
-          </div>
+          ))}
         </div>
 
         {activeCategory && activeSubcategories.length > 0 && (
           <div className="flex gap-1.5 flex-wrap items-center">
-            <SlidersHorizontal className="h-3 w-3 text-primary" />
-            <Button variant={!activeSub ? 'default' : 'ghost'} size="sm" className="rounded-full text-[11px] h-7 px-3" onClick={() => setSubcategory('')}>{t('shop.all')}</Button>
+            <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+            <Button variant={!activeSub ? 'default' : 'ghost'} size="sm" className="rounded-lg text-[11px] h-7 px-3" onClick={() => setSubcategory('')}>{t('shop.all')}</Button>
             {activeSubcategories.map(sc => (
-              <Button key={sc} variant={activeSub === sc ? 'default' : 'ghost'} size="sm" className="rounded-full text-[11px] h-7 px-3" onClick={() => setSubcategory(sc)}>{sc}</Button>
+              <Button key={sc} variant={activeSub === sc ? 'default' : 'ghost'} size="sm" className="rounded-lg text-[11px] h-7 px-3" onClick={() => setSubcategory(sc)}>{sc}</Button>
             ))}
           </div>
         )}
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {filtered.map(p => {
           const cat = categories.find(c => c.name === p.category);
           const isWished = wishlist.includes(p.id);

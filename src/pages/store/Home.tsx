@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
-import { ShoppingCart, ChevronRight, Heart, Sparkles, Star, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, Truck, ShieldCheck, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -13,10 +13,11 @@ export default function Home() {
   const banners = useStore(s => s.banners);
   const wishlist = useStore(s => s.wishlist);
   const toggleWishlist = useStore(s => s.toggleWishlist);
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
   const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
-  const trending = useMemo(() => [...products].sort((a, b) => a.stock - b.stock).slice(0, 4), [products]);
+  const trending = useMemo(() => [...products].sort((a, b) => a.stock - b.stock).slice(0, 6), [products]);
+  const newArrivals = useMemo(() => [...products].slice(-8), [products]);
 
   return (
     <div className="animate-fade-in">
@@ -24,187 +25,103 @@ export default function Home() {
       {activeBanners.length > 0 ? (
         <BannerSlider banners={activeBanners} />
       ) : (
-        <section className="hero-gradient relative overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-10 left-10 h-20 w-20 rounded-full bg-primary/10 animate-float" />
-            <div className="absolute bottom-8 right-16 h-14 w-14 rounded-full bg-accent/10 animate-float" style={{ animationDelay: '2s' }} />
-            <div className="absolute top-1/2 left-1/3 h-8 w-8 rounded-full bg-primary/5 animate-sparkle" />
-          </div>
-          <div className="container mx-auto px-4 py-12 sm:py-16 text-center relative z-10">
-            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium mb-4">
-              <Sparkles className="h-3 w-3" /> {t('home.newCollection')}
-            </div>
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-3">
-              <span className="text-gradient-pink">{t('home.heroTitle1')}</span> {t('home.heroTitle2')}
+        <section className="bg-gradient-to-br from-secondary via-background to-secondary/50">
+          <div className="container mx-auto px-4 py-16 sm:py-20 text-center relative">
+            <p className="text-xs font-semibold text-primary tracking-widest uppercase mb-3">{t('home.newCollection')}</p>
+            <h1 className="font-display text-3xl sm:text-5xl font-bold leading-tight mb-4">
+              {t('home.heroTitle1')} <span className="text-gradient-pink">{t('home.heroTitle2')}</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-6">
-              {t('home.heroDesc')}
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <Button asChild size="lg" className="rounded-full px-6 pink-glow">
-                <Link to="/shop">
-                  {t('home.viewAll')} <ArrowRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
-            </div>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto mb-8">{t('home.heroDesc')}</p>
+            <Button asChild size="lg" className="rounded-lg px-8 h-12 text-sm font-semibold shadow-md">
+              <Link to="/shop">{t('home.shopNow')} <ArrowRight className="h-4 w-4 ml-2" /></Link>
+            </Button>
           </div>
         </section>
       )}
 
-      {/* Category Bar */}
-      <section className="bg-card border-b">
-        <div className="px-3 py-3">
-          <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+      {/* Category Strip */}
+      <section className="border-b bg-background">
+        <div className="container mx-auto px-4 py-5">
+          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-1">
             {categories.map(c => (
-              <Link key={c.id} to={`/shop?category=${encodeURIComponent(c.name)}`} className="flex flex-col items-center gap-1.5 min-w-[60px] group">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:from-primary/20 group-hover:to-accent/20 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md overflow-hidden">
+              <Link key={c.id} to={`/shop?category=${encodeURIComponent(c.name)}`} className="flex flex-col items-center gap-2 min-w-[64px] group">
+                <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:scale-105 transition-all duration-300 overflow-hidden border">
                   {c.image ? <img src={c.image} alt={c.name} className="h-full w-full object-cover" /> : <span className="text-xl">{c.icon}</span>}
                 </div>
-                <span className="text-[9px] font-semibold text-muted-foreground group-hover:text-primary text-center leading-tight whitespace-nowrap transition-colors">{c.name}</span>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-primary text-center leading-tight whitespace-nowrap transition-colors">{c.name}</span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trending / Hot Products */}
+      {/* Trending Products */}
       {trending.length > 0 && (
-        <section className="px-3 py-5">
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <div className="flex items-center gap-1.5 bg-destructive/10 text-destructive px-2.5 py-1 rounded-full">
-              <span className="text-xs animate-sparkle">🔥</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider">{t('home.trending')}</span>
+        <section className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="section-title flex items-center gap-2">🔥 {t('home.trending')}</h2>
+              <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'সবচেয়ে জনপ্রিয় পণ্য' : 'Most popular products'}</p>
             </div>
+            <Link to="/shop" className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+              {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-            {trending.map(p => {
-              const cat = categories.find(c => c.name === p.category);
-              const isWished = wishlist.includes(p.id);
-              return (
-                <div key={p.id} className="min-w-[200px] max-w-[200px] product-card relative group">
-                  <div className="absolute top-2 right-2 z-10">
-                    <button
-                      onClick={() => toggleWishlist(p.id)}
-                      className="h-8 w-8 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-                    >
-                      <Heart className={`h-3.5 w-3.5 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
-                    </button>
-                  </div>
-                  <Link to={`/product/${p.id}`}>
-                    <div className="aspect-[4/5] bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center overflow-hidden">
-                      {p.image ? (
-                        <img src={p.image} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                      ) : (
-                        <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{cat?.icon || '📦'}</span>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="p-2.5">
-                    <Link to={`/product/${p.id}`}>
-                      <h3 className="text-xs font-medium line-clamp-1 group-hover:text-primary transition-colors">{p.name}</h3>
-                    </Link>
-                    <div className="flex items-center justify-between mt-1.5">
-                      <span className="font-display font-bold text-sm text-primary">৳{p.price.toFixed(0)}</span>
-                      <Button
-                        size="sm"
-                        className="h-7 rounded-full text-[10px] px-3 pink-glow"
-                        onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
-                        disabled={p.stock === 0}
-                      >
-                        <ShoppingCart className="h-3 w-3 mr-1" /> {t('home.addBtn')}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {trending.map(p => (
+              <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} compact />
+            ))}
           </div>
         </section>
       )}
 
-      {/* All Products */}
-      <section className="px-2.5 py-4">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-lg font-bold">{t('home.forYou')}</h2>
+      {/* Feature Banner */}
+      <section className="bg-secondary/50 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col items-center text-center gap-2">
+              <Truck className="h-6 w-6 text-primary" />
+              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'দ্রুত ডেলিভারি' : 'Fast Delivery'}</p>
+            </div>
+            <div className="flex flex-col items-center text-center gap-2">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>
+            </div>
+            <div className="flex flex-col items-center text-center gap-2">
+              <RotateCcw className="h-6 w-6 text-primary" />
+              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'সহজ রিটার্ন' : 'Easy Return'}</p>
+            </div>
           </div>
-          <Link to="/shop" className="text-[11px] text-primary font-semibold flex items-center gap-0.5 hover:gap-1.5 transition-all">
-            {t('home.viewAll')} <ChevronRight className="h-3 w-3" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
-          {shuffled.map(p => {
-            const cat = categories.find(c => c.name === p.category);
-            const isWished = wishlist.includes(p.id);
-            return (
-              <div key={p.id} className="group product-card relative">
-                <div className="absolute top-2 right-2 z-10">
-                  <button
-                    onClick={() => toggleWishlist(p.id)}
-                    className="h-7 w-7 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
-                  >
-                    <Heart className={`h-3 w-3 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
-                  </button>
-                </div>
-                <Link to={`/product/${p.id}`}>
-                  <div className="aspect-square bg-gradient-to-br from-muted/20 to-muted/5 flex items-center justify-center relative overflow-hidden">
-                    {p.image ? (
-                      <img src={p.image} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                    ) : (
-                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{cat?.icon || '📦'}</span>
-                    )}
-                    {p.stock < 5 && p.stock > 0 && (
-                      <span className="absolute bottom-1.5 left-1.5 text-[8px] bg-destructive/90 text-destructive-foreground px-2 py-0.5 rounded-full font-bold backdrop-blur-sm">{t('home.onlyLeft', { n: p.stock })}</span>
-                    )}
-                    {p.stock === 0 && (
-                      <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
-                        <span className="text-[10px] font-semibold text-muted-foreground bg-card/80 px-3 py-1 rounded-full">{t('home.outOfStock')}</span>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-                <div className="p-2.5">
-                  <Link to={`/product/${p.id}`}>
-                    <h3 className="text-[11px] font-medium line-clamp-2 leading-snug group-hover:text-primary transition-colors">{p.name}</h3>
-                  </Link>
-                  <div className="flex items-center gap-0.5 mt-1">
-                    {[1,2,3,4,5].map(s => (
-                      <Star key={s} className="h-2.5 w-2.5 fill-warning text-warning" />
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between mt-1.5">
-                    <span className="font-display font-bold text-sm text-primary">৳{p.price.toFixed(0)}</span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 w-7 p-0 rounded-full hover:bg-primary/10 hover:text-primary"
-                      onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
-                      disabled={p.stock === 0}
-                    >
-                      <ShoppingCart className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="px-3 py-4">
-        <div className="rounded-2xl overflow-hidden relative bg-gradient-to-r from-primary via-primary/90 to-accent p-6 sm:p-8 text-center pink-glow">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-white/10 animate-float" />
-            <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-white/5 animate-float" style={{ animationDelay: '3s' }} />
+      {/* All Products */}
+      <section className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="section-title">{t('home.forYou')}</h2>
+            <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'আমাদের সেরা কালেকশন' : 'Our best collection'}</p>
           </div>
+          <Link to="/shop" className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+            {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {shuffled.map(p => (
+            <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Banner */}
+      <section className="container mx-auto px-4 pb-8">
+        <div className="rounded-xl overflow-hidden relative bg-primary p-8 sm:p-12 text-center">
           <div className="relative z-10">
-            <span className="text-primary-foreground/80 text-xs font-medium uppercase tracking-wider">{t('home.specialOffer')}</span>
-            <h3 className="font-display text-xl sm:text-2xl font-bold text-primary-foreground mt-2 mb-1">{t('home.promoTitle')}</h3>
-            <p className="text-primary-foreground/70 text-xs mb-4">{t('home.promoDesc')}</p>
-            <Button asChild variant="secondary" className="rounded-full px-6">
-              <Link to="/shop">{t('home.shopNow')} <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+            <p className="text-primary-foreground/70 text-[10px] font-semibold uppercase tracking-widest mb-2">{t('home.specialOffer')}</p>
+            <h3 className="font-display text-xl sm:text-2xl font-bold text-primary-foreground mb-2">{t('home.promoTitle')}</h3>
+            <p className="text-primary-foreground/60 text-xs mb-6">{t('home.promoDesc')}</p>
+            <Button asChild variant="secondary" className="rounded-lg px-8 h-10 text-sm font-semibold">
+              <Link to="/shop">{t('home.shopNow')} <ArrowRight className="h-3.5 w-3.5 ml-2" /></Link>
             </Button>
           </div>
         </div>
@@ -213,6 +130,81 @@ export default function Home() {
   );
 }
 
+/* ─── Product Card Component ─── */
+function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCart, t, compact }: any) {
+  const cat = categories.find((c: any) => c.name === p.category);
+  const isWished = wishlist.includes(p.id);
+  const getProductRating = useStore(s => s.getProductRating);
+  const rating = getProductRating(p.id);
+
+  return (
+    <div className="group product-card relative">
+      {/* Wishlist */}
+      <button
+        onClick={() => toggleWishlist(p.id)}
+        className="absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+      >
+        <Heart className={`h-3.5 w-3.5 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
+      </button>
+
+      {/* Stock badge */}
+      {p.stock < 5 && p.stock > 0 && (
+        <span className="absolute top-2 left-2 z-10 text-[8px] bg-destructive text-destructive-foreground px-2 py-0.5 rounded font-semibold">
+          {t('shop.lowStock')}
+        </span>
+      )}
+
+      <Link to={`/product/${p.id}`}>
+        <div className="aspect-square bg-secondary/30 flex items-center justify-center overflow-hidden relative">
+          {p.image ? (
+            <img src={p.image} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          ) : (
+            <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{cat?.icon || '📦'}</span>
+          )}
+          {p.stock === 0 && (
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center">
+              <span className="text-[10px] font-semibold text-muted-foreground bg-background/80 px-3 py-1 rounded">{t('home.outOfStock')}</span>
+            </div>
+          )}
+        </div>
+      </Link>
+
+      <div className="p-2.5">
+        <Link to={`/product/${p.id}`}>
+          <h3 className="text-[11px] font-medium line-clamp-2 leading-snug group-hover:text-primary transition-colors">{p.name}</h3>
+        </Link>
+
+        {rating.count > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <div className="flex">
+              {[1,2,3,4,5].map(s => (
+                <Star key={s} className={`h-2.5 w-2.5 ${s <= Math.round(rating.avg) ? 'fill-warning text-warning' : 'text-border'}`} />
+              ))}
+            </div>
+            <span className="text-[9px] text-muted-foreground">({rating.count})</span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mt-2">
+          <span className="font-bold text-sm text-foreground" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</span>
+          {!compact && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0 rounded-lg hover:bg-primary/10 hover:text-primary"
+              onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
+              disabled={p.stock === 0}
+            >
+              <ShoppingCart className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Banner Slider ─── */
 function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] }) {
   const [current, setCurrent] = useState(0);
   const pauseRef = useRef(false);
@@ -229,52 +221,36 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
   useEffect(() => {
     if (banners.length <= 1) return;
     const timer = setInterval(() => {
-      if (!pauseRef.current) {
-        setCurrent(i => (i + 1) % banners.length);
-      }
+      if (!pauseRef.current) setCurrent(i => (i + 1) % banners.length);
     }, 4000);
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  useEffect(() => {
-    return () => { if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current); };
-  }, []);
+  useEffect(() => () => { if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current); }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      const nextIdx = diff > 0
-        ? (current + 1) % banners.length
-        : (current - 1 + banners.length) % banners.length;
-      goTo(nextIdx);
-    }
+    if (Math.abs(diff) > 50) goTo(diff > 0 ? (current + 1) % banners.length : (current - 1 + banners.length) % banners.length);
   };
 
   const banner = banners[current];
 
   return (
-    <section
-      className="relative w-full overflow-hidden group"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full cursor-pointer" onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
         {banner.image ? (
           <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary via-primary/85 to-accent flex items-center justify-center px-8">
-            <h2 className="text-primary-foreground text-xl sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
+          <div className="w-full h-full bg-gradient-to-r from-primary to-accent flex items-center justify-center px-8">
+            <h2 className="text-primary-foreground text-lg sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
           </div>
         )}
       </div>
-
       {banners.length > 1 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
           {banners.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-6 bg-white shadow-md' : 'w-2 bg-white/50'}`} />
+            <button key={i} onClick={() => goTo(i)} className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/50'}`} />
           ))}
         </div>
       )}

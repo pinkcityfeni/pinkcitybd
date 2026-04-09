@@ -1,7 +1,7 @@
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
-import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
@@ -22,35 +22,41 @@ export default function Account() {
   ];
 
   const handleLogout = () => { logout(); navigate('/'); };
-
-  const getStepIndex = (status: string) => {
-    if (status === 'cancelled') return -1;
-    return ORDER_STEPS.findIndex(s => s.status === status);
-  };
+  const getStepIndex = (status: string) => status === 'cancelled' ? -1 : ORDER_STEPS.findIndex(s => s.status === status);
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
-      <h1 className="page-header">{t('account.title')}</h1>
-      <div className="grid md:grid-cols-2 gap-6 mt-6">
-        <div className="stat-card flex items-center gap-3">
-          <Package className="h-8 w-8 text-primary" />
-          <div>
-            <p className="text-2xl font-bold">{orders.length}</p>
-            <p className="text-sm text-muted-foreground">{t('account.orders')}</p>
+    <div className="container mx-auto px-4 py-6 animate-fade-in">
+      <h1 className="font-display text-2xl font-bold mb-5">{t('account.title')}</h1>
+
+      {/* Profile Card */}
+      <div className="rounded-xl border bg-card p-5 mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <User className="h-6 w-6 text-primary" />
           </div>
-        </div>
-        <div className="stat-card flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium">{user?.name || 'Guest'}</p>
+            <p className="font-semibold text-sm">{user?.name || 'Guest'}</p>
             <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout}>{t('account.logout')}</Button>
+        </div>
+        <Button variant="outline" size="sm" className="rounded-lg" onClick={handleLogout}>{t('account.logout')}</Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold" style={{ fontFamily: 'DM Sans, sans-serif' }}>{orders.length}</p>
+          <p className="text-xs text-muted-foreground">{t('account.orders')}</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold" style={{ fontFamily: 'DM Sans, sans-serif' }}>{orders.filter(o => o.status === 'completed').length}</p>
+          <p className="text-xs text-muted-foreground">{t('account.delivered')}</p>
         </div>
       </div>
 
-
-      <h2 className="font-bold mt-8 mb-4">{t('account.recentOrders')}</h2>
-      <div className="space-y-3">
+      {/* Orders */}
+      <h2 className="font-semibold text-sm mb-3" style={{ fontFamily: 'DM Sans, sans-serif' }}>{t('account.recentOrders')}</h2>
+      <div className="space-y-2">
         {orders.map(o => {
           const expanded = expandedOrder === o.id;
           const stepIdx = getStepIndex(o.status);
@@ -61,13 +67,13 @@ export default function Account() {
                 onClick={() => setExpandedOrder(expanded ? null : o.id)}
               >
                 <div>
-                  <p className="font-mono text-sm">{o.id}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(o.date).toLocaleDateString('bn-BD')}</p>
+                  <p className="font-mono text-xs text-muted-foreground">{o.id}</p>
+                  <p className="text-[10px] text-muted-foreground">{new Date(o.date).toLocaleDateString('bn-BD')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="font-bold text-primary">৳{o.total.toFixed(0)}</p>
-                    <p className={`text-xs capitalize ${o.status === 'completed' ? 'text-success' : o.status === 'cancelled' ? 'text-destructive' : o.status === 'pending' ? 'text-warning' : 'text-info'}`}>{o.status}</p>
+                    <p className="font-bold text-sm" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{o.total.toFixed(0)}</p>
+                    <p className={`text-[10px] capitalize font-medium ${o.status === 'completed' ? 'text-success' : o.status === 'cancelled' ? 'text-destructive' : o.status === 'pending' ? 'text-warning' : 'text-info'}`}>{o.status}</p>
                   </div>
                   {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
@@ -97,7 +103,6 @@ export default function Account() {
                       <span className="text-sm font-medium">{t('account.orderCancelled')}</span>
                     </div>
                   )}
-
                   <div className="space-y-1 pt-2 border-t">
                     {o.items.map((item, idx) => (
                       <div key={idx} className="flex justify-between text-sm">
@@ -117,7 +122,7 @@ export default function Account() {
             </div>
           );
         })}
-        {orders.length === 0 && <p className="text-sm text-muted-foreground">{t('account.noOrders')}</p>}
+        {orders.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">{t('account.noOrders')}</p>}
       </div>
     </div>
   );

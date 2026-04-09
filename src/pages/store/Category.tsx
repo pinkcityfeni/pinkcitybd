@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
-import { ChevronRight, Grid3X3 } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 export default function Category() {
   const categories = useStore(s => s.categories);
@@ -10,31 +10,29 @@ export default function Category() {
 
   return (
     <div className="container mx-auto px-4 py-6 animate-fade-in">
-      <div className="flex items-center gap-2 mb-6">
-        <Grid3X3 className="h-5 w-5 text-primary" />
-        <h1 className="font-display text-xl font-bold">{t('category.title')}</h1>
-      </div>
+      <h1 className="font-display text-2xl font-bold mb-1">{t('category.title')}</h1>
+      <p className="text-xs text-muted-foreground mb-6">{t('shop.found', { n: products.length })}</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {categories.map(c => {
           const catProducts = products.filter(p => p.category === c.name);
           return (
-            <div key={c.id} className="rounded-2xl border bg-card overflow-hidden hover:shadow-lg transition-all duration-300 group">
+            <div key={c.id} className="rounded-xl border bg-card overflow-hidden hover:shadow-md transition-all duration-300 group">
               <Link
                 to={`/shop?category=${encodeURIComponent(c.name)}`}
-                className="flex items-center gap-3 p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-b group-hover:from-primary/10 group-hover:to-primary/15 transition-colors"
+                className="flex items-center gap-3 p-4 border-b bg-secondary/30 group-hover:bg-secondary/50 transition-colors"
               >
-                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                <div className="h-10 w-10 rounded-lg bg-background flex items-center justify-center text-lg shrink-0 overflow-hidden border">
                   {c.image ? <img src={c.image} alt={c.name} className="h-full w-full object-cover" /> : c.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-display font-semibold text-base truncate">{c.name}</h2>
-                  <p className="text-[11px] text-muted-foreground">{t('category.products', { n: catProducts.length })}</p>
+                  <h2 className="font-semibold text-sm truncate" style={{ fontFamily: 'DM Sans, sans-serif' }}>{c.name}</h2>
+                  <p className="text-[10px] text-muted-foreground">{t('category.products', { n: catProducts.length })}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
               </Link>
 
-              <div className="p-3">
+              <div className="p-2">
                 {c.subcategories.length > 0 ? (
                   <div className="space-y-0.5">
                     {c.subcategories.map(sc => {
@@ -43,11 +41,11 @@ export default function Category() {
                         <Link
                           key={sc}
                           to={`/shop?category=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sc)}`}
-                          className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors group/sub"
+                          className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted transition-colors group/sub text-sm"
                         >
-                          <span className="text-sm group-hover/sub:text-primary transition-colors">{sc}</span>
+                          <span className="group-hover/sub:text-primary transition-colors">{sc}</span>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{subCount}</span>
+                            <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">{subCount}</span>
                             <ChevronRight className="h-3 w-3 text-muted-foreground group-hover/sub:text-primary transition-colors" />
                           </div>
                         </Link>
@@ -55,7 +53,7 @@ export default function Category() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground text-center py-3 italic">{t('category.noSub')}</p>
+                  <p className="text-xs text-muted-foreground text-center py-3">{t('category.noSub')}</p>
                 )}
               </div>
             </div>
@@ -65,7 +63,7 @@ export default function Category() {
 
       {categories.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
-          <Grid3X3 className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p className="text-5xl mb-3">📦</p>
           <p className="font-display text-lg">{t('category.noCat')}</p>
         </div>
       )}

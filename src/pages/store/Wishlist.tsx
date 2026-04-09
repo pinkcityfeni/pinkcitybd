@@ -17,12 +17,12 @@ export default function Wishlist() {
 
   if (wishedProducts.length === 0) return (
     <div className="container mx-auto px-4 py-20 text-center animate-fade-in">
-      <div className="h-20 w-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-5">
-        <Heart className="h-9 w-9 text-muted-foreground/40" />
+      <div className="h-16 w-16 rounded-xl bg-muted flex items-center justify-center mx-auto mb-5">
+        <Heart className="h-8 w-8 text-muted-foreground/40" />
       </div>
       <h2 className="font-display text-xl font-bold mb-2">{t('account.wishlist')}</h2>
       <p className="text-sm text-muted-foreground mb-6">{t('cart.emptyDesc')}</p>
-      <Button asChild className="rounded-full px-6"><Link to="/shop">{t('cart.startShopping')}</Link></Button>
+      <Button asChild className="rounded-lg px-8"><Link to="/shop">{t('cart.startShopping')}</Link></Button>
     </div>
   );
 

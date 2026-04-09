@@ -28,27 +28,28 @@ export default function Wishlist() {
 
   return (
     <div className="container mx-auto px-4 py-6 animate-fade-in">
-      <h1 className="font-display text-xl font-bold mb-4 flex items-center gap-2">
-        <Heart className="h-5 w-5 text-destructive" /> {t('nav.wishlist')} ({wishedProducts.length})
+      <h1 className="font-display text-xl font-bold mb-1 flex items-center gap-2">
+        <Heart className="h-5 w-5 text-destructive" /> {t('nav.wishlist')}
       </h1>
+      <p className="text-xs text-muted-foreground mb-5">{wishedProducts.length} items</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {wishedProducts.map(p => (
-          <div key={p.id} className="rounded-2xl border bg-card overflow-hidden group hover:shadow-lg transition-all">
+          <div key={p.id} className="product-card group">
             <Link to={`/product/${p.id}`}>
-              <div className="aspect-square bg-muted/30 flex items-center justify-center overflow-hidden">
-                {p.image ? <img src={p.image} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform" /> : <span className="text-4xl">💎</span>}
+              <div className="aspect-square bg-secondary/30 flex items-center justify-center overflow-hidden">
+                {p.image ? <img src={p.image} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <span className="text-4xl">💎</span>}
               </div>
             </Link>
             <div className="p-3 space-y-2">
               <Link to={`/product/${p.id}`}>
                 <p className="text-sm font-medium line-clamp-1 hover:text-primary transition-colors">{p.name}</p>
               </Link>
-              <p className="text-base font-bold text-primary">৳{p.price.toFixed(0)}</p>
+              <p className="font-bold text-sm" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</p>
               <div className="flex gap-1.5">
-                <Button size="sm" className="flex-1 rounded-full text-xs h-8" onClick={() => { addToCart(p); toast.success('Added to cart'); }}>
+                <Button size="sm" className="flex-1 rounded-lg text-xs h-8 font-semibold" onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}>
                   <ShoppingCart className="h-3 w-3 mr-1" /> {t('product.addToCart')}
                 </Button>
-                <Button size="sm" variant="ghost" className="rounded-full h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => toggleWishlist(p.id)}>
+                <Button size="sm" variant="ghost" className="rounded-lg h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => toggleWishlist(p.id)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>

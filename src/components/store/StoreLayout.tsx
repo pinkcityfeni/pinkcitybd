@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, Instagram, MessageCircle, ChevronRight, Truck, ShieldCheck, RotateCcw, Headphones } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, Instagram, MessageCircle, ChevronRight, Truck, ShieldCheck, Headphones } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -55,10 +55,9 @@ export default function StoreLayout() {
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <img src={logoImg} alt="PINK CITY" className="h-9 w-9 rounded-lg object-cover" />
             <div className="leading-none">
-              <span className="text-base font-bold tracking-tight block" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <span className="text-xl font-bold tracking-tight block pink-city-glow" style={{ fontFamily: 'Playfair Display, serif' }}>
                 <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>
               </span>
-              <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Beauty & Care</span>
             </div>
           </Link>
 
@@ -186,7 +185,7 @@ export default function StoreLayout() {
         {/* Trust badges */}
         <div className="border-b border-background/10">
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
                   <Truck className="h-5 w-5" />
@@ -203,15 +202,6 @@ export default function StoreLayout() {
                 <div>
                   <p className="text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>
                   <p className="text-[10px] text-background/60">{lang === 'bn' ? 'গ্যারান্টেড' : 'Guaranteed'}</p>
-                </div>
-              </div>
-              <div className="trust-badge">
-                <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <RotateCcw className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">{lang === 'bn' ? 'সহজ রিটার্ন' : 'Easy Return'}</p>
-                  <p className="text-[10px] text-background/60">{lang === 'bn' ? '৭ দিনের মধ্যে' : 'Within 7 days'}</p>
                 </div>
               </div>
               <div className="trust-badge">
@@ -235,7 +225,6 @@ export default function StoreLayout() {
                 <img src={logoImg} alt="PINK CITY" className="h-10 w-10 rounded-lg object-cover" />
                 <div>
                   <span className="font-bold text-sm block" style={{ fontFamily: 'Playfair Display, serif' }}>PINK CITY</span>
-                  <span className="text-[9px] text-background/50 tracking-widest uppercase">Beauty & Care</span>
                 </div>
               </div>
               <p className="text-xs text-background/60 leading-relaxed mb-4">{t('footer.tagline')}</p>

@@ -22,7 +22,7 @@ export default function POSSalesHistory() {
   const getMethodLabel = (m: PaymentMethod): string => {
     const map: Record<PaymentMethod, string> = {
       cash: t('pos.cash'), cod: t('pos.cash'), bkash: t('pos.bkash'),
-      nagad: t('pos.nagad'), bank: t('pos.bank'), card: t('pos.card'),
+      nagad: t('pos.nagad'), bank: t('pos.bank'),
     };
     return map[m] || m;
   };

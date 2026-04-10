@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, CreditCard, Building2, Banknote, Smartphone, Copy, Check, Lock, Truck } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck } from 'lucide-react';
 import type { PaymentMethod, DeliveryZone } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
@@ -32,10 +32,6 @@ export default function Checkout() {
   const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>('feni');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvv, setCardCvv] = useState('');
-  const [cardName, setCardName] = useState('');
   const [copied, setCopied] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [orderTotal, setOrderTotal] = useState(0);
@@ -45,7 +41,6 @@ export default function Checkout() {
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
     { id: 'bkash', label: t('checkout.bkash'), icon: <Smartphone className="h-5 w-5" />, description: t('checkout.bkashDesc') },
     { id: 'nagad', label: t('checkout.nagad'), icon: <Smartphone className="h-5 w-5" />, description: t('checkout.nagadDesc') },
-    { id: 'card', label: t('checkout.card'), icon: <CreditCard className="h-5 w-5" />, description: t('checkout.cardDesc') },
     { id: 'bank', label: t('checkout.bank'), icon: <Building2 className="h-5 w-5" />, description: t('checkout.bankDesc') },
   ];
 
@@ -69,28 +64,12 @@ export default function Checkout() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const formatCardNumber = (v: string) => {
-    const digits = v.replace(/\D/g, '').slice(0, 16);
-    return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
-  };
-
-  const formatExpiry = (v: string) => {
-    const digits = v.replace(/\D/g, '').slice(0, 4);
-    if (digits.length > 2) return digits.slice(0, 2) + '/' + digits.slice(2);
-    return digits;
-  };
 
   const handleContinueToReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) { toast.error(t('checkout.enterPhone')); return; }
     if (!address.trim()) { toast.error(t('checkout.enterAddress')); return; }
     if (needsTrxId && !trxId.trim()) { toast.error(t('checkout.enterTrxId')); return; }
-    if (paymentMethod === 'card') {
-      if (cardNumber.replace(/\s/g, '').length < 16) { toast.error(t('checkout.enterCardNumber')); return; }
-      if (cardExpiry.length < 5) { toast.error(t('checkout.enterExpiry')); return; }
-      if (cardCvv.length < 3) { toast.error(t('checkout.enterCvv')); return; }
-      if (!cardName.trim()) { toast.error(t('checkout.enterCardName')); return; }
-    }
     setStep('review');
   };
 
@@ -340,7 +319,7 @@ export default function Checkout() {
               <button
                 key={pm.id}
                 type="button"
-                onClick={() => { setPaymentMethod(pm.id); setTrxId(''); setCardNumber(''); setCardExpiry(''); setCardCvv(''); setCardName(''); }}
+                onClick={() => { setPaymentMethod(pm.id); setTrxId(''); }}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                   paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'
                 }`}
@@ -388,22 +367,28 @@ export default function Checkout() {
                     <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
                       <div>
                         <p className="text-[10px] text-muted-foreground">{t('checkout.bankName')}</p>
-                        <p className="text-xs font-medium">ABC Bank</p>
+                        <p className="text-xs font-medium">BRAC BANK</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">Account Name</p>
+                        <p className="text-xs font-medium">PINK CITY</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
                       <div className="flex-1">
                         <p className="text-[10px] text-muted-foreground">{t('checkout.accountNumber')}</p>
-                        <p className="font-mono font-bold text-sm tracking-wider">123456789</p>
+                        <p className="font-mono font-bold text-sm tracking-wider">1802204711537001</p>
                       </div>
-                      <button type="button" onClick={() => copyToClipboard('123456789')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
+                      <button type="button" onClick={() => copyToClipboard('1802204711537001')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
                         {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                       </button>
                     </div>
                     <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
                       <div>
                         <p className="text-[10px] text-muted-foreground">{t('checkout.branch')}</p>
-                        <p className="text-xs font-medium">Dhaka</p>
+                        <p className="text-xs font-medium">FENI</p>
                       </div>
                     </div>
                   </div>
@@ -417,45 +402,6 @@ export default function Checkout() {
             </div>
           )}
 
-          {paymentMethod === 'card' && (
-            <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Lock className="h-3.5 w-3.5 text-success" />
-                <p className="text-xs font-medium text-success">{t('checkout.securePayment')}</p>
-              </div>
-              <div>
-                <Label htmlFor="cardName" className="text-xs">{t('checkout.cardholderName')} <span className="text-destructive">*</span></Label>
-                <Input id="cardName" value={cardName} onChange={e => setCardName(e.target.value)} placeholder="CARDHOLDER NAME" className="mt-1 uppercase" />
-              </div>
-              <div>
-                <Label htmlFor="cardNumber" className="text-xs">{t('checkout.cardNumber')} <span className="text-destructive">*</span></Label>
-                <div className="relative mt-1">
-                  <Input
-                    id="cardNumber"
-                    value={cardNumber}
-                    onChange={e => setCardNumber(formatCardNumber(e.target.value))}
-                    placeholder="0000 0000 0000 0000"
-                    className="pr-10 font-mono tracking-wider"
-                    maxLength={19}
-                  />
-                  <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="cardExpiry" className="text-xs">{t('checkout.expiry')} <span className="text-destructive">*</span></Label>
-                  <Input id="cardExpiry" value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/YY" className="mt-1 font-mono" maxLength={5} />
-                </div>
-                <div>
-                  <Label htmlFor="cardCvv" className="text-xs">CVV <span className="text-destructive">*</span></Label>
-                  <Input id="cardCvv" type="password" value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} />
-                </div>
-              </div>
-              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <Lock className="h-3 w-3" /> {t('checkout.cardSecure')}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Quick summary */}

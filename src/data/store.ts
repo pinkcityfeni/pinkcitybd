@@ -29,7 +29,7 @@ export interface CartItem {
   quantity: number;
 }
 
-export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'card' | 'bank' | 'cash';
+export type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'bank' | 'cash';
 
 export interface SplitPayment {
   method1: PaymentMethod;

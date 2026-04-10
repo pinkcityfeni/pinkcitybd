@@ -154,6 +154,9 @@
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .pink-city-glow {
+    filter: drop-shadow(0 0 8px hsl(340 82% 52% / 0.4)) drop-shadow(0 0 20px hsl(340 82% 52% / 0.2));
+  }
 }
 
 /* Scrollbar hide */

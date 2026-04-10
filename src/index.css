@@ -155,8 +155,14 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   .pink-city-glow {
-    filter: drop-shadow(0 0 8px hsl(340 82% 52% / 0.4)) drop-shadow(0 0 20px hsl(340 82% 52% / 0.2));
+    filter: drop-shadow(0 0 6px hsl(340 82% 52% / 0.6)) drop-shadow(0 0 16px hsl(340 82% 52% / 0.4)) drop-shadow(0 0 32px hsl(340 82% 52% / 0.25));
+    animation: neon-pulse 2.5s ease-in-out infinite alternate;
   }
+}
+
+@keyframes neon-pulse {
+  from { filter: drop-shadow(0 0 6px hsl(340 82% 52% / 0.6)) drop-shadow(0 0 16px hsl(340 82% 52% / 0.4)) drop-shadow(0 0 32px hsl(340 82% 52% / 0.25)); }
+  to { filter: drop-shadow(0 0 10px hsl(340 82% 52% / 0.8)) drop-shadow(0 0 24px hsl(340 82% 52% / 0.5)) drop-shadow(0 0 48px hsl(340 82% 52% / 0.3)); }
 }
 
 /* Scrollbar hide */

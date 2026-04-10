@@ -285,7 +285,7 @@ export default function StoreLayout() {
               <span>bKash</span>
               <span>Nagad</span>
               <span>COD</span>
-              <span>Card</span>
+              <span>Bank Transfer</span>
             </div>
           </div>
         </div>

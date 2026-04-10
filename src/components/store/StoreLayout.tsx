@@ -115,12 +115,6 @@ export default function StoreLayout() {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative p-2 rounded-lg hover:bg-muted transition-colors">
-              <ShoppingCart className="h-4 w-4" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 flex items-center justify-center text-[9px] font-bold bg-primary text-primary-foreground rounded-full border-2 border-background">{cartCount}</span>
-              )}
-            </Link>
 
             {/* Auth */}
             {isAuthenticated ? (

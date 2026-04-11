@@ -209,7 +209,7 @@ export default function StoreLayout() {
               </div>
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <BadgeDollarSign className="h-5 w-5" />
+                  <span className="text-lg font-bold">৳</span>
                 </div>
                 <div>
                   <p className="text-xs font-semibold">{lang === 'bn' ? 'সেরা দাম' : 'Best Price'}</p>

@@ -146,6 +146,10 @@ interface StoreState {
   banners: Banner[];
   wishlist: string[];
   reviews: Review[];
+  announcementText: string;
+
+  // Announcement
+  setAnnouncementText: (text: string) => void;
 
   // Banner actions
   addBanner: (banner: Omit<Banner, 'id'>) => void;
@@ -209,6 +213,10 @@ export const useStore = create<StoreState>((set, get) => ({
   ],
   wishlist: [],
   reviews: [],
+  announcementText: '🚚 ফেনীতে ফ্রি ডেলিভারি | সারাদেশে ক্যাশ অন ডেলিভারি',
+
+  // ─── Announcement ───
+  setAnnouncementText: (text) => set({ announcementText: text }),
 
   // ─── Banner actions ───
   addBanner: (banner) => set(s => ({

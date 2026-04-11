@@ -67,7 +67,7 @@ export default function Home() {
               {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
             {trending.map(p => (
               <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} compact />
             ))}
@@ -106,7 +106,7 @@ export default function Home() {
             {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
           {shuffled.map(p => (
             <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
           ))}
@@ -169,35 +169,24 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
         </div>
       </Link>
 
-      <div className="p-2.5">
+      <div className="p-1.5">
         <Link to={`/product/${p.id}`}>
-          <h3 className="text-[11px] font-medium line-clamp-2 leading-snug group-hover:text-primary transition-colors">{p.name}</h3>
+          <h3 className="text-[10px] font-medium line-clamp-2 leading-tight group-hover:text-primary transition-colors">{p.name}</h3>
         </Link>
 
         {rating.count > 0 && (
-          <div className="flex items-center gap-1 mt-1">
+          <div className="flex items-center gap-0.5 mt-0.5">
             <div className="flex">
               {[1,2,3,4,5].map(s => (
-                <Star key={s} className={`h-2.5 w-2.5 ${s <= Math.round(rating.avg) ? 'fill-warning text-warning' : 'text-border'}`} />
+                <Star key={s} className={`h-2 w-2 ${s <= Math.round(rating.avg) ? 'fill-warning text-warning' : 'text-border'}`} />
               ))}
             </div>
-            <span className="text-[9px] text-muted-foreground">({rating.count})</span>
+            <span className="text-[8px] text-muted-foreground">({rating.count})</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-2">
-          <span className="font-bold text-sm text-foreground" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</span>
-          {!compact && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 rounded-lg hover:bg-primary/10 hover:text-primary"
-              onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}
-              disabled={p.stock === 0}
-            >
-              <ShoppingCart className="h-3.5 w-3.5" />
-            </Button>
-          )}
+        <div className="flex items-center justify-between mt-1">
+          <span className="font-bold text-xs text-primary" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</span>
         </div>
       </div>
     </div>
@@ -238,7 +227,7 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
 
   return (
     <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full cursor-pointer" onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
+      <div className="relative w-full cursor-pointer" style={{ height: '94px' }} onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
         {banner.image ? (
           <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
         ) : (

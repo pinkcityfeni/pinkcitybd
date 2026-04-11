@@ -64,7 +64,7 @@ export interface Order {
   deliveryAddress?: string;
   deliveryZone?: DeliveryZone;
   deliveryCharge?: number;
-  pointsEarned?: number;
+  
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
   splitPayment?: SplitPayment;
@@ -84,7 +84,6 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  points: number;
   role: 'customer' | 'admin' | 'cashier';
 }
 

@@ -91,8 +91,8 @@ export default function Home() {
               <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
-              <RotateCcw className="h-6 w-6 text-primary" />
-              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'সহজ রিটার্ন' : 'Easy Return'}</p>
+              <span className="text-lg font-bold text-primary">৳</span>
+              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'সেরা দাম' : 'Best Price'}</p>
             </div>
           </div>
         </div>

@@ -21,7 +21,6 @@ export default function AdminBanners() {
   const [newLink, setNewLink] = useState('/shop');
   const [newImage, setNewImage] = useState('');
   const [editAnnouncement, setEditAnnouncement] = useState(announcementText);
-  const [newImage, setNewImage] = useState('');
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, bannerId?: string) => {
     const file = e.target.files?.[0];
@@ -58,7 +57,7 @@ export default function AdminBanners() {
       <Card className="p-4 mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Megaphone className="h-4 w-4 text-primary" />
-          <h3 className="font-medium text-sm">{t('banner.announcement') || 'Announcement Bar Text'}</h3>
+          <h3 className="font-medium text-sm">Announcement Bar Text</h3>
         </div>
         <div className="flex gap-2">
           <Input

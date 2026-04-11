@@ -235,14 +235,14 @@ export default function StoreLayout() {
                 <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>Appayon Afroz Tower (1st floor, Shop 11-12), College Road, Feni 3900</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-background/60 mb-2">
+              <a href="tel:+8801715307271" className="flex items-center gap-2 text-xs text-background/60 hover:text-background transition-colors mb-2">
                 <Phone className="h-3 w-3" />
                 <span>+880 1715-307271</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-background/60">
+              </a>
+              <a href="mailto:pinkcity.feni@gmail.com" className="flex items-center gap-2 text-xs text-background/60 hover:text-background transition-colors">
                 <Mail className="h-3 w-3" />
                 <span>pinkcity.feni@gmail.com</span>
-              </div>
+              </a>
             </div>
 
             {/* Quick Links */}

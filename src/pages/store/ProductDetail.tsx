@@ -21,6 +21,76 @@ function StarRating({ rating, size = 'sm', interactive = false, onChange }: { ra
   );
 }
 
+function ProductImageGallery({ product, cat }: { product: { image: string; images?: string[]; name: string }; cat?: { icon: string } }) {
+  const allImages = (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : []);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const touchStartRef = useRef(0);
+  const touchEndRef = useRef(0);
+
+  const goTo = useCallback((idx: number) => {
+    setCurrentIndex(Math.max(0, Math.min(allImages.length - 1, idx)));
+  }, [allImages.length]);
+
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartRef.current = e.touches[0].clientX; };
+  const handleTouchMove = (e: React.TouchEvent) => { touchEndRef.current = e.touches[0].clientX; };
+  const handleTouchEnd = () => {
+    const diff = touchStartRef.current - touchEndRef.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && currentIndex < allImages.length - 1) goTo(currentIndex + 1);
+      else if (diff < 0 && currentIndex > 0) goTo(currentIndex - 1);
+    }
+  };
+
+  if (allImages.length === 0) {
+    return (
+      <div className="aspect-square rounded-xl overflow-hidden bg-secondary/30 flex items-center justify-center border">
+        <span className="text-8xl">{cat?.icon || '📦'}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div
+        className="aspect-square rounded-xl overflow-hidden bg-secondary/30 border relative select-none"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img src={allImages[currentIndex]} alt={`${product.name} ${currentIndex + 1}`} className="h-full w-full object-cover transition-opacity duration-300" draggable={false} />
+        {allImages.length > 1 && (
+          <>
+            {currentIndex > 0 && (
+              <button onClick={() => goTo(currentIndex - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-background transition-colors">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            )}
+            {currentIndex < allImages.length - 1 && (
+              <button onClick={() => goTo(currentIndex + 1)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-background transition-colors">
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {allImages.map((_, i) => (
+                <button key={i} onClick={() => goTo(i)} className={`h-1.5 rounded-full transition-all ${i === currentIndex ? 'w-4 bg-primary' : 'w-1.5 bg-background/60'}`} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+      {allImages.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {allImages.map((img, i) => (
+            <button key={i} onClick={() => goTo(i)} className={`shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+              <img src={img} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProductDetail() {
   const { id } = useParams();
   const products = useStore(s => s.products);

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
-import { Plus, Trash2, Image as ImageIcon, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, GripVertical, Megaphone, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminBanners() {
@@ -13,10 +13,14 @@ export default function AdminBanners() {
   const addBanner = useStore(s => s.addBanner);
   const updateBanner = useStore(s => s.updateBanner);
   const deleteBanner = useStore(s => s.deleteBanner);
+  const announcementText = useStore(s => s.announcementText);
+  const setAnnouncementText = useStore(s => s.setAnnouncementText);
   const { t } = useLanguage();
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newLink, setNewLink] = useState('/shop');
+  const [newImage, setNewImage] = useState('');
+  const [editAnnouncement, setEditAnnouncement] = useState(announcementText);
   const [newImage, setNewImage] = useState('');
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, bannerId?: string) => {
@@ -49,6 +53,33 @@ export default function AdminBanners() {
           <Plus className="h-4 w-4" /> {t('banner.newBanner')}
         </Button>
       </div>
+
+      {/* Announcement Text Editor */}
+      <Card className="p-4 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Megaphone className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-sm">{t('banner.announcement') || 'Announcement Bar Text'}</h3>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={editAnnouncement}
+            onChange={e => setEditAnnouncement(e.target.value)}
+            placeholder="Enter announcement text..."
+            className="text-sm"
+          />
+          <Button
+            size="sm"
+            className="rounded-full gap-1.5 shrink-0"
+            onClick={() => {
+              setAnnouncementText(editAnnouncement);
+              toast.success('Announcement updated!');
+            }}
+          >
+            <Save className="h-3.5 w-3.5" /> Save
+          </Button>
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2">This text appears at the top of your store</p>
+      </Card>
 
       {showAdd && (
         <Card className="p-4 mb-6 space-y-4">

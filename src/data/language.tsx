@@ -52,7 +52,7 @@ const translations = {
   'cart.subtotal': { bn: 'সাবটোটাল', en: 'Subtotal' },
   'cart.deliveryCharge': { bn: 'ডেলিভারি চার্জ', en: 'Delivery Charge' },
   'cart.seeAtCheckout': { bn: 'চেকআউটে দেখুন', en: 'See at checkout' },
-  'cart.points': { bn: 'পয়েন্ট', en: 'Points' },
+  
   'cart.checkout': { bn: 'চেকআউট', en: 'Checkout' },
   'cart.continueShopping': { bn: 'শপিং চালিয়ে যান', en: 'Continue Shopping' },
 
@@ -61,7 +61,7 @@ const translations = {
   'product.backToShop': { bn: 'শপে ফিরুন', en: 'Back to Shop' },
   'product.reviews': { bn: '{n}টি রিভিউ', en: '{n} reviews' },
   'product.inStock': { bn: '{n}টি স্টকে আছে', en: '{n} in stock' },
-  'product.earnPoints': { bn: '{n} পয়েন্ট পাবেন', en: 'Earn {n} points' },
+  
   'product.addToCart': { bn: 'কার্টে যোগ করুন', en: 'Add to Cart' },
   'product.buyNow': { bn: 'এখনই কিনুন', en: 'Buy Now' },
   'product.barcode': { bn: 'বারকোড', en: 'Barcode' },
@@ -83,9 +83,9 @@ const translations = {
   'checkout.backToCart': { bn: 'কার্টে ফিরুন', en: 'Back to Cart' },
   'checkout.guestOrder': { bn: 'গেস্ট হিসেবে অর্ডার করছেন', en: 'Ordering as Guest' },
   'checkout.guestDesc': { bn: 'লগইন ছাড়াই অর্ডার করতে পারবেন', en: 'You can order without logging in' },
-  'checkout.loginPrompt': { bn: 'লগইন করুন — পয়েন্ট ও ট্র্যাকিং সুবিধা পান', en: 'Login — Get points & order tracking' },
+  'checkout.loginPrompt': { bn: 'লগইন করুন — অর্ডার ট্র্যাকিং সুবিধা পান', en: 'Login — Get order tracking' },
   'checkout.loggedInAs': { bn: '{name} হিসেবে লগইন আছেন', en: 'Logged in as {name}' },
-  'checkout.earnPointsDesc': { bn: 'এই অর্ডার থেকে পয়েন্ট পাবেন', en: 'You\'ll earn points from this order' },
+  
   'checkout.contact': { bn: 'যোগাযোগ', en: 'Contact' },
   'checkout.name': { bn: 'নাম', en: 'Name' },
   'checkout.fullName': { bn: 'আপনার পূর্ণ নাম', en: 'Your full name' },
@@ -122,7 +122,7 @@ const translations = {
   'checkout.copied': { bn: 'কপি হয়েছে!', en: 'Copied!' },
   'checkout.deliveryDetails': { bn: 'ডেলিভারি তথ্য', en: 'Delivery Details' },
   'checkout.orderTotal': { bn: 'মোট', en: 'Total' },
-  'checkout.pointsLabel': { bn: 'পয়েন্ট', en: 'Points' },
+  
   'checkout.deliveryAddress': { bn: 'ডেলিভারি ঠিকানা', en: 'Delivery Address' },
   'checkout.bkashPersonal': { bn: '📱 বিকাশ (Personal)', en: '📱 bKash (Personal)' },
   'checkout.nagadPersonal': { bn: '📱 নগদ (Personal)', en: '📱 Nagad (Personal)' },
@@ -154,7 +154,7 @@ const translations = {
 
   // Account
   'account.title': { bn: 'আমার অ্যাকাউন্ট', en: 'My Account' },
-  'account.rewardPoints': { bn: 'রিওয়ার্ড পয়েন্ট', en: 'Reward Points' },
+  
   'account.orders': { bn: 'অর্ডার', en: 'Orders' },
   'account.logout': { bn: 'লগআউট', en: 'Logout' },
   'account.wishlist': { bn: 'উইশলিস্ট', en: 'Wishlist' },
@@ -174,7 +174,7 @@ const translations = {
   'auth.noAccount': { bn: 'অ্যাকাউন্ট নেই?', en: "Don't have an account?" },
   'auth.signUp': { bn: 'সাইন আপ', en: 'Sign up' },
   'auth.createAccount': { bn: 'অ্যাকাউন্ট তৈরি করুন', en: 'Create an account' },
-  'auth.earnRewards': { bn: 'আজ থেকে রিওয়ার্ড পয়েন্ট পান', en: 'Start earning reward points today' },
+  'auth.earnRewards': { bn: 'আজ থেকে এক্সক্লুসিভ অফার পান', en: 'Get exclusive offers today' },
   'auth.joinDesc': { bn: 'এক্সক্লুসিভ অফার ও অর্ডার ট্র্যাক করুন', en: 'Join for exclusive offers & track orders' },
   'auth.fullName': { bn: 'পূর্ণ নাম', en: 'Full Name' },
   'auth.createBtn': { bn: 'অ্যাকাউন্ট তৈরি করুন', en: 'Create Account' },
@@ -358,7 +358,7 @@ const translations = {
   'order.noOrders': { bn: 'কোনো অর্ডার নেই', en: 'No orders' },
   'order.items': { bn: 'আইটেম', en: 'Items' },
   'order.deliveryCharge': { bn: 'ডেলিভারি চার্জ', en: 'Delivery Charge' },
-  'order.pointsEarned': { bn: '{n} পয়েন্ট অর্জিত', en: '{n} points earned' },
+  
   'order.cancel': { bn: 'বাতিল', en: 'Cancel' },
   'order.process': { bn: 'প্রসেস', en: 'Process' },
   'order.complete': { bn: 'সম্পন্ন', en: 'Complete' },
@@ -412,7 +412,7 @@ const translations = {
   'user.name': { bn: 'নাম', en: 'Name' },
   'user.email': { bn: 'ইমেইল', en: 'Email' },
   'user.role': { bn: 'রোল', en: 'Role' },
-  'user.points': { bn: 'পয়েন্ট', en: 'Points' },
+  
   'user.orders': { bn: 'অর্ডার', en: 'Orders' },
   'user.actions': { bn: 'অ্যাকশন', en: 'Actions' },
   'user.confirmDelete': { bn: 'ইউজার ডিলিট করুন', en: 'Confirm Delete' },

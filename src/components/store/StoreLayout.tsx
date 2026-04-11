@@ -6,6 +6,7 @@ import { useLanguage } from '@/data/language';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { SupportChatButton } from '@/components/store/SupportChatButton';
 import { useState } from 'react';
 import logoImg from '@/assets/logo.jpg';
 import logoIcon from '@/assets/logo-icon.png';
@@ -107,11 +108,6 @@ export default function StoreLayout() {
               <Search className="h-4 w-4 text-muted-foreground" />
             </button>
 
-
-
-
-            {/* Cart */}
-
             {/* Auth */}
             {isAuthenticated ? (
               <>
@@ -168,6 +164,7 @@ export default function StoreLayout() {
 
       <main className="flex-1 pb-16 md:pb-0"><Outlet /></main>
 
+      <SupportChatButton />
       <MobileBottomNav cartCount={cartCount} wishlistCount={wishlist.length} />
 
       {/* Professional Footer */}

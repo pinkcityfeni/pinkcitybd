@@ -39,7 +39,7 @@ export interface SplitPayment {
   amount2: number;
 }
 
-export type DeliveryZone = 'feni' | 'outside';
+export type DeliveryZone = 'feni' | 'feni_upozila' | 'outside';
 
 export interface Review {
   id: string;

@@ -3,8 +3,8 @@ import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, ArrowLeft, Package, Zap, Star, Heart, Send, Truck, ShieldCheck, RotateCcw } from 'lucide-react';
-import { useState } from 'react';
+import { ShoppingCart, ArrowLeft, Package, Zap, Star, Heart, Send, Truck, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 

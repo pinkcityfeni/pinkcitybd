@@ -231,10 +231,10 @@ export default function StoreLayout() {
                 </div>
               </div>
               <p className="text-xs text-background/60 leading-relaxed mb-4">{t('footer.tagline')}</p>
-              <div className="flex items-start gap-2 text-xs text-background/60 leading-relaxed mb-4">
+              <a href="https://maps.google.com/?q=Appayon+Afroz+Tower,+College+Road,+Feni+3900" target="_blank" rel="noopener noreferrer" className="flex items-start gap-2 text-xs text-background/60 hover:text-background transition-colors leading-relaxed mb-4">
                 <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>Appayon Afroz Tower (1st floor, Shop 11-12), College Road, Feni 3900</span>
-              </div>
+              </a>
               <a href="tel:+8801715307271" className="flex items-center gap-2 text-xs text-background/60 hover:text-background transition-colors mb-2">
                 <Phone className="h-3 w-3" />
                 <span>+880 1715-307271</span>

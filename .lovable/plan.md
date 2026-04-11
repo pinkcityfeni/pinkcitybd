@@ -1,27 +1,21 @@
 
 
-## সমস্যা
+## পরিকল্পনা: ৪র্থ Trust Badge যোগ করা
 
-Line 18-এ `useMemo` দিয়ে products shuffle করা হয়েছে `[products]` dependency দিয়ে। যেহেতু Zustand store-এর `products` reference একই থাকে, shuffle শুধু একবারই হয় — refresh বা page revisit-এ নতুন করে হয় না।
+### পরিবর্তন: `src/components/store/StoreLayout.tsx`
 
-## সমাধান
+1. **Grid কলাম আপডেট**: `grid-cols-2 md:grid-cols-3` → `grid-cols-2 md:grid-cols-4` করবো যাতে ৪টি badge সুন্দরভাবে বসে।
 
-`useMemo` এর বদলে `useState` + `useEffect` ব্যবহার করবো যাতে প্রতিবার component mount হলে (page visit/refresh) নতুন করে shuffle হয়।
+2. **৪র্থ badge যোগ**: `RefreshCw` (or `RotateCcw`) icon দিয়ে **"Easy Return"** / **"সহজ রিটার্ন"** badge যোগ করবো। এটা e-commerce সাইটে খুবই common trust signal।
 
-### পরিবর্তন: `src/pages/store/Home.tsx`
+   ```
+   Fast Delivery | 100% Original | 24/7 Support | Easy Return
+   ```
 
-**আগে (line 18):**
-```ts
-const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
-```
+3. Import-এ `RotateCcw` icon যোগ করবো lucide-react থেকে।
 
-**পরে:**
-```ts
-const [shuffled, setShuffled] = useState<typeof products>([]);
-useEffect(() => {
-  setShuffled([...products].sort(() => Math.random() - 0.5));
-}, [products]);
-```
-
-এতে প্রতিবার Home page-এ ঢুকলে বা refresh দিলে products নতুনভাবে সাজানো হবে।
+### Technical Details
+- Line 1: `RotateCcw` import যোগ
+- Line 182: grid class update → `md:grid-cols-4`
+- Line 209 এর পরে: নতুন trust-badge div যোগ
 

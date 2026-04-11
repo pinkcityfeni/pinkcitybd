@@ -421,7 +421,7 @@ export default function Checkout() {
         {/* Quick summary */}
         <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.nItems', { n: itemCount })}</span><span>৳{total.toFixed(0)}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base">
             <span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span>
           </div>

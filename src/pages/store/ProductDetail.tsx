@@ -96,23 +96,17 @@ export default function ProductDetail() {
       {/* Product Section */}
       <div className="container mx-auto px-4 pb-8">
         <div className="grid md:grid-cols-2 gap-6 lg:gap-10">
-          {/* Image */}
+          {/* Image Gallery */}
           <div className="relative">
-            <div className="aspect-square rounded-xl overflow-hidden bg-secondary/30 flex items-center justify-center border">
-              {product.image ? (
-                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-8xl">{cat?.icon || '📦'}</span>
-              )}
-            </div>
+            <ProductImageGallery product={product} cat={cat} />
             <button
               onClick={() => toggleWishlist(product.id)}
-              className={`absolute top-4 right-4 h-10 w-10 rounded-lg backdrop-blur-md flex items-center justify-center shadow-sm transition-all ${isWished ? 'bg-destructive text-white' : 'bg-background/80 text-muted-foreground hover:text-destructive'}`}
+              className={`absolute top-4 right-4 z-10 h-10 w-10 rounded-lg backdrop-blur-md flex items-center justify-center shadow-sm transition-all ${isWished ? 'bg-destructive text-white' : 'bg-background/80 text-muted-foreground hover:text-destructive'}`}
             >
               <Heart className={`h-5 w-5 ${isWished ? 'fill-white' : ''}`} />
             </button>
             {product.stock <= 5 && product.stock > 0 && (
-              <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground rounded text-[10px]">
+              <Badge className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground rounded text-[10px]">
                 {lang === 'bn' ? `মাত্র ${product.stock}টি বাকি` : `Only ${product.stock} left`}
               </Badge>
             )}

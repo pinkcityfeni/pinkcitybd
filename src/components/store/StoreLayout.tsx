@@ -106,13 +106,8 @@ export default function StoreLayout() {
               <Search className="h-4 w-4 text-muted-foreground" />
             </button>
 
-            {/* Wishlist */}
-            <Link to="/wishlist" className="hidden sm:flex relative p-2 rounded-lg hover:bg-muted transition-colors">
-              <Heart className="h-4 w-4 text-muted-foreground" />
-              {wishlist.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center text-[9px] font-bold bg-primary text-primary-foreground rounded-full">{wishlist.length}</span>
-              )}
-            </Link>
+
+
 
             {/* Cart */}
 

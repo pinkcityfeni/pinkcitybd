@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 export default function Signup() {
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,7 +28,7 @@ export default function Signup() {
     e.preventDefault();
     setError('');
     if (password.length < 6) { setError(t('auth.passwordShort')); return; }
-    if (signup(name, email, password)) {
+    if (signup(name, email, password, phone)) {
       toast.success(t('auth.accountCreated'));
       navigate('/');
     } else {
@@ -62,6 +63,10 @@ export default function Signup() {
             <div>
               <Label htmlFor="name" className="text-xs">{t('auth.fullName')}</Label>
               <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder={t('auth.fullName')} required className="rounded-lg" />
+            </div>
+            <div>
+              <Label htmlFor="phone" className="text-xs">Phone Number</Label>
+              <Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" required className="rounded-lg" />
             </div>
             <div>
               <Label htmlFor="email" className="text-xs">{t('auth.emailLabel')}</Label>

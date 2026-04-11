@@ -15,7 +15,10 @@ export default function Home() {
   const toggleWishlist = useStore(s => s.toggleWishlist);
   const { t, lang } = useLanguage();
   const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
-  const shuffled = useMemo(() => [...products].sort(() => Math.random() - 0.5), [products]);
+  const [shuffled, setShuffled] = useState<typeof products>([]);
+  useEffect(() => {
+    setShuffled([...products].sort(() => Math.random() - 0.5));
+  }, [products]);
   const trending = useMemo(() => [...products].sort((a, b) => a.stock - b.stock).slice(0, 6), [products]);
   const newArrivals = useMemo(() => [...products].slice(-8), [products]);
 

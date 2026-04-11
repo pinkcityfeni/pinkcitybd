@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import logoImg from '@/assets/logo.jpg';
+import logoIcon from '@/assets/logo-icon.png';
 
 export default function StoreLayout() {
   const cart = useStore(s => s.cart);

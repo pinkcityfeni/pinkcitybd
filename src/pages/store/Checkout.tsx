@@ -56,7 +56,7 @@ export default function Checkout() {
     return null;
   }
 
-  const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'nagad' || paymentMethod === 'bank';
+  const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'bank';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -158,7 +158,7 @@ export default function Checkout() {
         <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
         {email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-muted-foreground" /><span>{email}</span></div>}
         <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span>{address}</span></div>
-        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryZone === 'feni' ? t('checkout.feni') : t('checkout.outsideFeni')} — ৳{deliveryCharge}</span></div>
+        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')} — ৳{deliveryCharge}</span></div>
       </div>
 
       <div className="rounded-2xl border bg-card p-4 mb-4 text-sm">
@@ -185,7 +185,7 @@ export default function Checkout() {
         ))}
         <div className="border-t pt-2 space-y-1 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
           
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">
@@ -279,17 +279,30 @@ export default function Checkout() {
           {/* Delivery Zone */}
           <div>
             <Label className="mb-2 block">{t('checkout.deliveryZone')} <span className="text-destructive">*</span></Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setDeliveryZone('feni')}
                 className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'feni' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
               >
                 <div className="flex items-center gap-2">
-                  <Truck className={`h-4 w-4 ${deliveryZone === 'feni' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === 'feni' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <div>
-                    <p className="font-medium text-sm">{t('checkout.feni')}</p>
+                    <p className="font-medium text-xs">{t('checkout.feni')}</p>
                     <p className="text-xs text-primary font-bold">৳৩০</p>
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeliveryZone('feni_upozila')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'feni_upozila' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === 'feni_upozila' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <div>
+                    <p className="font-medium text-xs">{t('checkout.feniUpozila')}</p>
+                    <p className="text-xs text-primary font-bold">৳৭০</p>
                   </div>
                 </div>
               </button>
@@ -299,9 +312,9 @@ export default function Checkout() {
                 className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'outside' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
               >
                 <div className="flex items-center gap-2">
-                  <Truck className={`h-4 w-4 ${deliveryZone === 'outside' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === 'outside' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <div>
-                    <p className="font-medium text-sm">{t('checkout.outsideFeni')}</p>
+                    <p className="font-medium text-xs">{t('checkout.outsideFeni')}</p>
                     <p className="text-xs text-primary font-bold">৳১৫০</p>
                   </div>
                 </div>

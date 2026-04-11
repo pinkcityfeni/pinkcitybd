@@ -181,7 +181,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Trust */}
-            <div className="grid grid-cols-3 gap-3 border rounded-lg p-3">
+            <div className="grid grid-cols-2 gap-3 border rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Truck className="h-4 w-4 text-primary shrink-0" />
                 <span>{lang === 'bn' ? 'দ্রুত ডেলিভারি' : 'Fast Delivery'}</span>
@@ -189,10 +189,6 @@ export default function ProductDetail() {
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                 <span>{lang === 'bn' ? 'অরিজিনাল' : 'Original'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <RotateCcw className="h-4 w-4 text-primary shrink-0" />
-                <span>{lang === 'bn' ? 'সহজ রিটার্ন' : 'Easy Return'}</span>
               </div>
             </div>
 

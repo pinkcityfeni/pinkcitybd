@@ -259,17 +259,10 @@ export default function StoreLayout() {
             {/* Follow Us */}
             <div>
               <h4 className="font-semibold text-sm mb-4 uppercase tracking-wider text-background/80" style={{ fontFamily: 'DM Sans, sans-serif' }}>{lang === 'bn' ? 'ফলো করুন' : 'Follow Us'}</h4>
-              <div className="flex gap-2.5 mb-4">
-                <a href="https://www.facebook.com/share/17KZiPoqUF/" target="_blank" rel="noopener noreferrer" className="h-9 w-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">
-                  <Facebook className="h-4 w-4" />
-                </a>
-                <span className="h-9 w-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors cursor-pointer">
-                  <Instagram className="h-4 w-4" />
-                </span>
-                <span className="h-9 w-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors cursor-pointer">
-                  <MessageCircle className="h-4 w-4" />
-                </span>
-              </div>
+              <a href="https://www.facebook.com/share/17KZiPoqUF/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-background/70 hover:text-background transition-colors mb-4">
+                <Facebook className="h-4 w-4" />
+                <span>Facebook Page</span>
+              </a>
               {user?.role === 'admin' && (
                 <div className="space-y-2.5">
                   <Link to="/admin" className="block text-xs text-background/50 hover:text-background transition-colors">{t('footer.dashboard')}</Link>

@@ -237,7 +237,7 @@ export default function StoreLayout() {
               </div>
               <div className="flex items-center gap-2 text-xs text-background/60 mb-2">
                 <Phone className="h-3 w-3" />
-                <span>+880 1XXX-XXXXXX</span>
+                <span>+880 1715-307271</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-background/60">
                 <Mail className="h-3 w-3" />

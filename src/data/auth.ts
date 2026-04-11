@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { useUserRegistry } from './userRegistry';
 
 interface AuthState {
@@ -20,7 +21,7 @@ const DEMO_ACCOUNTS = [
   { id: 'u3', email: normalizeEmail('user@shop.com'), password: normalizePassword('user123'), name: 'Demo Customer', phone: '', role: 'customer' as const },
 ];
 
-export const useAuth = create<AuthState>((set, get) => ({
+export const useAuth = create<AuthState>()(persist((set, get) => ({
   user: null,
   isAuthenticated: false,
 
@@ -60,4 +61,4 @@ export const useAuth = create<AuthState>((set, get) => ({
     if (user.role === 'admin') return true;
     return user.role === role;
   },
-}));
+}), { name: 'glamora-auth' }));

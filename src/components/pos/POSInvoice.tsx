@@ -25,7 +25,7 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
         <h1 className="text-lg font-bold tracking-tight">{t('invoice.shopName')}</h1>
         <p className="text-[10px] text-gray-500 mt-0.5">{t('invoice.shopDesc')}</p>
         <p className="text-[10px] text-gray-500">{t('invoice.location')}</p>
-        <p className="text-[10px] text-gray-500">📞 01XXXXXXXXX</p>
+        <p className="text-[10px] text-gray-500">📞 01715307271</p>
       </div>
 
       <div className="flex justify-between mb-3 text-[10px]">

@@ -342,8 +342,8 @@ export default function Checkout() {
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-pink-600">{t('checkout.bkashPersonal')}</p>
                   <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
-                    <span className="flex-1 font-mono font-bold text-sm tracking-wider">01XXXXXXXXX</span>
-                    <button type="button" onClick={() => copyToClipboard('01XXXXXXXXX')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
+                    <span className="flex-1 font-mono font-bold text-sm tracking-wider">01715307271</span>
+                    <button type="button" onClick={() => copyToClipboard('01715307271')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
                       {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
@@ -353,8 +353,8 @@ export default function Checkout() {
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-orange-600">{t('checkout.nagadPersonal')}</p>
                   <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
-                    <span className="flex-1 font-mono font-bold text-sm tracking-wider">01XXXXXXXXX</span>
-                    <button type="button" onClick={() => copyToClipboard('01XXXXXXXXX')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
+                    <span className="flex-1 font-mono font-bold text-sm tracking-wider">01715307271</span>
+                    <button type="button" onClick={() => copyToClipboard('01715307271')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
                       {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>

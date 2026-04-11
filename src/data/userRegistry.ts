@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface RegisteredUser {
   id: string;
@@ -18,7 +19,7 @@ interface UserRegistryState {
   updateRole: (id: string, role: RegisteredUser['role']) => void;
 }
 
-export const useUserRegistry = create<UserRegistryState>((set) => ({
+export const useUserRegistry = create<UserRegistryState>()(persist((set) => ({
   users: [
     { id: 'u1', name: 'Admin User', email: 'pinkcity.feni@gmail.com', phone: '01715307271', role: 'admin', points: 0, orders: 0, createdAt: '2026-01-01' },
   ],
@@ -43,4 +44,4 @@ export const useUserRegistry = create<UserRegistryState>((set) => ({
     set((state) => ({
       users: state.users.map((u) => (u.id === id ? { ...u, role } : u)),
     })),
-}));
+}), { name: 'glamora-users' }));

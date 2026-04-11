@@ -1,5 +1,6 @@
 // Shared data store for the entire application
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 // ─── Types ───
 
@@ -201,7 +202,7 @@ interface StoreState {
   getProductRating: (productId: string) => { avg: number; count: number };
 }
 
-export const useStore = create<StoreState>((set, get) => ({
+export const useStore = create<StoreState>()(persist((set, get) => ({
   products: INITIAL_PRODUCTS,
   orders: [],
   cart: [],
@@ -351,4 +352,4 @@ export const useStore = create<StoreState>((set, get) => ({
     const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
     return { avg, count: reviews.length };
   },
-}));
+}), { name: 'glamora-store' }));

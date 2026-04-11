@@ -4,6 +4,7 @@ export interface RegisteredUser {
   id: string;
   name: string;
   email: string;
+  phone: string;
   role: 'admin' | 'cashier' | 'customer';
   points: number;
   orders: number;
@@ -18,7 +19,7 @@ interface UserRegistryState {
 
 export const useUserRegistry = create<UserRegistryState>((set) => ({
   users: [
-    { id: 'u1', name: 'Admin User', email: 'pinkcity.feni@gmail.com', role: 'admin', points: 0, orders: 0, createdAt: '2026-01-01' },
+    { id: 'u1', name: 'Admin User', email: 'pinkcity.feni@gmail.com', phone: '01715307271', role: 'admin', points: 0, orders: 0, createdAt: '2026-01-01' },
   ],
 
   addUser: (user) =>
@@ -27,7 +28,7 @@ export const useUserRegistry = create<UserRegistryState>((set) => ({
       return {
         users: [
           ...state.users,
-          { ...user, points: 0, orders: 0, createdAt: new Date().toISOString().slice(0, 10) },
+          { ...user, phone: user.phone || '', points: 0, orders: 0, createdAt: new Date().toISOString().slice(0, 10) },
         ],
       };
     }),

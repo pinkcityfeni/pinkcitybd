@@ -16,6 +16,7 @@ export interface Product {
   id: string;
   name: string;
   image: string;
+  images: string[];
   price: number;
   buyingPrice: number;
   barcode: string;
@@ -105,21 +106,21 @@ const INITIAL_CATEGORIES: Category[] = [
 ];
 
 const INITIAL_PRODUCTS: Product[] = [
-  { id: 'p1', name: 'Gold Layered Necklace', image: '', price: 2500, buyingPrice: 1100, barcode: '2001', stock: 35, category: 'Jewelry', subcategory: 'Necklace', description: 'Elegant multi-layer gold-plated necklace, adjustable chain length.' },
-  { id: 'p2', name: 'Pearl Pendant Necklace', image: '', price: 1800, buyingPrice: 800, barcode: '2002', stock: 50, category: 'Jewelry', subcategory: 'Necklace', description: 'Classic freshwater pearl pendant on a sterling silver chain.' },
-  { id: 'p3', name: 'Silver Statement Necklace', image: '', price: 3200, buyingPrice: 1400, barcode: '2003', stock: 20, category: 'Jewelry', subcategory: 'Necklace', description: 'Bold silver-tone statement necklace for special occasions.' },
-  { id: 'p4', name: 'Traditional Glass Churi Set', image: '', price: 350, buyingPrice: 120, barcode: '2004', stock: 100, category: 'Jewelry', subcategory: 'Churi', description: 'Set of 12 colorful glass bangles, assorted colors.' },
-  { id: 'p5', name: 'Gold Plated Churi Set', image: '', price: 1200, buyingPrice: 500, barcode: '2005', stock: 60, category: 'Jewelry', subcategory: 'Churi', description: 'Premium gold-plated bangle set of 6, intricate design.' },
-  { id: 'p6', name: 'Crystal Churi Pair', image: '', price: 850, buyingPrice: 350, barcode: '2006', stock: 45, category: 'Jewelry', subcategory: 'Churi', description: 'Sparkling crystal-studded bangle pair, one size fits most.' },
-  { id: 'p7', name: 'Diamond Solitaire Ring', image: '', price: 6500, buyingPrice: 2800, barcode: '2007', stock: 15, category: 'Jewelry', subcategory: 'Ring', description: 'Stunning CZ diamond solitaire ring in white gold setting.' },
-  { id: 'p8', name: 'Stacking Ring Set', image: '', price: 1500, buyingPrice: 600, barcode: '2008', stock: 40, category: 'Jewelry', subcategory: 'Ring', description: 'Set of 5 minimalist stacking rings, mixed metals.' },
-  { id: 'p9', name: 'Vintage Emerald Ring', image: '', price: 4000, buyingPrice: 1800, barcode: '2009', stock: 18, category: 'Jewelry', subcategory: 'Ring', description: 'Vintage-style emerald green stone ring with filigree band.' },
-  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', price: 450, buyingPrice: 150, barcode: '3001', stock: 120, category: 'Makeup', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
-  { id: 'p11', name: 'Glossy Lip Color', image: '', price: 380, buyingPrice: 130, barcode: '3002', stock: 90, category: 'Makeup', subcategory: 'Lip Gloss', description: 'High-shine glossy lip color with moisturizing formula.' },
-  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', price: 650, buyingPrice: 250, barcode: '3003', stock: 75, category: 'Makeup', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
-  { id: 'p13', name: 'Hydrating Face Cream', image: '', price: 950, buyingPrice: 350, barcode: '3004', stock: 85, category: 'Skin', subcategory: 'Moisturizer', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
-  { id: 'p14', name: 'Night Repair Cream', image: '', price: 1400, buyingPrice: 550, barcode: '3005', stock: 55, category: 'Skin', subcategory: 'Night Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
-  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', price: 750, buyingPrice: 300, barcode: '3006', stock: 100, category: 'Skin', subcategory: 'Sunscreen', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
+  { id: 'p1', name: 'Gold Layered Necklace', image: '', images: [], price: 2500, buyingPrice: 1100, barcode: '2001', stock: 35, category: 'Jewelry', subcategory: 'Necklace', description: 'Elegant multi-layer gold-plated necklace, adjustable chain length.' },
+  { id: 'p2', name: 'Pearl Pendant Necklace', image: '', images: [], price: 1800, buyingPrice: 800, barcode: '2002', stock: 50, category: 'Jewelry', subcategory: 'Necklace', description: 'Classic freshwater pearl pendant on a sterling silver chain.' },
+  { id: 'p3', name: 'Silver Statement Necklace', image: '', images: [], price: 3200, buyingPrice: 1400, barcode: '2003', stock: 20, category: 'Jewelry', subcategory: 'Necklace', description: 'Bold silver-tone statement necklace for special occasions.' },
+  { id: 'p4', name: 'Traditional Glass Churi Set', image: '', images: [], price: 350, buyingPrice: 120, barcode: '2004', stock: 100, category: 'Jewelry', subcategory: 'Churi', description: 'Set of 12 colorful glass bangles, assorted colors.' },
+  { id: 'p5', name: 'Gold Plated Churi Set', image: '', images: [], price: 1200, buyingPrice: 500, barcode: '2005', stock: 60, category: 'Jewelry', subcategory: 'Churi', description: 'Premium gold-plated bangle set of 6, intricate design.' },
+  { id: 'p6', name: 'Crystal Churi Pair', image: '', images: [], price: 850, buyingPrice: 350, barcode: '2006', stock: 45, category: 'Jewelry', subcategory: 'Churi', description: 'Sparkling crystal-studded bangle pair, one size fits most.' },
+  { id: 'p7', name: 'Diamond Solitaire Ring', image: '', images: [], price: 6500, buyingPrice: 2800, barcode: '2007', stock: 15, category: 'Jewelry', subcategory: 'Ring', description: 'Stunning CZ diamond solitaire ring in white gold setting.' },
+  { id: 'p8', name: 'Stacking Ring Set', image: '', images: [], price: 1500, buyingPrice: 600, barcode: '2008', stock: 40, category: 'Jewelry', subcategory: 'Ring', description: 'Set of 5 minimalist stacking rings, mixed metals.' },
+  { id: 'p9', name: 'Vintage Emerald Ring', image: '', images: [], price: 4000, buyingPrice: 1800, barcode: '2009', stock: 18, category: 'Jewelry', subcategory: 'Ring', description: 'Vintage-style emerald green stone ring with filigree band.' },
+  { id: 'p10', name: 'Matte Velvet Lipstick', image: '', images: [], price: 450, buyingPrice: 150, barcode: '3001', stock: 120, category: 'Makeup', subcategory: 'Lipstick', description: 'Long-lasting matte finish lipstick, rich pigmentation.' },
+  { id: 'p11', name: 'Glossy Lip Color', image: '', images: [], price: 380, buyingPrice: 130, barcode: '3002', stock: 90, category: 'Makeup', subcategory: 'Lip Gloss', description: 'High-shine glossy lip color with moisturizing formula.' },
+  { id: 'p12', name: 'Liquid Lipstick Pro', image: '', images: [], price: 650, buyingPrice: 250, barcode: '3003', stock: 75, category: 'Makeup', subcategory: 'Lipstick', description: 'Professional-grade liquid lipstick, 12-hour wear.' },
+  { id: 'p13', name: 'Hydrating Face Cream', image: '', images: [], price: 950, buyingPrice: 350, barcode: '3004', stock: 85, category: 'Skin', subcategory: 'Moisturizer', description: 'Deep hydrating face cream with hyaluronic acid and vitamin E.' },
+  { id: 'p14', name: 'Night Repair Cream', image: '', images: [], price: 1400, buyingPrice: 550, barcode: '3005', stock: 55, category: 'Skin', subcategory: 'Night Cream', description: 'Intensive overnight repair cream with retinol and collagen.' },
+  { id: 'p15', name: 'SPF50 Sunscreen Cream', image: '', images: [], price: 750, buyingPrice: 300, barcode: '3006', stock: 100, category: 'Skin', subcategory: 'Sunscreen', description: 'Broad-spectrum SPF50 sunscreen, lightweight, non-greasy.' },
 ];
 
 // ─── Store ───

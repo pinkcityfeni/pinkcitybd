@@ -9,33 +9,40 @@ import { Plus, Pencil, Trash2, Search, Camera, X as XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
-const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '' };
+const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '', images: [] as string[] };
 
-function ImageUpload({ value, onChange, uploadLabel }: { value: string; onChange: (v: string) => void; uploadLabel: string }) {
+function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[]; onChange: (imgs: string[]) => void; uploadLabel: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return; }
-    const reader = new FileReader();
-    reader.onload = () => onChange(reader.result as string);
-    reader.readAsDataURL(file);
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return; }
+      const reader = new FileReader();
+      reader.onload = () => onChange([...images, reader.result as string]);
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
   };
+  const removeImage = (index: number) => onChange(images.filter((_, i) => i !== index));
+
   return (
     <div className="space-y-2">
-      {value ? (
-        <div className="relative w-24 h-24 rounded-xl overflow-hidden border">
-          <img src={value} alt="Product" className="w-full h-full object-cover" />
-          <button type="button" onClick={() => onChange('')} className="absolute top-1 right-1 bg-background/80 rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors">
-            <XIcon className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ) : (
-        <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-sm text-muted-foreground w-full justify-center">
-          <Camera className="h-4 w-4" /><span>{uploadLabel}</span>
+      <div className="flex flex-wrap gap-2">
+        {images.map((img, i) => (
+          <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border">
+            <img src={img} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
+            <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-background/80 rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors">
+              <XIcon className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={() => fileRef.current?.click()} className="flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground">
+          <Camera className="h-4 w-4" />
+          <span className="text-[10px] mt-1">{uploadLabel}</span>
         </button>
-      )}
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
     </div>
   );
 }
@@ -70,13 +77,15 @@ export default function Products() {
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
-    setForm({ name: p.name, description: p.description, price: String(p.price), buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image });
+    setForm({ name: p.name, description: p.description, price: String(p.price), buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [] });
     setDialogOpen(true);
   };
 
   const handleSave = () => {
     if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
-    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: form.image };
+    const allImages = form.images;
+    const mainImage = allImages[0] || form.image || '';
+    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages };
     if (editProduct) { updateProduct(editProduct.id, data); toast.success(t('prod.updated')); }
     else { addProduct(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
@@ -115,9 +124,14 @@ export default function Products() {
         {filtered.map(p => (
           <div key={p.id} className="stat-card p-4 space-y-2">
             <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-medium text-sm">{p.name}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{p.category} · {p.subcategory}</p>
+              <div className="flex items-center gap-3">
+                {(p.images?.[0] || p.image) && (
+                  <img src={p.images?.[0] || p.image} alt={p.name} className="w-12 h-12 rounded-lg object-cover border" />
+                )}
+                <div>
+                  <h3 className="font-medium text-sm">{p.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{p.category} · {p.subcategory}</p>
+                </div>
               </div>
               <div className="flex gap-1">
                 <button onClick={() => openEdit(p)} className="p-1.5 hover:text-primary rounded-lg hover:bg-primary/10"><Pencil className="h-4 w-4" /></button>
@@ -127,6 +141,7 @@ export default function Products() {
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline" className="text-[10px]">{p.barcode}</Badge>
               <span className={`font-medium ${p.stock < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>{t('prod.stock')}: {p.stock}</span>
+              {(p.images?.length || 0) > 0 && <Badge variant="secondary" className="text-[10px]">📷 {p.images.length}</Badge>}
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="font-bold text-primary">৳{p.price.toFixed(0)}</span>
@@ -155,7 +170,12 @@ export default function Products() {
           <tbody>
             {filtered.map(p => (
               <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30">
-                <td className="py-3 font-medium">{p.name}</td>
+                <td className="py-3 font-medium">
+                  <div className="flex items-center gap-2">
+                    {(p.images?.[0] || p.image) && <img src={p.images?.[0] || p.image} alt="" className="w-8 h-8 rounded-md object-cover border" />}
+                    <span>{p.name}</span>
+                  </div>
+                </td>
                 <td className="py-3 font-mono text-xs">{p.barcode}</td>
                 <td className="py-3"><Badge variant="outline" className="text-xs">{p.category}</Badge></td>
                 <td className="py-3 text-xs text-muted-foreground">{p.subcategory}</td>
@@ -179,7 +199,10 @@ export default function Products() {
           <div className="grid gap-3 max-h-[70vh] overflow-auto pr-1">
             <div><Label>{t('prod.name')}</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
             <div><Label>{t('prod.description')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
-            <div><Label>{t('prod.image')}</Label><ImageUpload value={form.image} onChange={(val) => setForm(f => ({ ...f, image: val }))} uploadLabel={t('prod.uploadPhoto')} /></div>
+            <div>
+              <Label>{t('prod.image')} ({form.images.length})</Label>
+              <MultiImageUpload images={form.images} onChange={(imgs) => setForm(f => ({ ...f, images: imgs, image: imgs[0] || '' }))} uploadLabel={t('prod.uploadPhoto')} />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{t('prod.sellingPrice')}</Label><Input type="number" step="1" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
               <div><Label>{t('prod.buyingPrice')}</Label><Input type="number" step="1" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>

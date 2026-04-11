@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, ChevronRight, Truck, ShieldCheck, Headphones, BadgeDollarSign } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, ChevronRight, Truck, ShieldCheck, Headphones } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -209,7 +209,7 @@ export default function StoreLayout() {
               </div>
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <BadgeDollarSign className="h-5 w-5" />
+                  <span className="text-lg font-bold">৳</span>
                 </div>
                 <div>
                   <p className="text-xs font-semibold">{lang === 'bn' ? 'সেরা দাম' : 'Best Price'}</p>

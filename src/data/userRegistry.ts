@@ -15,6 +15,7 @@ interface UserRegistryState {
   users: RegisteredUser[];
   addUser: (user: Omit<RegisteredUser, 'points' | 'orders' | 'createdAt'>) => void;
   removeUser: (id: string) => void;
+  updateRole: (id: string, role: RegisteredUser['role']) => void;
 }
 
 export const useUserRegistry = create<UserRegistryState>((set) => ({

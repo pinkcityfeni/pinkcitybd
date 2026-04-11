@@ -374,7 +374,6 @@ export default function Checkout() {
                   </div>
                 </div>
               )}
-              )}
               {paymentMethod === 'bank' && (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold text-blue-600">{t('checkout.bankTransfer')}</p>

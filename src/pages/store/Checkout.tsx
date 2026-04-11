@@ -41,7 +41,6 @@ export default function Checkout() {
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
     { id: 'bkash', label: t('checkout.bkash'), icon: <Smartphone className="h-5 w-5" />, description: t('checkout.bkashDesc') },
-    { id: 'cash', label: t('checkout.cash'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.cashDesc') },
     { id: 'bank', label: t('checkout.bank'), icon: <Building2 className="h-5 w-5" />, description: t('checkout.bankDesc') },
   ];
 

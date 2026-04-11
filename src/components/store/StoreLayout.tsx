@@ -54,7 +54,7 @@ export default function StoreLayout() {
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <img src={logoImg} alt="PINK CITY" className="h-9 w-9 rounded-lg object-cover" />
+            <img src={logoIcon} alt="PINK CITY" className="h-9 w-9 object-contain" />
             <div className="leading-none">
               <span className="text-xl font-bold tracking-tight block pink-city-glow" style={{ fontFamily: 'Playfair Display, serif' }}>
                 <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>

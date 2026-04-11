@@ -7,21 +7,21 @@ export interface RegisteredUser {
   email: string;
   phone: string;
   role: 'admin' | 'cashier' | 'customer';
-  points: number;
+  
   orders: number;
   createdAt: string;
 }
 
 interface UserRegistryState {
   users: RegisteredUser[];
-  addUser: (user: Omit<RegisteredUser, 'points' | 'orders' | 'createdAt'>) => void;
+  addUser: (user: Omit<RegisteredUser, 'orders' | 'createdAt'>) => void;
   removeUser: (id: string) => void;
   updateRole: (id: string, role: RegisteredUser['role']) => void;
 }
 
 export const useUserRegistry = create<UserRegistryState>()(persist((set) => ({
   users: [
-    { id: 'u1', name: 'Admin User', email: 'pinkcity.feni@gmail.com', phone: '01715307271', role: 'admin', points: 0, orders: 0, createdAt: '2026-01-01' },
+    { id: 'u1', name: 'Admin User', email: 'pinkcity.feni@gmail.com', phone: '01715307271', role: 'admin', orders: 0, createdAt: '2026-01-01' },
   ],
 
   addUser: (user) =>
@@ -30,7 +30,7 @@ export const useUserRegistry = create<UserRegistryState>()(persist((set) => ({
       return {
         users: [
           ...state.users,
-          { ...user, phone: user.phone || '', points: 0, orders: 0, createdAt: new Date().toISOString().slice(0, 10) },
+          { ...user, phone: user.phone || '', orders: 0, createdAt: new Date().toISOString().slice(0, 10) },
         ],
       };
     }),

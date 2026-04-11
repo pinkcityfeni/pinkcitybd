@@ -64,7 +64,7 @@ export interface Order {
   deliveryAddress?: string;
   deliveryZone?: DeliveryZone;
   deliveryCharge?: number;
-  pointsEarned?: number;
+  
   paymentMethod?: PaymentMethod;
   paymentStatus?: 'pending' | 'paid';
   splitPayment?: SplitPayment;
@@ -84,7 +84,6 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  points: number;
   role: 'customer' | 'admin' | 'cashier';
 }
 
@@ -288,7 +287,7 @@ export const useStore = create<StoreState>()(persist((set, get) => ({
       ? (data.discountType === 'percent' ? Math.round(subtotal * data.discount / 100) : data.discount)
       : 0;
     const total = Math.max(0, subtotal - discountAmount) + deliveryCharge;
-    const pointsEarned = type === 'online' ? Math.floor(subtotal) : 0;
+    
     const id = `ord-${Date.now()}`;
     const order: Order = {
       id,
@@ -303,7 +302,7 @@ export const useStore = create<StoreState>()(persist((set, get) => ({
       deliveryAddress: data?.deliveryAddress,
       deliveryZone: data?.deliveryZone,
       deliveryCharge,
-      pointsEarned,
+      
       paymentMethod: data?.paymentMethod,
       paymentStatus: data?.paymentStatus || (data?.paymentMethod === 'cod' ? 'pending' : 'paid'),
       splitPayment: data?.splitPayment,

@@ -15,6 +15,7 @@ interface UserRegistryState {
   users: RegisteredUser[];
   addUser: (user: Omit<RegisteredUser, 'points' | 'orders' | 'createdAt'>) => void;
   removeUser: (id: string) => void;
+  updateRole: (id: string, role: RegisteredUser['role']) => void;
 }
 
 export const useUserRegistry = create<UserRegistryState>((set) => ({
@@ -36,5 +37,10 @@ export const useUserRegistry = create<UserRegistryState>((set) => ({
   removeUser: (id) =>
     set((state) => ({
       users: state.users.filter((u) => u.id !== id),
+    })),
+
+  updateRole: (id, role) =>
+    set((state) => ({
+      users: state.users.map((u) => (u.id === id ? { ...u, role } : u)),
     })),
 }));

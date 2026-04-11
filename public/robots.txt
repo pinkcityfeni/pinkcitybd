@@ -1,8 +1,19 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /pos
+Disallow: /login
+Disallow: /signup
+
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /pos
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /pos
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +21,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+Sitemap: https://pinkcitybd.lovable.app/sitemap.xml

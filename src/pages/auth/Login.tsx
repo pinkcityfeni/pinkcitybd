@@ -6,13 +6,15 @@ import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import { sanitizeEmail, checkLoginRateLimit, recordLoginAttempt, isValidEmail } from '@/lib/security';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -27,12 +29,37 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (login(email, password)) {
-      toast.success(t('auth.welcomeBackToast'));
-      navigate(from, { replace: true });
-    } else {
-      setError(t('auth.invalidCreds'));
+
+    const cleanEmail = sanitizeEmail(email);
+
+    // Validate email format
+    if (!isValidEmail(cleanEmail)) {
+      setError('সঠিক ইমেইল দিন');
+      return;
     }
+
+    // Check rate limiting
+    const rateCheck = checkLoginRateLimit(cleanEmail);
+    if (!rateCheck.allowed) {
+      setError(rateCheck.message);
+      return;
+    }
+
+    setLoading(true);
+
+    // Small delay to prevent timing attacks
+    setTimeout(() => {
+      const success = login(cleanEmail, password);
+      recordLoginAttempt(cleanEmail, success);
+
+      if (success) {
+        toast.success(t('auth.welcomeBackToast'));
+        navigate(from, { replace: true });
+      } else {
+        setError(t('auth.invalidCreds'));
+      }
+      setLoading(false);
+    }, 300);
   };
 
   return (
@@ -52,7 +79,7 @@ export default function Login() {
           <h1 className="font-display text-xl font-bold mb-1">{t('auth.welcomeBack')}</h1>
           <p className="text-xs text-muted-foreground mb-5">{t('auth.signInDesc')}</p>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3" autoComplete="on">
             {error && (
               <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 rounded-lg px-3 py-2">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -61,16 +88,23 @@ export default function Login() {
             )}
             <div>
               <Label htmlFor="email" className="text-xs">{t('auth.emailLabel')}</Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-lg" />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-lg" autoComplete="email" maxLength={255} />
             </div>
             <div>
               <Label htmlFor="password" className="text-xs">{t('auth.passwordLabel')}</Label>
-              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-lg" />
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-lg" autoComplete="current-password" maxLength={128} />
             </div>
-            <Button type="submit" className="w-full rounded-lg h-10 font-semibold">{t('auth.signInBtn')}</Button>
+            <Button type="submit" className="w-full rounded-lg h-10 font-semibold" disabled={loading}>
+              {loading ? '...' : t('auth.signInBtn')}
+            </Button>
           </form>
 
-          <p className="text-xs text-center mt-4 text-muted-foreground">
+          <div className="flex items-center gap-1.5 justify-center mt-3 text-[10px] text-muted-foreground">
+            <Shield className="h-3 w-3" />
+            <span>নিরাপদ লগইন</span>
+          </div>
+
+          <p className="text-xs text-center mt-3 text-muted-foreground">
             {t('auth.noAccount')}{' '}
             <Link to="/signup" className="text-primary font-medium hover:underline">{t('auth.signUp')}</Link>
           </p>

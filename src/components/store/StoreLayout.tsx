@@ -45,7 +45,7 @@ export default function StoreLayout() {
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top announcement bar */}
       <div className="announcement-bar text-center py-1.5 text-xs font-medium tracking-wide">
-        <span>{lang === 'bn' ? '🚚 ফেনীতে ফ্রি ডেলিভারি | সারাদেশে ক্যাশ অন ডেলিভারি' : '🚚 Free Delivery in Feni | Cash on Delivery Nationwide'}</span>
+        <span>{useStore(s => s.announcementText)}</span>
       </div>
 
       {/* Main Header */}

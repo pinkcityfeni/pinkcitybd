@@ -67,7 +67,7 @@ export default function Home() {
               {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
             {trending.map(p => (
               <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} compact />
             ))}
@@ -106,7 +106,7 @@ export default function Home() {
             {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
           {shuffled.map(p => (
             <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
           ))}
@@ -238,7 +238,7 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
 
   return (
     <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <div className="relative aspect-[2/1] sm:aspect-[3/1] w-full cursor-pointer" onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
+      <div className="relative w-full cursor-pointer" style={{ height: '94px' }} onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
         {banner.image ? (
           <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
         ) : (

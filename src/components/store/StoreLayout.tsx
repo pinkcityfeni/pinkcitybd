@@ -179,7 +179,7 @@ export default function StoreLayout() {
         {/* Trust badges */}
         <div className="border-b border-background/10">
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
                   <Truck className="h-5 w-5" />
@@ -205,6 +205,15 @@ export default function StoreLayout() {
                 <div>
                   <p className="text-xs font-semibold">{lang === 'bn' ? '২৪/৭ সাপোর্ট' : '24/7 Support'}</p>
                   <p className="text-[10px] text-background/60">{lang === 'bn' ? 'যেকোনো সময়' : 'Anytime'}</p>
+                </div>
+              </div>
+              <div className="trust-badge">
+                <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
+                  <RotateCcw className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold">{lang === 'bn' ? 'সহজ রিটার্ন' : 'Easy Return'}</p>
+                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'ঝামেলামুক্ত' : 'Hassle Free'}</p>
                 </div>
               </div>
             </div>

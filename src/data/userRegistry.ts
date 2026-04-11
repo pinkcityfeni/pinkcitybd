@@ -38,4 +38,9 @@ export const useUserRegistry = create<UserRegistryState>((set) => ({
     set((state) => ({
       users: state.users.filter((u) => u.id !== id),
     })),
+
+  updateRole: (id, role) =>
+    set((state) => ({
+      users: state.users.map((u) => (u.id === id ? { ...u, role } : u)),
+    })),
 }));

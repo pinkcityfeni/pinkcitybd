@@ -37,12 +37,11 @@ export default function Users() {
       <div className="stat-card overflow-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-muted-foreground">
+             <tr className="border-b text-left text-muted-foreground">
               <th className="pb-3 font-medium">{t('user.name')}</th>
+              <th className="pb-3 font-medium">Phone</th>
               <th className="pb-3 font-medium">{t('user.email')}</th>
               <th className="pb-3 font-medium">{t('user.role')}</th>
-              
-              <th className="pb-3 font-medium text-right">{t('user.orders')}</th>
               <th className="pb-3 font-medium text-right">{t('user.actions')}</th>
             </tr>
           </thead>
@@ -50,14 +49,13 @@ export default function Users() {
             {users.map((u) => (
               <tr key={u.id} className="border-b last:border-0 hover:bg-muted/30">
                 <td className="py-3 font-medium">{u.name}</td>
+                <td className="py-3 text-muted-foreground">{u.phone || '—'}</td>
                 <td className="py-3 text-muted-foreground">{u.email}</td>
                 <td className="py-3">
                   <Badge variant="outline" className="capitalize text-xs">
                     {u.role}
                   </Badge>
                 </td>
-                
-                <td className="py-3 text-right">{u.orders}</td>
                 <td className="py-3 text-right">
                   {u.role !== 'admin' ? (
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget(u)}>

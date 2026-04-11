@@ -41,14 +41,14 @@ export default function Home() {
 
       {/* Category Strip */}
       <section className="border-b bg-background">
-        <div className="container mx-auto px-4 py-5">
-          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-1">
+        <div className="container mx-auto px-3 py-3">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-0.5">
             {categories.map(c => (
-              <Link key={c.id} to={`/shop?category=${encodeURIComponent(c.name)}`} className="flex flex-col items-center gap-2 min-w-[64px] group">
-                <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:scale-105 transition-all duration-300 overflow-hidden border">
-                  {c.image ? <img src={c.image} alt={c.name} className="h-full w-full object-cover" /> : <span className="text-xl">{c.icon}</span>}
+              <Link key={c.id} to={`/shop?category=${encodeURIComponent(c.name)}`} className="flex flex-col items-center gap-1 min-w-[52px] group">
+                <div className="h-11 w-11 rounded-lg bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:scale-105 transition-all duration-300 overflow-hidden border">
+                  {c.image ? <img src={c.image} alt={c.name} className="h-full w-full object-cover" /> : <span className="text-base">{c.icon}</span>}
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-primary text-center leading-tight whitespace-nowrap transition-colors">{c.name}</span>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-primary text-center leading-tight whitespace-nowrap transition-colors">{c.name}</span>
               </Link>
             ))}
           </div>
@@ -57,8 +57,8 @@ export default function Home() {
 
       {/* Trending Products */}
       {trending.length > 0 && (
-        <section className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-5">
+        <section className="container mx-auto px-3 py-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
               <h2 className="section-title flex items-center gap-2">🔥 {t('home.trending')}</h2>
               <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'সবচেয়ে জনপ্রিয় পণ্য' : 'Most popular products'}</p>
@@ -76,7 +76,7 @@ export default function Home() {
       )}
 
       {/* Feature Banner */}
-      <section className="bg-secondary/50 py-8">
+      <section className="bg-secondary/50 py-4">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col items-center text-center gap-2">
@@ -96,8 +96,8 @@ export default function Home() {
       </section>
 
       {/* All Products */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-5">
+      <section className="container mx-auto px-3 py-4">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="section-title">{t('home.forYou')}</h2>
             <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'আমাদের সেরা কালেকশন' : 'Our best collection'}</p>

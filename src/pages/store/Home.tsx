@@ -138,28 +138,28 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
   const rating = getProductRating(p.id);
 
   return (
-    <div className="group product-card relative">
+    <div className="group product-card relative rounded-lg overflow-hidden border bg-background">
       {/* Wishlist */}
       <button
         onClick={() => toggleWishlist(p.id)}
-        className="absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+        className="absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
       >
-        <Heart className={`h-3.5 w-3.5 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
+        <Heart className={`h-3 w-3 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
       </button>
 
       {/* Stock badge */}
       {p.stock < 5 && p.stock > 0 && (
-        <span className="absolute top-2 left-2 z-10 text-[8px] bg-destructive text-destructive-foreground px-2 py-0.5 rounded font-semibold">
+        <span className="absolute top-1 left-1 z-10 text-[7px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded font-semibold">
           {t('shop.lowStock')}
         </span>
       )}
 
       <Link to={`/product/${p.id}`}>
-        <div className="aspect-square bg-secondary/30 flex items-center justify-center overflow-hidden relative">
+        <div className="aspect-[4/5] bg-secondary/30 flex items-center justify-center overflow-hidden relative">
           {p.image ? (
             <img src={p.image} alt={p.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
           ) : (
-            <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{cat?.icon || '📦'}</span>
+            <span className="text-2xl group-hover:scale-110 transition-transform duration-300">{cat?.icon || '📦'}</span>
           )}
           {p.stock === 0 && (
             <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center">

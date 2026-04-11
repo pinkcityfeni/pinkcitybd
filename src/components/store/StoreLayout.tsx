@@ -209,11 +209,11 @@ export default function StoreLayout() {
               </div>
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <RotateCcw className="h-5 w-5" />
+                  <BadgeDollarSign className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold">{lang === 'bn' ? 'সহজ রিটার্ন' : 'Easy Return'}</p>
-                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'ঝামেলামুক্ত' : 'Hassle Free'}</p>
+                  <p className="text-xs font-semibold">{lang === 'bn' ? 'সেরা দাম' : 'Best Price'}</p>
+                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'সাশ্রয়ী মূল্য' : 'Affordable'}</p>
                 </div>
               </div>
             </div>

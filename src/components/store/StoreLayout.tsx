@@ -218,7 +218,7 @@ export default function StoreLayout() {
               <div className="flex items-center gap-2 mb-4">
                 <img src={logoImg} alt="PINK CITY" className="h-10 w-10 rounded-lg object-cover" />
                 <div>
-                  <span className="font-bold text-sm block" style={{ fontFamily: 'Playfair Display, serif' }}>PINK CITY</span>
+                  <span className="text-base block" style={{ fontFamily: "'Pacifico', cursive" }}>Pink City</span>
                 </div>
               </div>
               <p className="text-xs text-background/60 leading-relaxed mb-4">{t('footer.tagline')}</p>

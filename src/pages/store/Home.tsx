@@ -60,14 +60,13 @@ export default function Home() {
 
       {/* Trending Products */}
       {trending.length > 0 && (
-        <section className="container mx-auto px-3 py-4">
-          <div className="flex items-center justify-between mb-3">
+        <section className="container mx-auto px-3 py-2">
+          <div className="flex items-center justify-between mb-1.5">
             <div>
-              <h2 className="section-title flex items-center gap-2">🔥 {t('home.trending')}</h2>
-              <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'সবচেয়ে জনপ্রিয় পণ্য' : 'Most popular products'}</p>
+              <h2 className="text-sm font-semibold flex items-center gap-1.5">🔥 {t('home.trending')}</h2>
             </div>
-            <Link to="/shop" className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all">
-              {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />
+            <Link to="/shop" className="text-[10px] text-primary font-semibold flex items-center gap-0.5 hover:gap-1 transition-all">
+              {t('home.viewAll')} <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">

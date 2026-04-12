@@ -56,8 +56,8 @@ export default function StoreLayout() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
-            <span className="text-[26px] leading-none" style={{ fontFamily: "'Lilita One', cursive" }}>
-              <span className="text-gradient-pink">Pink</span> <span className="text-foreground">City</span>
+            <span className="text-[28px] font-bold leading-none uppercase" style={{ fontFamily: "'Bungee', sans-serif" }}>
+              <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>
             </span>
           </Link>
 
@@ -218,7 +218,7 @@ export default function StoreLayout() {
               <div className="flex items-center gap-2 mb-4">
                 <img src={logoImg} alt="PINK CITY" className="h-10 w-10 rounded-lg object-cover" />
                 <div>
-                  <span className="text-base block" style={{ fontFamily: "'Lilita One', cursive" }}>Pink City</span>
+                  <span className="text-lg block uppercase" style={{ fontFamily: "'Bungee', sans-serif" }}>PINK CITY</span>
                 </div>
               </div>
               <p className="text-xs text-background/60 leading-relaxed mb-4">{t('footer.tagline')}</p>

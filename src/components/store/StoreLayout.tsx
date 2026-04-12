@@ -84,11 +84,11 @@ export default function StoreLayout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
-            {!isAuthenticated && (
-              <Button asChild variant="default" size="sm" className="sm:hidden rounded-full text-[11px] h-7 px-3 font-semibold shrink-0 whitespace-nowrap shadow-lg shadow-primary/40 hover:shadow-xl hover:shadow-primary/50 transition-shadow">
-                <Link to="/login">{t('nav.signIn')}</Link>
-              </Button>
-            )}
+            <Button asChild variant="default" size="sm" className="sm:hidden rounded-full text-[11px] h-7 px-3 font-semibold shrink-0 whitespace-nowrap shadow-lg shadow-primary/40 hover:shadow-xl hover:shadow-primary/50 transition-shadow max-w-[88px]">
+              <Link to={isAuthenticated ? '/account' : '/login'} className="truncate">
+                {isAuthenticated ? t('nav.account') : t('nav.signIn')}
+              </Link>
+            </Button>
 
             {/* Language */}
             <button
@@ -119,7 +119,7 @@ export default function StoreLayout() {
             {/* Auth */}
             {isAuthenticated ? (
               <>
-                <Link to="/account" className="flex p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
+                <Link to="/account" className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
                   <User className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 <button onClick={handleLogout} className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground">

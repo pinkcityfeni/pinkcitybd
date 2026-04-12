@@ -57,7 +57,7 @@ export default function StoreLayout() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
-            <img src={pinkCityText} alt="Pink City" className="h-8 object-contain" />
+            <img src={pinkCityText} alt="Pink City" className="h-9 object-contain mix-blend-multiply dark:mix-blend-screen" />
           </Link>
 
           {/* Desktop Nav */}

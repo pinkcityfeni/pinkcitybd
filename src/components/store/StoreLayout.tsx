@@ -55,9 +55,11 @@ export default function StoreLayout() {
       <header className="sticky top-0 z-50 bg-background border-b">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
+          <Link to="/" className="flex items-center gap-1.5 shrink-0 -ml-1">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
-            <img src={pinkCityText} alt="Pink City" className="h-9 object-contain" />
+            <span className="text-[22px] font-extrabold tracking-tight leading-none" style={{ fontFamily: "'Bungee', sans-serif", WebkitTextStroke: '1px rgba(0,0,0,0.15)' }}>
+              <span className="text-primary">Pink</span> <span className="text-foreground">City</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}

@@ -230,15 +230,22 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
 
   return (
     <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <div className="relative w-full cursor-pointer" style={{ height: '94px' }} onClick={() => banners.length > 1 && goTo((current + 1) % banners.length)}>
+      <Link to={banner.link || '/shop'} className="relative block w-full cursor-pointer aspect-[21/9]">
         {banner.image ? (
-          <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
+          <>
+            <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />
+            {banner.title && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
+                <h2 className="text-white text-sm sm:text-2xl font-display font-bold drop-shadow-lg leading-snug">{banner.title}</h2>
+              </div>
+            )}
+          </>
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-primary to-accent flex items-center justify-center px-8">
             <h2 className="text-primary-foreground text-lg sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
           </div>
         )}
-      </div>
+      </Link>
       {banners.length > 1 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
           {banners.map((_, i) => (

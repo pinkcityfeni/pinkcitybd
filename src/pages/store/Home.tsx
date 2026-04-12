@@ -230,7 +230,7 @@ function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] })
 
   return (
     <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <Link to={banner.link || '/shop'} className="relative block w-full cursor-pointer aspect-[21/9]">
+      <Link to={banner.link || '/shop'} className="relative block w-full cursor-pointer" style={{ height: '94px' }}>
         {banner.image ? (
           <>
             <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />

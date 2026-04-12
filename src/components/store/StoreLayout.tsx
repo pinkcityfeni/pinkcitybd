@@ -79,6 +79,15 @@ export default function StoreLayout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
+            {!isAuthenticated && (
+              <Link
+                to="/login"
+                className="sm:hidden inline-flex items-center px-1.5 py-1 rounded-md text-[10px] font-semibold leading-none text-primary shrink-0 whitespace-nowrap"
+              >
+                {t('nav.signIn')}
+              </Link>
+            )}
+
             {/* Language */}
             <button
               onClick={toggleLang}
@@ -88,15 +97,6 @@ export default function StoreLayout() {
               <Globe className="h-3.5 w-3.5" />
               <span className="text-[10px] font-bold">{lang === 'bn' ? 'EN' : 'বা'}</span>
             </button>
-
-            {!isAuthenticated && (
-              <Link
-                to="/login"
-                className="sm:hidden px-1 py-1 text-[10px] font-semibold leading-none text-primary shrink-0"
-              >
-                {lang === 'bn' ? 'লগইন' : 'Sign In'}
-              </Link>
-            )}
 
             {/* Desktop Search */}
             <form onSubmit={handleSearch} className="hidden sm:block relative w-48">

@@ -85,7 +85,7 @@ export default function StoreLayout() {
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
             {!isAuthenticated && (
-              <Button asChild variant="default" size="sm" className="sm:hidden rounded-full text-[11px] h-7 px-3 font-semibold shrink-0 whitespace-nowrap shadow-md shadow-primary/30">
+              <Button asChild variant="default" size="sm" className="sm:hidden rounded-full text-[11px] h-7 px-3 font-semibold shrink-0 whitespace-nowrap shadow-lg shadow-primary/40 hover:shadow-xl hover:shadow-primary/50 transition-shadow">
                 <Link to="/login">{t('nav.signIn')}</Link>
               </Button>
             )}

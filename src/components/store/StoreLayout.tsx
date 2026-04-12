@@ -10,7 +10,7 @@ import { SupportChatButton } from '@/components/store/SupportChatButton';
 import { useState } from 'react';
 import logoImg from '@/assets/logo.jpg';
 import logoIcon from '@/assets/logo-icon.png';
-import pinkCityText from '@/assets/pink-city-text.jpg';
+import pinkCityText from '@/assets/pink-city-text.png';
 
 export default function StoreLayout() {
   const cart = useStore(s => s.cart);

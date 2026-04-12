@@ -53,7 +53,7 @@ export default function StoreLayout() {
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 bg-background border-b">
-        <div className="container mx-auto flex items-center justify-between h-14 px-2 sm:px-4">
+        <div className="container mx-auto flex items-center justify-between h-14 px-1.5 sm:px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain shrink-0" />
@@ -78,16 +78,25 @@ export default function StoreLayout() {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-0.5 sm:gap-1">
+          <div className="flex items-center gap-0 sm:gap-1 shrink-0">
             {/* Language */}
             <button
               onClick={toggleLang}
-              className="h-7 px-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-0.5 text-xs font-medium"
+              className="h-7 px-1 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-0.5 text-xs font-medium shrink-0"
               title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
             >
               <Globe className="h-3.5 w-3.5" />
               <span className="text-[10px] font-bold">{lang === 'bn' ? 'EN' : 'বা'}</span>
             </button>
+
+            {!isAuthenticated && (
+              <Link
+                to="/login"
+                className="sm:hidden px-1 py-1 text-[10px] font-semibold leading-none text-primary shrink-0"
+              >
+                {lang === 'bn' ? 'লগইন' : 'Sign In'}
+              </Link>
+            )}
 
             {/* Desktop Search */}
             <form onSubmit={handleSearch} className="hidden sm:block relative w-48">
@@ -101,14 +110,14 @@ export default function StoreLayout() {
             </form>
 
             {/* Mobile Search Toggle */}
-            <button onClick={() => setSearchOpen(!searchOpen)} className="sm:hidden p-1.5 rounded-lg hover:bg-muted transition-colors">
+            <button onClick={() => setSearchOpen(!searchOpen)} className="sm:hidden p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
               <Search className="h-4 w-4 text-muted-foreground" />
             </button>
 
             {/* Auth */}
             {isAuthenticated ? (
               <>
-                <Link to="/account" className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors">
+                <Link to="/account" className="flex p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
                   <User className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 <button onClick={handleLogout} className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground">
@@ -116,13 +125,13 @@ export default function StoreLayout() {
                 </button>
               </>
             ) : (
-              <Button asChild variant="default" size="sm" className="inline-flex rounded-lg text-[9px] sm:text-xs h-6 sm:h-8 px-1.5 sm:px-4">
+              <Button asChild variant="default" size="sm" className="hidden sm:inline-flex rounded-lg text-xs h-8 px-4 shrink-0">
                 <Link to="/login">{t('nav.signIn')}</Link>
               </Button>
             )}
 
             {/* Mobile menu */}
-            <button className="md:hidden p-1.5 rounded-lg hover:bg-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-1.5 rounded-lg hover:bg-muted shrink-0" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>

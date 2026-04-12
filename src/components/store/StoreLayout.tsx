@@ -53,11 +53,11 @@ export default function StoreLayout() {
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 bg-background border-b">
-        <div className="container mx-auto flex items-center justify-between h-14 px-4">
+        <div className="container mx-auto flex items-center justify-between h-14 px-2 sm:px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1 min-w-0">
-            <img src={logoIcon} alt="PINK CITY" className="h-9 w-9 object-contain shrink-0" />
-            <img src={pinkCityText} alt="Pink City" className="h-10 object-contain max-w-[120px]" />
+          <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
+            <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain shrink-0" />
+            <img src={pinkCityText} alt="Pink City" className="h-12 object-contain" />
           </Link>
 
           {/* Desktop Nav */}
@@ -78,11 +78,11 @@ export default function StoreLayout() {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1">
             {/* Language */}
             <button
               onClick={toggleLang}
-              className="h-8 px-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-1 text-xs font-medium"
+              className="h-7 px-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-0.5 text-xs font-medium"
               title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
             >
               <Globe className="h-3.5 w-3.5" />
@@ -101,7 +101,7 @@ export default function StoreLayout() {
             </form>
 
             {/* Mobile Search Toggle */}
-            <button onClick={() => setSearchOpen(!searchOpen)} className="sm:hidden p-2 rounded-lg hover:bg-muted transition-colors">
+            <button onClick={() => setSearchOpen(!searchOpen)} className="sm:hidden p-1.5 rounded-lg hover:bg-muted transition-colors">
               <Search className="h-4 w-4 text-muted-foreground" />
             </button>
 
@@ -116,13 +116,13 @@ export default function StoreLayout() {
                 </button>
               </>
             ) : (
-              <Button asChild variant="default" size="sm" className="inline-flex rounded-lg text-xs h-8 px-4">
+              <Button asChild variant="default" size="sm" className="inline-flex rounded-lg text-[10px] sm:text-xs h-7 sm:h-8 px-2.5 sm:px-4">
                 <Link to="/login">{t('nav.signIn')}</Link>
               </Button>
             )}
 
             {/* Mobile menu */}
-            <button className="md:hidden p-2 rounded-lg hover:bg-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-1.5 rounded-lg hover:bg-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>

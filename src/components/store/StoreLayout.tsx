@@ -54,13 +54,11 @@ export default function StoreLayout() {
       <header className="sticky top-0 z-50 bg-background border-b">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <img src={logoIcon} alt="PINK CITY" className="h-9 w-9 object-contain" />
-            <div className="leading-none">
-              <span className="text-xl font-bold tracking-tight block pink-city-glow" style={{ fontFamily: 'Playfair Display, serif' }}>
-                <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>
-              </span>
-            </div>
+          <Link to="/" className="flex items-center gap-1.5 shrink-0 -ml-1">
+            <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
+            <span className="text-2xl font-extrabold tracking-tight leading-none pink-city-glow" style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '-0.02em' }}>
+              <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}

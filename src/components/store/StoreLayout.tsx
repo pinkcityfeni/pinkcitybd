@@ -56,7 +56,7 @@ export default function StoreLayout() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
-            <span className="text-[28px] leading-none" style={{ fontFamily: "'Great Vibes', cursive" }}>
+            <span className="text-[26px] leading-none" style={{ fontFamily: "'Pacifico', cursive" }}>
               <span className="text-gradient-pink">Pink</span> <span className="text-foreground">City</span>
             </span>
           </Link>

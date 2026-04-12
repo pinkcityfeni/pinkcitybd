@@ -116,7 +116,7 @@ export default function StoreLayout() {
                 </button>
               </>
             ) : (
-              <Button asChild variant="default" size="sm" className="inline-flex rounded-lg text-[10px] sm:text-xs h-7 sm:h-8 px-2.5 sm:px-4">
+              <Button asChild variant="default" size="sm" className="hidden sm:inline-flex rounded-lg text-xs h-8 px-4">
                 <Link to="/login">{t('nav.signIn')}</Link>
               </Button>
             )}

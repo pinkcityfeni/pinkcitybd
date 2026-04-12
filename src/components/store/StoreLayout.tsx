@@ -10,6 +10,7 @@ import { SupportChatButton } from '@/components/store/SupportChatButton';
 import { useState } from 'react';
 import logoImg from '@/assets/logo.jpg';
 import logoIcon from '@/assets/logo-icon.png';
+import pinkCityText from '@/assets/pink-city-text.jpg';
 
 export default function StoreLayout() {
   const cart = useStore(s => s.cart);
@@ -56,9 +57,7 @@ export default function StoreLayout() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
-            <span className="text-[28px] font-bold leading-none uppercase" style={{ fontFamily: "'Bungee', sans-serif" }}>
-              <span className="text-gradient-pink">PINK</span> <span className="text-foreground">CITY</span>
-            </span>
+            <img src={pinkCityText} alt="Pink City" className="h-8 object-contain" />
           </Link>
 
           {/* Desktop Nav */}

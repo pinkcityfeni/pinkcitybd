@@ -55,9 +55,9 @@ export default function StoreLayout() {
       <header className="sticky top-0 z-50 bg-background border-b">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1">
-            <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain" />
-            <img src={pinkCityText} alt="Pink City" className="h-12 object-contain" />
+          <Link to="/" className="flex items-center gap-1 shrink-0 -ml-1 min-w-0">
+            <img src={logoIcon} alt="PINK CITY" className="h-9 w-9 object-contain shrink-0" />
+            <img src={pinkCityText} alt="Pink City" className="h-10 object-contain max-w-[120px]" />
           </Link>
 
           {/* Desktop Nav */}

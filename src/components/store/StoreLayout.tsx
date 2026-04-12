@@ -85,12 +85,9 @@ export default function StoreLayout() {
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
             {!isAuthenticated && (
-              <Link
-                to="/login"
-                className="sm:hidden inline-flex items-center px-1.5 py-1 rounded-md text-[10px] font-semibold leading-none text-primary shrink-0 whitespace-nowrap"
-              >
-                {t('nav.signIn')}
-              </Link>
+              <Button asChild variant="default" size="sm" className="sm:hidden rounded-full text-[11px] h-7 px-3 font-semibold shrink-0 whitespace-nowrap">
+                <Link to="/login">{t('nav.signIn')}</Link>
+              </Button>
             )}
 
             {/* Language */}

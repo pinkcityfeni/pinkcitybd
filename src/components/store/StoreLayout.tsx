@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, ChevronRight, Truck, ShieldCheck, Headphones } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, ChevronRight, ChevronDown, Truck, ShieldCheck, Headphones } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -29,7 +29,7 @@ export default function StoreLayout() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
   const navLinks = [
     { to: '/', label: t('nav.home') },
@@ -45,11 +45,10 @@ export default function StoreLayout() {
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setMobileMenuOpen(false);
-      setSearchOpen(false);
     }
   };
 
-  const toggleLang = () => setLang(lang === 'bn' ? 'en' : 'bn');
+  const toggleLang = () => { setLang(lang === 'bn' ? 'en' : 'bn'); setLangDropdownOpen(false); };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -89,39 +88,29 @@ export default function StoreLayout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
-            <Button asChild variant="default" size="sm" className="sm:hidden rounded-full text-[11px] h-7 px-3 font-semibold shrink-0 whitespace-nowrap shadow-lg shadow-primary/40 hover:shadow-xl hover:shadow-primary/50 transition-shadow max-w-[88px]">
-              <Link to={isAuthenticated ? '/account' : '/login'} className="truncate">
-                {isAuthenticated ? t('nav.account') : t('nav.signIn')}
-              </Link>
-            </Button>
+            {/* Language Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="h-8 px-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-1 text-xs font-medium shrink-0"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-bold">{lang === 'bn' ? 'বাংলা' : 'English'}</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              {langDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg z-50 min-w-[120px] animate-fade-in">
+                  <button onClick={toggleLang} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors rounded-t-lg ${lang === 'en' ? 'text-primary font-semibold' : ''}`}>
+                    English
+                  </button>
+                  <button onClick={toggleLang} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors rounded-b-lg ${lang === 'bn' ? 'text-primary font-semibold' : ''}`}>
+                    বাংলা
+                  </button>
+                </div>
+              )}
+            </div>
 
-            {/* Language */}
-            <button
-              onClick={toggleLang}
-              className="h-7 px-1 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-0.5 text-xs font-medium shrink-0"
-              title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
-            >
-              <Globe className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-bold">{lang === 'bn' ? 'EN' : 'বা'}</span>
-            </button>
-
-            {/* Desktop Search */}
-            <form onSubmit={handleSearch} className="hidden sm:block relative w-48">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder={t('nav.search')}
-                className="pl-9 h-9 text-xs rounded-lg bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
-            </form>
-
-            {/* Mobile Search Toggle */}
-            <button onClick={() => setSearchOpen(!searchOpen)} className="sm:hidden p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </button>
-
-            {/* Auth */}
+            {/* Auth - desktop only */}
             {isAuthenticated ? (
               <>
                 <Link to="/account" className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
@@ -131,26 +120,22 @@ export default function StoreLayout() {
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
               </>
-            ) : (
-              <Button asChild variant="default" size="sm" className="hidden sm:inline-flex rounded-lg text-xs h-8 px-4 shrink-0">
-                <Link to="/login">{t('nav.signIn')}</Link>
-              </Button>
-            )}
-
-            {/* Mobile menu */}
-            {/* hamburger moved to left side */}
+            ) : null}
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        {searchOpen && (
-          <div className="sm:hidden border-t px-4 py-2 bg-background animate-fade-in">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input placeholder={t('nav.search')} className="pl-9 rounded-lg bg-muted/50 border-0 text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} autoFocus />
-            </form>
-          </div>
-        )}
+        {/* Search Bar below header */}
+        <div className="border-t px-3 py-1.5 bg-background">
+          <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder={t('nav.search')}
+              className="pl-9 h-8 text-xs rounded-lg bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </form>
+        </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (

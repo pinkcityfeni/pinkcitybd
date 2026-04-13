@@ -8,6 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SupportChatButton } from '@/components/store/SupportChatButton';
 import { useState } from 'react';
+import { useAppSettings } from '@/hooks/useSupabaseData';
+
+function AnnouncementBar() {
+  const { data: settings } = useAppSettings();
+  const text = settings?.announcement_text || '🚚 ফেনীতে ফ্রি ডেলিভারি | সারাদেশে ক্যাশ অন ডেলিভারি';
+  return <div className="announcement-bar text-center py-1.5 text-xs font-medium tracking-wide"><span>{text}</span></div>;
+}
 import logoImg from '@/assets/logo.jpg';
 import logoIcon from '@/assets/logo-icon.png';
 import pinkCityText from '@/assets/pink-city-text.jpg';
@@ -47,9 +54,7 @@ export default function StoreLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top announcement bar */}
-      <div className="announcement-bar text-center py-1.5 text-xs font-medium tracking-wide">
-        <span>{useStore(s => s.announcementText)}</span>
-      </div>
+      <AnnouncementBar />
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 bg-background border-b">

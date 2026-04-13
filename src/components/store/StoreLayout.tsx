@@ -37,7 +37,7 @@ export default function StoreLayout() {
     { to: '/category', label: t('nav.category') },
   ];
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = async () => { await logout(); navigate('/'); };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

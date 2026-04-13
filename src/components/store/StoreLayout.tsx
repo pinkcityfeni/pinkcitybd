@@ -88,28 +88,6 @@ export default function StoreLayout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
-            {/* Language Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                className="h-8 px-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground flex items-center gap-1 text-xs font-medium shrink-0"
-              >
-                <Globe className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-bold">{lang === 'bn' ? 'বাংলা' : 'English'}</span>
-                <ChevronDown className="h-3 w-3" />
-              </button>
-              {langDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg z-50 min-w-[120px] animate-fade-in">
-                  <button onClick={toggleLang} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors rounded-t-lg ${lang === 'en' ? 'text-primary font-semibold' : ''}`}>
-                    English
-                  </button>
-                  <button onClick={toggleLang} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors rounded-b-lg ${lang === 'bn' ? 'text-primary font-semibold' : ''}`}>
-                    বাংলা
-                  </button>
-                </div>
-              )}
-            </div>
-
             {/* Auth - desktop only */}
             {isAuthenticated ? (
               <>

@@ -269,6 +269,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -291,7 +298,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      products_public: {
+        Row: {
+          barcode: string | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image: string | null
+          images: string[] | null
+          name: string | null
+          price: number | null
+          stock: number | null
+          subcategory: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image?: string | null
+          images?: string[] | null
+          name?: string | null
+          price?: number | null
+          stock?: number | null
+          subcategory?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image?: string | null
+          images?: string[] | null
+          name?: string | null
+          price?: number | null
+          stock?: number | null
+          subcategory?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

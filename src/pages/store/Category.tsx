@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/data/language';
 import { ChevronRight } from 'lucide-react';
-import { useProducts, useCategories } from '@/hooks/useSupabaseData';
+import { usePublicProducts, useCategories } from '@/hooks/useSupabaseData';
 
 export default function Category() {
   const { data: categories = [] } = useCategories();
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = usePublicProducts();
   const { t } = useLanguage();
 
   return (

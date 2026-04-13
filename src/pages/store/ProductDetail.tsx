@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { useProducts, useCategories, useReviews, useAddReview, useProductRating } from '@/hooks/useSupabaseData';
+import { usePublicProducts, useCategories, useReviews, useAddReview, useProductRating } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -29,7 +29,7 @@ export default function StoreLayout() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
   const navLinks = [
     { to: '/', label: t('nav.home') },

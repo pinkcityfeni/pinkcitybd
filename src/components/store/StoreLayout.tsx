@@ -125,6 +125,11 @@ export default function StoreLayout() {
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
               ))}
+              {/* Language toggle */}
+              <button onClick={() => { toggleLang(); setMobileMenuOpen(false); }} className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> {lang === 'bn' ? 'English' : 'বাংলা'}</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
               {!isAuthenticated && (
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-primary">
                   {t('nav.signIn')}

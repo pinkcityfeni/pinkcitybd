@@ -31,20 +31,62 @@ type DialogMode =
   | { type: 'delete'; user: DbUser }
   | null;
 
+async function getAdminAccessToken() {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData.user) {
+    const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+    const refreshedToken = refreshed.session?.access_token;
+
+    if (refreshError || !refreshedToken) {
+      throw new Error('সেশন শেষ হয়ে গেছে, আবার লগইন করুন');
+    }
+
+    return refreshedToken;
+  }
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+
+  if (!accessToken) {
+    throw new Error('সেশন পাওয়া যায়নি, আবার লগইন করুন');
+  }
+
+  return accessToken;
+}
+
+async function callAdminFunction<T>(
+  functionName: 'list-users' | 'delete-user',
+  options?: { method?: 'GET' | 'POST'; body?: unknown }
+) {
+  const accessToken = await getAdminAccessToken();
+  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`, {
+    method: options?.method || (options?.body ? 'POST' : 'GET'),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+    body: options?.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  const data = await response.json().catch(() => null) as { error?: string } | null;
+
+  if (!response.ok) {
+    throw new Error(data?.error || 'Request failed');
+  }
+
+  return data as T;
+}
+
 function useDbUsers() {
+  const { loading, isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ['db-users'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Not authenticated');
-      const res = await supabase.functions.invoke('list-users', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (res.error) throw res.error;
-      if (res.data?.error) throw new Error(res.data.error);
-      return (res.data || []) as DbUser[];
-    },
-    retry: 2,
+    enabled: !loading && isAuthenticated,
+    queryFn: async () => callAdminFunction<DbUser[]>('list-users'),
+    retry: false,
   });
 }
 
@@ -65,13 +107,10 @@ function useDeleteUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userId: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await supabase.functions.invoke('delete-user', {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+      await callAdminFunction<{ success: boolean }>('delete-user', {
+        method: 'POST',
         body: { userId },
       });
-      if (res.error) throw res.error;
-      if (res.data?.error) throw new Error(res.data.error);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['db-users'] }),
   });
@@ -80,7 +119,7 @@ function useDeleteUser() {
 export default function Users() {
   const { t } = useLanguage();
   const { user: currentUser } = useAuth();
-  const { data: users = [], isLoading } = useDbUsers();
+  const { data: users = [], isLoading, error, refetch, isFetching } = useDbUsers();
   const updateRoleMut = useUpdateUserRole();
   const deleteUserMut = useDeleteUser();
   const [dialog, setDialog] = useState<DialogMode>(null);
@@ -120,15 +159,23 @@ export default function Users() {
   };
 
   const isPending = updateRoleMut.isPending || deleteUserMut.isPending;
+  const errorMessage = error instanceof Error ? error.message : 'Users লোড করা যায়নি';
 
   return (
     <div className="p-6 animate-fade-in">
       <h1 className="page-header">{t('user.title')}</h1>
-      <p className="page-subheader mb-6">{t('user.nUsers', { n: users.length })}</p>
+      <p className="page-subheader mb-6">{error ? errorMessage : t('user.nUsers', { n: users.length })}</p>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : error ? (
+        <div className="stat-card flex flex-col items-start gap-3">
+          <p className="text-sm text-destructive">{errorMessage}</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            {isFetching ? 'লোড হচ্ছে...' : 'আবার চেষ্টা করুন'}
+          </Button>
         </div>
       ) : (
         <div className="stat-card overflow-auto">

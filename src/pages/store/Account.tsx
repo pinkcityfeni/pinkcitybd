@@ -18,7 +18,7 @@ export default function Account() {
     { status: 'processing', label: t('account.processing'), icon: Package },
     { status: 'completed', label: t('account.delivered'), icon: CheckCircle2 },
   ];
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = async () => { await logout(); navigate('/'); };
   const getStepIndex = (status: string) => status === 'cancelled' ? -1 : ORDER_STEPS.findIndex(s => s.status === status);
 
   return (

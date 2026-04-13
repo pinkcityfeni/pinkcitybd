@@ -1,59 +1,43 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { useUserRegistry } from './userRegistry';
+import { supabase } from '@/integrations/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
 
-interface AuthState {
-  user: { id: string; email: string; name: string; phone: string; role: 'customer' | 'admin' | 'cashier' } | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
-  signup: (name: string, email: string, password: string, phone: string) => boolean;
-  logout: () => void;
-  hasRole: (role: 'admin' | 'cashier' | 'customer') => boolean;
+type AppRole = 'admin' | 'cashier' | 'customer';
+
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  role: AppRole;
 }
 
-const normalizeEmail = (value: string) => value.trim().toLowerCase();
-const normalizePassword = (value: string) => value.trim();
+interface AuthState {
+  user: AuthUser | null;
+  session: Session | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  setSession: (session: Session | null) => void;
+  setUser: (user: AuthUser | null) => void;
+  setLoading: (loading: boolean) => void;
+  logout: () => Promise<void>;
+  hasRole: (role: AppRole) => boolean;
+}
 
-// Demo accounts for testing protected routes
-const DEMO_ACCOUNTS = [
-  { id: 'u1', email: normalizeEmail('pinkcity.feni@gmail.com'), password: normalizePassword('rihan56'), name: 'Admin User', phone: '01715307271', role: 'admin' as const },
-  { id: 'u2', email: normalizeEmail('cashier@shop.com'), password: normalizePassword('cashier123'), name: 'Cashier', phone: '', role: 'cashier' as const },
-  { id: 'u3', email: normalizeEmail('user@shop.com'), password: normalizePassword('user123'), name: 'Demo Customer', phone: '', role: 'customer' as const },
-];
-
-export const useAuth = create<AuthState>()(persist((set, get) => ({
+export const useAuth = create<AuthState>()((set, get) => ({
   user: null,
+  session: null,
   isAuthenticated: false,
+  loading: true,
 
-  login: (email, password) => {
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = normalizePassword(password);
-    const account = DEMO_ACCOUNTS.find(
-      (a) => a.email === normalizedEmail && a.password === normalizedPassword,
-    );
+  setSession: (session) => set({ session, isAuthenticated: !!session }),
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  setLoading: (loading) => set({ loading }),
 
-    if (account) {
-      const userInfo = { id: account.id, email: account.email, name: account.name, phone: account.phone, role: account.role };
-      set({ user: userInfo, isAuthenticated: true });
-      useUserRegistry.getState().addUser(userInfo);
-      return true;
-    }
-    return false;
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({ user: null, session: null, isAuthenticated: false });
   },
-
-  signup: (name, email, password, phone) => {
-    const normalizedName = name.trim();
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = normalizePassword(password);
-    const normalizedPhone = phone.trim();
-    if (!normalizedName || !normalizedEmail || !normalizedPassword) return false;
-    const newUser = { id: `u-${Date.now()}`, email: normalizedEmail, name: normalizedName, phone: normalizedPhone, role: 'customer' as const };
-    set({ user: newUser, isAuthenticated: true });
-    useUserRegistry.getState().addUser(newUser);
-    return true;
-  },
-
-  logout: () => set({ user: null, isAuthenticated: false }),
 
   hasRole: (role) => {
     const user = get().user;
@@ -61,4 +45,63 @@ export const useAuth = create<AuthState>()(persist((set, get) => ({
     if (user.role === 'admin') return true;
     return user.role === role;
   },
-}), { name: 'glamora-auth' }));
+}));
+
+// Fetch user profile + role from DB
+async function fetchUserProfile(supabaseUser: User): Promise<AuthUser> {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name, phone')
+    .eq('user_id', supabaseUser.id)
+    .single();
+
+  const { data: roleData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', supabaseUser.id)
+    .single();
+
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    name: profile?.name || supabaseUser.user_metadata?.name || supabaseUser.email || '',
+    phone: profile?.phone || '',
+    role: (roleData?.role as AppRole) || 'customer',
+  };
+}
+
+// Initialize auth listener — call once at app startup
+let initialized = false;
+export function initAuth() {
+  if (initialized) return;
+  initialized = true;
+
+  const store = useAuth.getState();
+
+  // Listen for auth changes
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    useAuth.getState().setSession(session);
+
+    if (session?.user) {
+      // Use setTimeout to avoid Supabase deadlock on initial load
+      setTimeout(async () => {
+        const profile = await fetchUserProfile(session.user);
+        useAuth.getState().setUser(profile);
+        useAuth.getState().setLoading(false);
+      }, 0);
+    } else {
+      useAuth.getState().setUser(null);
+      useAuth.getState().setLoading(false);
+    }
+  });
+
+  // Check existing session
+  supabase.auth.getSession().then(async ({ data: { session } }) => {
+    store.setSession(session);
+    if (session?.user) {
+      const profile = await fetchUserProfile(session.user);
+      store.setUser(profile);
+    }
+    store.setLoading(false);
+  });
+}

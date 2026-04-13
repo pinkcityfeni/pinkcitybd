@@ -105,7 +105,7 @@ export default function Signup() {
             <span className="font-display text-xl font-bold block">
               <span className="text-gradient-pink">PINK</span> CITY
             </span>
-            <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Beauty & Care</span>
+            
           </div>
         </Link>
 

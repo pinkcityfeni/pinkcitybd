@@ -75,7 +75,7 @@ function ProductImageGallery({ product, cat }: { product: { image: string; image
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = usePublicProducts();
   const { data: categories = [] } = useCategories();
   const addToCart = useStore(s => s.addToCart);
   const buyNow = useStore(s => s.buyNow);

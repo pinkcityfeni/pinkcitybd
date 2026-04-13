@@ -43,7 +43,7 @@ function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t 
 }
 
 export default function Shop() {
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = usePublicProducts();
   const { data: categories = [] } = useCategories();
   const addToCart = useStore(s => s.addToCart);
   const wishlist = useStore(s => s.wishlist);

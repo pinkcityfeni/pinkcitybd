@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
+import { useProducts, useOrders, usePlaceOrder } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
@@ -7,14 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
+import { dbToOrder } from '@/data/store';
 
 export default function POSSales() {
-  const products = useStore(s => s.products);
+  const { data: products = [] } = useProducts();
   const posCart = useStore(s => s.posCart);
   const addToPosCart = useStore(s => s.addToPosCart);
   const removeFromPosCart = useStore(s => s.removeFromPosCart);
   const updatePosCartQty = useStore(s => s.updatePosCartQty);
-  const placeOrder = useStore(s => s.placeOrder);
+  const clearPosCart = useStore(s => s.clearPosCart);
+  const placeOrderMut = usePlaceOrder();
   const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
@@ -74,7 +77,7 @@ export default function POSSales() {
     focusBarcode();
   };
 
-  const handleCompleteSale = () => {
+  const handleCompleteSale = async () => {
     if (posCart.length === 0) return;
     if (isSplit && splitAmt1 <= 0) { toast.error(t('pos.splitError1')); return; }
     if (isSplit && splitAmt1 >= total) { toast.error(t('pos.splitError2')); return; }
@@ -84,17 +87,39 @@ export default function POSSales() {
       method1: splitMethod1, amount1: splitAmt1, method2: splitMethod2, amount2: splitAmt2,
     } : undefined;
 
-    const id = placeOrder('pos', {
-      paymentMethod: isSplit ? splitMethod1 : paymentMethod,
-      paymentStatus: 'paid',
-      splitPayment,
-      discount: discountNum > 0 ? discountNum : undefined,
-      discountType: discountNum > 0 ? discountType : undefined,
-    });
-    const orders = useStore.getState().orders;
-    const completedOrder = orders.find(o => o.id === id);
-    if (completedOrder) { setSaleComplete({ order: completedOrder, profit: saleProfit }); }
-    setPaymentMethod('cash'); setIsSplit(false); setSplitAmount1(''); setDiscountValue(''); setDiscountType('fixed');
+    try {
+      const result = await placeOrderMut.mutateAsync({
+        type: 'pos',
+        items: posCart,
+        data: {
+          paymentMethod: isSplit ? splitMethod1 : paymentMethod,
+          paymentStatus: 'paid',
+          splitPayment,
+          discount: discountNum > 0 ? discountNum : undefined,
+          discountType: discountNum > 0 ? discountType : undefined,
+        },
+      });
+
+      const completedOrder: Order = {
+        id: result.id,
+        items: posCart,
+        total: result.total,
+        date: new Date().toISOString(),
+        status: 'pending',
+        type: 'pos',
+        paymentMethod: isSplit ? splitMethod1 : paymentMethod,
+        paymentStatus: 'paid',
+        splitPayment,
+        discount: discountNum > 0 ? discountNum : undefined,
+        discountType: discountNum > 0 ? discountType : undefined,
+      };
+
+      setSaleComplete({ order: completedOrder, profit: saleProfit });
+      clearPosCart();
+      setPaymentMethod('cash'); setIsSplit(false); setSplitAmount1(''); setDiscountValue(''); setDiscountType('fixed');
+    } catch (err: any) {
+      toast.error(err.message || 'Order failed');
+    }
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };
@@ -122,7 +147,7 @@ export default function POSSales() {
         <div className="text-center animate-fade-in">
           <CheckCircle2 className="h-20 w-20 mx-auto mb-4 text-success" />
           <h2 className="text-2xl font-bold mb-2">{t('pos.saleComplete')}</h2>
-          <p className="text-sm opacity-70 mb-1">Order: {saleComplete.order.id}</p>
+          <p className="text-sm opacity-70 mb-1">Order: {saleComplete.order.id.slice(0, 8)}</p>
           <p className="text-sm opacity-70 mb-1">{t('pos.nItemsSold', { n: saleItemCount })}</p>
           <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
           <p className="text-sm text-success font-medium mb-2">{t('pos.profitLabel')}: ৳{saleComplete.profit.toFixed(0)}</p>

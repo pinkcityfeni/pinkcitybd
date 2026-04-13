@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { useStore, Category } from '@/data/store';
+import { Category } from '@/data/store';
+import { useCategories, useProducts, useAddCategory, useUpdateCategory, useDeleteCategory, uploadImage } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,13 +11,11 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
 export default function Categories() {
-  const categories = useStore(s => s.categories);
-  const products = useStore(s => s.products);
-  const addCategory = useStore(s => s.addCategory);
-  const updateCategory = useStore(s => s.updateCategory);
-  const deleteCategory = useStore(s => s.deleteCategory);
-  const addSubcategory = useStore(s => s.addSubcategory);
-  const removeSubcategory = useStore(s => s.removeSubcategory);
+  const { data: categories = [] } = useCategories();
+  const { data: products = [] } = useProducts();
+  const addCategoryMut = useAddCategory();
+  const updateCategoryMut = useUpdateCategory();
+  const deleteCategoryMut = useDeleteCategory();
   const { t } = useLanguage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCat, setEditCat] = useState<Category | null>(null);
@@ -29,22 +28,23 @@ export default function Categories() {
   const openNew = () => { setEditCat(null); setCatName(''); setCatIcon('📦'); setCatImage(''); setDialogOpen(true); };
   const openEdit = (c: Category) => { setEditCat(c); setCatName(c.name); setCatIcon(c.icon); setCatImage(c.image || ''); setDialogOpen(true); };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { toast.error('Max 2MB'); return; }
-    const reader = new FileReader();
-    reader.onload = () => setCatImage(reader.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const url = await uploadImage(file);
+      setCatImage(url);
+    } catch { toast.error('Upload failed'); }
   };
 
   const handleSave = () => {
     if (!catName.trim()) return;
     if (editCat) {
-      updateCategory(editCat.id, { name: catName.trim(), icon: catIcon, image: catImage || undefined });
+      updateCategoryMut.mutate({ id: editCat.id, updates: { name: catName.trim(), icon: catIcon, image: catImage || undefined } });
       toast.success(t('cat.categoryUpdated'));
     } else {
-      addCategory(catName.trim(), catIcon, catImage || undefined);
+      addCategoryMut.mutate({ name: catName.trim(), icon: catIcon, image: catImage || undefined });
       toast.success(t('cat.categoryAdded'));
     }
     setDialogOpen(false);
@@ -55,15 +55,24 @@ export default function Categories() {
     if (!val) { toast.error(t('cat.enterSubName')); return; }
     const cat = categories.find(c => c.id === catId);
     if (cat?.subcategories.includes(val)) { toast.error(t('cat.subExists')); return; }
-    addSubcategory(catId, val);
+    if (cat) {
+      updateCategoryMut.mutate({ id: catId, updates: { subcategories: [...cat.subcategories, val] } as any });
+    }
     setSubInput(s => ({ ...s, [catId]: '' }));
     toast.success(t('cat.subAdded'));
+  };
+
+  const handleRemoveSub = (catId: string, sc: string) => {
+    const cat = categories.find(c => c.id === catId);
+    if (cat) {
+      updateCategoryMut.mutate({ id: catId, updates: { subcategories: cat.subcategories.filter(s => s !== sc) } as any });
+    }
   };
 
   const handleDeleteCat = (c: Category) => {
     const productCount = products.filter(p => p.category === c.name).length;
     if (productCount > 0) { toast.error(t('cat.cantDelete', { n: productCount })); return; }
-    deleteCategory(c.id);
+    deleteCategoryMut.mutate(c.id);
     toast.success(t('cat.catDeleted'));
   };
 
@@ -116,7 +125,7 @@ export default function Categories() {
                           onClick={() => {
                             const scProducts = catProducts.filter(p => p.subcategory === sc).length;
                             if (scProducts > 0) { toast.error(t('cat.cantDeleteSub', { n: scProducts })); return; }
-                            removeSubcategory(c.id, sc);
+                            handleRemoveSub(c.id, sc);
                             toast.success(t('cat.subRemoved'));
                           }}
                           className="ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive"

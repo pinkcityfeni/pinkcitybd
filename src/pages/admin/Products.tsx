@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { useStore, Product } from '@/data/store';
+import { Product } from '@/data/store';
+import { useProducts, useCategories, useAddProduct, useUpdateProduct, useDeleteProduct, uploadImage } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,15 +14,16 @@ const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barc
 
 function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[]; onChange: (imgs: string[]) => void; uploadLabel: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    Array.from(files).forEach(file => {
-      if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return; }
-      const reader = new FileReader();
-      reader.onload = () => onChange([...images, reader.result as string]);
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files)) {
+      if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); continue; }
+      try {
+        const url = await uploadImage(file);
+        onChange([...images, url]);
+      } catch { toast.error('Upload failed'); }
+    }
     e.target.value = '';
   };
   const removeImage = (index: number) => onChange(images.filter((_, i) => i !== index));
@@ -48,11 +50,11 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
 }
 
 export default function Products() {
-  const products = useStore(s => s.products);
-  const addProduct = useStore(s => s.addProduct);
-  const updateProduct = useStore(s => s.updateProduct);
-  const deleteProduct = useStore(s => s.deleteProduct);
-  const categories = useStore(s => s.categories);
+  const { data: products = [] } = useProducts();
+  const { data: categories = [] } = useCategories();
+  const addProductMut = useAddProduct();
+  const updateProductMut = useUpdateProduct();
+  const deleteProductMut = useDeleteProduct();
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
@@ -86,8 +88,8 @@ export default function Products() {
     const allImages = form.images;
     const mainImage = allImages[0] || form.image || '';
     const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages };
-    if (editProduct) { updateProduct(editProduct.id, data); toast.success(t('prod.updated')); }
-    else { addProduct(data); toast.success(t('prod.added')); }
+    if (editProduct) { updateProductMut.mutate({ id: editProduct.id, updates: data }); toast.success(t('prod.updated')); }
+    else { addProductMut.mutate(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
   };
 
@@ -135,7 +137,7 @@ export default function Products() {
               </div>
               <div className="flex gap-1">
                 <button onClick={() => openEdit(p)} className="p-1.5 hover:text-primary rounded-lg hover:bg-primary/10"><Pencil className="h-4 w-4" /></button>
-                <button onClick={() => { deleteProduct(p.id); toast.success(t('prod.deleted')); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs">
@@ -184,7 +186,7 @@ export default function Products() {
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? 'text-destructive' : ''}`}>{p.stock}</td>
                 <td className="py-3 text-right">
                   <button onClick={() => openEdit(p)} className="p-1 hover:text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => { deleteProduct(p.id); toast.success(t('prod.deleted')); }} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
             ))}

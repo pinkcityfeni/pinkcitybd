@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useStore, Banner } from '@/data/store';
+import { Banner } from '@/data/store';
+import { useBanners, useAddBanner, useUpdateBanner, useDeleteBanner, useAppSettings, useUpdateAppSetting, uploadImage } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +10,13 @@ import { Plus, Trash2, Image as ImageIcon, GripVertical, Megaphone, Save } from 
 import { toast } from 'sonner';
 
 export default function AdminBanners() {
-  const banners = useStore(s => s.banners);
-  const addBanner = useStore(s => s.addBanner);
-  const updateBanner = useStore(s => s.updateBanner);
-  const deleteBanner = useStore(s => s.deleteBanner);
-  const announcementText = useStore(s => s.announcementText);
-  const setAnnouncementText = useStore(s => s.setAnnouncementText);
+  const { data: banners = [] } = useBanners();
+  const addBannerMut = useAddBanner();
+  const updateBannerMut = useUpdateBanner();
+  const deleteBannerMut = useDeleteBanner();
+  const { data: settings } = useAppSettings();
+  const updateSettingMut = useUpdateAppSetting();
+  const announcementText = settings?.announcement_text || '';
   const { t } = useLanguage();
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -22,21 +24,19 @@ export default function AdminBanners() {
   const [newImage, setNewImage] = useState('');
   const [editAnnouncement, setEditAnnouncement] = useState(announcementText);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, bannerId?: string) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, bannerId?: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      if (bannerId) { updateBanner(bannerId, { image: dataUrl }); toast.success(t('banner.imageUpdated')); }
-      else { setNewImage(dataUrl); }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const url = await uploadImage(file);
+      if (bannerId) { updateBannerMut.mutate({ id: bannerId, updates: { image: url } }); toast.success(t('banner.imageUpdated')); }
+      else { setNewImage(url); }
+    } catch { toast.error('Upload failed'); }
   };
 
   const handleAdd = () => {
     if (!newTitle.trim()) { toast.error(t('banner.enterTitle')); return; }
-    addBanner({ title: newTitle, link: newLink, image: newImage, active: true });
+    addBannerMut.mutate({ title: newTitle, link: newLink, image: newImage, active: true });
     setNewTitle(''); setNewLink('/shop'); setNewImage(''); setShowAdd(false);
     toast.success(t('banner.added'));
   };
@@ -70,7 +70,7 @@ export default function AdminBanners() {
             size="sm"
             className="rounded-full gap-1.5 shrink-0"
             onClick={() => {
-              setAnnouncementText(editAnnouncement);
+              updateSettingMut.mutate({ key: 'announcement_text', value: editAnnouncement });
               toast.success('Announcement updated!');
             }}
           >
@@ -135,14 +135,14 @@ export default function AdminBanners() {
               )}
             </div>
             <div className="flex-1 flex flex-col gap-2">
-              <Input value={b.title} onChange={e => updateBanner(b.id, { title: e.target.value })} className="text-sm font-medium" />
-              <Input value={b.link} onChange={e => updateBanner(b.id, { link: e.target.value })} className="text-xs" placeholder={t('banner.linkPlaceholder')} />
+              <Input value={b.title} onChange={e => updateBannerMut.mutate({ id: b.id, updates: { title: e.target.value } })} className="text-sm font-medium" />
+              <Input value={b.link} onChange={e => updateBannerMut.mutate({ id: b.id, updates: { link: e.target.value } })} className="text-xs" placeholder={t('banner.linkPlaceholder')} />
               <div className="flex items-center justify-between mt-auto">
                 <div className="flex items-center gap-2">
-                  <Switch checked={b.active} onCheckedChange={v => updateBanner(b.id, { active: v })} />
+                  <Switch checked={b.active} onCheckedChange={v => updateBannerMut.mutate({ id: b.id, updates: { active: v } })} />
                   <span className="text-xs text-muted-foreground">{b.active ? t('banner.active') : t('banner.inactive')}</span>
                 </div>
-                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full h-8 w-8 p-0" onClick={() => { deleteBanner(b.id); toast.success(t('banner.deleted')); }}>
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full h-8 w-8 p-0" onClick={() => { deleteBannerMut.mutate(b.id); toast.success(t('banner.deleted')); }}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

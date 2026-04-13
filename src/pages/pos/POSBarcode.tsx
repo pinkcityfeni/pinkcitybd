@@ -1,17 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/data/store';
+import { useProducts } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Barcode, Package } from 'lucide-react';
 import { toast } from 'sonner';
+import type { Product } from '@/data/store';
 
 export default function POSBarcode() {
-  const products = useStore(s => s.products);
+  const { data: products = [] } = useProducts();
   const addToPosCart = useStore(s => s.addToPosCart);
   const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
-  const [result, setResult] = useState<typeof products[0] | null>(null);
+  const [result, setResult] = useState<Product | null>(null);
   const [notFound, setNotFound] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 

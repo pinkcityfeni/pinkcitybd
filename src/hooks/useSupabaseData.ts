@@ -18,7 +18,7 @@ function useRealtimeSubscription(tableName: string, queryKey: string[]) {
   }, [tableName, queryClient, queryKey]);
 }
 
-// ─── Products ───
+// ─── Products (admin/cashier — includes buyingPrice) ───
 export function useProducts() {
   const queryKey = ['products'];
   useRealtimeSubscription('products', queryKey);
@@ -28,6 +28,32 @@ export function useProducts() {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []).map(dbToProduct);
+    },
+  });
+}
+
+// ─── Public Products (store-facing — excludes buyingPrice) ───
+export function usePublicProducts() {
+  const queryKey = ['products_public'];
+  useRealtimeSubscription('products', queryKey);
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products_public' as any).select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map((p: any): Product => ({
+        id: p.id,
+        name: p.name,
+        image: p.image || '',
+        images: p.images || [],
+        price: Number(p.price),
+        buyingPrice: 0,
+        barcode: p.barcode || '',
+        stock: p.stock || 0,
+        category: p.category || '',
+        subcategory: p.subcategory || '',
+        description: p.description || '',
+      }));
     },
   });
 }

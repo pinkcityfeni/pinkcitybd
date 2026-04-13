@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, SlidersHorizontal, Heart, Star } from 'lucide-react';
 import { toast } from 'sonner';
-import { useProducts, useCategories, useProductRating } from '@/hooks/useSupabaseData';
+import { usePublicProducts, useCategories, useProductRating } from '@/hooks/useSupabaseData';
 
 function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t }: any) {
   const rating = useProductRating(product.id);
@@ -43,7 +43,7 @@ function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t 
 }
 
 export default function Shop() {
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = usePublicProducts();
   const { data: categories = [] } = useCategories();
   const addToCart = useStore(s => s.addToCart);
   const wishlist = useStore(s => s.wishlist);

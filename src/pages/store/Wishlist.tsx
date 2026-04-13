@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useMemo } from 'react';
-import { useProducts } from '@/hooks/useSupabaseData';
+import { usePublicProducts } from '@/hooks/useSupabaseData';
 
 export default function Wishlist() {
   const wishlist = useStore(s => s.wishlist);
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = usePublicProducts();
   const toggleWishlist = useStore(s => s.toggleWishlist);
   const addToCart = useStore(s => s.addToCart);
   const { t } = useLanguage();

@@ -5,11 +5,11 @@ import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, Truck, ShieldCheck
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useProducts, useCategories, useBanners, useProductRating } from '@/hooks/useSupabaseData';
+import { usePublicProducts, useCategories, useBanners, useProductRating } from '@/hooks/useSupabaseData';
 import type { Banner, Product, Category } from '@/data/store';
 
 export default function Home() {
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = usePublicProducts();
   const { data: categories = [] } = useCategories();
   const { data: banners = [] } = useBanners();
   const addToCart = useStore(s => s.addToCart);

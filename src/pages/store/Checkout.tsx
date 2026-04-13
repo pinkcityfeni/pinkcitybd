@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
+import { usePlaceOrder } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck } from 'lucide-react';
-import type { PaymentMethod, DeliveryZone } from '@/data/store';
+import type { PaymentMethod, DeliveryZone, Order } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
 
@@ -20,7 +21,8 @@ const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
 
 export default function Checkout() {
   const cart = useStore(s => s.cart);
-  const placeOrder = useStore(s => s.placeOrder);
+  const clearCart = useStore(s => s.clearCart);
+  const placeOrderMut = usePlaceOrder();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -36,7 +38,6 @@ export default function Checkout() {
   const [copied, setCopied] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [orderTotal, setOrderTotal] = useState(0);
-  
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -47,7 +48,6 @@ export default function Checkout() {
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const deliveryCharge = DELIVERY_CHARGES[deliveryZone];
   const grandTotal = total + deliveryCharge;
-  
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   if (cart.length === 0 && step !== 'done') {
@@ -64,7 +64,6 @@ export default function Checkout() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-
   const handleContinueToReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) { toast.error(t('checkout.enterPhone')); return; }
@@ -73,77 +72,66 @@ export default function Checkout() {
     setStep('review');
   };
 
-  const handlePlaceOrder = () => {
-    const savedTotal = grandTotal;
-    const id = placeOrder('online', {
-      customerName: name || 'Guest',
-      customerEmail: email || undefined,
-      customerPhone: phone,
-      deliveryAddress: address,
-      deliveryZone,
-      deliveryCharge,
-      paymentMethod,
-      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
-    });
-    setOrderId(id);
-    setOrderTotal(savedTotal);
-    
-    setStep('done');
-    toast.success(t('checkout.orderPlaced'));
+  const handlePlaceOrder = async () => {
+    try {
+      const result = await placeOrderMut.mutateAsync({
+        type: 'online',
+        items: cart,
+        data: {
+          customerName: name || 'Guest',
+          customerEmail: email || undefined,
+          customerPhone: phone,
+          deliveryAddress: address,
+          deliveryZone,
+          deliveryCharge,
+          paymentMethod,
+          paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+        },
+      });
+      setOrderId(result.id);
+      setOrderTotal(result.total);
+      clearCart();
+      setStep('done');
+      toast.success(t('checkout.orderPlaced'));
+    } catch (err: any) {
+      toast.error(err.message || 'Order failed');
+    }
   };
 
   const selectedPayment = paymentMethods.find(p => p.id === paymentMethod)!;
 
-  // ─── Order Confirmation ───
   if (step === 'done') return (
     <div className="container mx-auto px-4 py-12 max-w-md text-center animate-fade-in">
       <div className="rounded-2xl border bg-card p-8">
         <CheckCircle2 className="h-16 w-16 text-success mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-1">{t('checkout.orderConfirmed')}</h2>
         <p className="text-muted-foreground text-sm mb-6">{t('checkout.orderSuccess')}</p>
-
         <div className="text-left space-y-3 mb-6">
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <Package className="h-4 w-4 text-primary shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">Order ID</p>
-              <p className="font-mono text-sm font-medium">{orderId}</p>
-            </div>
+            <div><p className="text-xs text-muted-foreground">Order ID</p><p className="font-mono text-sm font-medium">{orderId.slice(0, 8)}</p></div>
           </div>
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <ShoppingBag className="h-4 w-4 text-primary shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">{t('checkout.total')}</p>
-              <p className="text-sm font-bold text-primary">৳{orderTotal.toFixed(0)}</p>
-            </div>
+            <div><p className="text-xs text-muted-foreground">{t('checkout.total')}</p><p className="text-sm font-bold text-primary">৳{orderTotal.toFixed(0)}</p></div>
           </div>
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <Wallet className="h-4 w-4 text-primary shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">{t('checkout.payment')}</p>
-              <p className="text-sm font-medium">{selectedPayment.label}</p>
-            </div>
+            <div><p className="text-xs text-muted-foreground">{t('checkout.payment')}</p><p className="text-sm font-medium">{selectedPayment.label}</p></div>
           </div>
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <MapPin className="h-4 w-4 text-primary shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">{t('checkout.deliveryAddress')}</p>
-              <p className="text-sm">{address}</p>
-            </div>
+            <div><p className="text-xs text-muted-foreground">{t('checkout.deliveryAddress')}</p><p className="text-sm">{address}</p></div>
           </div>
         </div>
-
         <div className="flex flex-col gap-2">
           <Button asChild size="lg"><Link to="/shop">{t('checkout.moreShopping')}</Link></Button>
-          {isAuthenticated && (
-            <Button asChild variant="outline" size="sm"><Link to="/account">{t('checkout.myOrders')}</Link></Button>
-          )}
+          {isAuthenticated && <Button asChild variant="outline" size="sm"><Link to="/account">{t('checkout.myOrders')}</Link></Button>}
         </div>
       </div>
     </div>
   );
 
-  // ─── Review Step ───
   if (step === 'review') return (
     <div className="container mx-auto px-4 py-8 max-w-lg animate-fade-in">
       <button onClick={() => setStep('details')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
@@ -164,14 +152,9 @@ export default function Checkout() {
         <h3 className="font-semibold text-base mb-2">{t('checkout.paymentMethod')}</h3>
         <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
           <span className="text-primary">{selectedPayment.icon}</span>
-          <div>
-            <p className="font-medium">{selectedPayment.label}</p>
-            <p className="text-xs text-muted-foreground">{selectedPayment.description}</p>
-          </div>
+          <div><p className="font-medium">{selectedPayment.label}</p><p className="text-xs text-muted-foreground">{selectedPayment.description}</p></div>
         </div>
-        {trxId && (
-          <p className="mt-2 text-xs text-muted-foreground">TrxID: <span className="font-mono font-medium text-foreground">{trxId}</span></p>
-        )}
+        {trxId && <p className="mt-2 text-xs text-muted-foreground">TrxID: <span className="font-mono font-medium text-foreground">{trxId}</span></p>}
       </div>
 
       <div className="rounded-2xl border bg-card p-4 mb-4 space-y-3">
@@ -185,7 +168,6 @@ export default function Checkout() {
         <div className="border-t pt-2 space-y-1 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
-          
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">
           <span>{t('checkout.total')}</span>
@@ -193,13 +175,12 @@ export default function Checkout() {
         </div>
       </div>
 
-      <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder}>
-        {t('checkout.confirmBtn')} — ৳{grandTotal.toFixed(0)}
+      <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending}>
+        {placeOrderMut.isPending ? 'Processing...' : `${t('checkout.confirmBtn')} — ৳${grandTotal.toFixed(0)}`}
       </Button>
     </div>
   );
 
-  // ─── Details Step ───
   return (
     <div className="container mx-auto px-4 py-8 max-w-lg animate-fade-in">
       <button onClick={() => navigate('/cart')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
@@ -207,141 +188,63 @@ export default function Checkout() {
       </button>
       <h1 className="text-xl font-bold mb-4">{t('checkout.title')}</h1>
 
-      {/* Guest / Login prompt */}
       {!isAuthenticated && (
         <div className="rounded-2xl border bg-card p-4 mb-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium text-sm">{t('checkout.guestOrder')}</p>
-              <p className="text-xs text-muted-foreground">{t('checkout.guestDesc')}</p>
-            </div>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><User className="h-5 w-5 text-primary" /></div>
+            <div><p className="font-medium text-sm">{t('checkout.guestOrder')}</p><p className="text-xs text-muted-foreground">{t('checkout.guestDesc')}</p></div>
           </div>
-          <Link
-            to="/login"
-            state={{ from: '/checkout' }}
-            className="block w-full text-center py-2.5 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 transition-colors"
-          >
-            {t('checkout.loginPrompt')}
-          </Link>
+          <Link to="/login" state={{ from: '/checkout' }} className="block w-full text-center py-2.5 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 transition-colors">{t('checkout.loginPrompt')}</Link>
         </div>
       )}
       {isAuthenticated && (
         <div className="rounded-2xl border bg-card p-3 mb-4 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center">
-            <Gift className="h-4 w-4 text-accent" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">{t('checkout.loggedInAs', { name: user?.name || '' })}</p>
-            <p className="text-xs text-muted-foreground">{t('checkout.loggedInAs', { name: user?.name || '' })}</p>
-          </div>
+          <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center"><Gift className="h-4 w-4 text-accent" /></div>
+          <div><p className="font-medium text-sm">{t('checkout.loggedInAs', { name: user?.name || '' })}</p><p className="text-xs text-muted-foreground">{t('checkout.loggedInAs', { name: user?.name || '' })}</p></div>
         </div>
       )}
 
       <form onSubmit={handleContinueToReview} className="space-y-4">
         <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <User className="h-4 w-4 text-primary" /> {t('checkout.contact')}
-          </h3>
-          <div>
-            <Label htmlFor="name">{t('checkout.name')}</Label>
-            <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder={t('checkout.fullName')} />
-          </div>
-          <div>
-            <Label htmlFor="email">{t('checkout.email')}</Label>
-            <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" />
-          </div>
+          <h3 className="font-semibold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> {t('checkout.contact')}</h3>
+          <div><Label htmlFor="name">{t('checkout.name')}</Label><Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder={t('checkout.fullName')} /></div>
+          <div><Label htmlFor="email">{t('checkout.email')}</Label><Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" /></div>
         </div>
 
         <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-primary" /> {t('checkout.deliveryInfo')}
-          </h3>
-          <div>
-            <Label htmlFor="phone">{t('checkout.phone')} <span className="text-destructive">*</span></Label>
-            <Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" required />
-          </div>
+          <h3 className="font-semibold flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> {t('checkout.deliveryInfo')}</h3>
+          <div><Label htmlFor="phone">{t('checkout.phone')} <span className="text-destructive">*</span></Label><Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" required /></div>
           <div>
             <Label htmlFor="address">{t('checkout.address')} <span className="text-destructive">*</span></Label>
-            <textarea
-              id="address"
-              value={address}
-              onChange={e => setAddress(e.target.value)}
-              placeholder={t('checkout.addressPlaceholder')}
-              required
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none"
-            />
+            <textarea id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder={t('checkout.addressPlaceholder')} required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none" />
           </div>
-
-          {/* Delivery Zone */}
           <div>
             <Label className="mb-2 block">{t('checkout.deliveryZone')} <span className="text-destructive">*</span></Label>
             <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setDeliveryZone('feni')}
-                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'feni' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === 'feni' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <div>
-                    <p className="font-medium text-xs">{t('checkout.feni')}</p>
-                    <p className="text-xs text-primary font-bold">৳৩০</p>
+              {(['feni', 'feni_upozila', 'outside'] as DeliveryZone[]).map(zone => (
+                <button key={zone} type="button" onClick={() => setDeliveryZone(zone)}
+                  className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === zone ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
+                  <div className="flex items-center gap-2">
+                    <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === zone ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div>
+                      <p className="font-medium text-xs">{zone === 'feni' ? t('checkout.feni') : zone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')}</p>
+                      <p className="text-xs text-primary font-bold">৳{DELIVERY_CHARGES[zone]}</p>
+                    </div>
                   </div>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeliveryZone('feni_upozila')}
-                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'feni_upozila' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === 'feni_upozila' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <div>
-                    <p className="font-medium text-xs">{t('checkout.feniUpozila')}</p>
-                    <p className="text-xs text-primary font-bold">৳৭০</p>
-                  </div>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeliveryZone('outside')}
-                className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === 'outside' ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === 'outside' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <div>
-                    <p className="font-medium text-xs">{t('checkout.outsideFeni')}</p>
-                    <p className="text-xs text-primary font-bold">৳১৫০</p>
-                  </div>
-                </div>
-              </button>
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Payment Method */}
         <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-primary" /> {t('checkout.paymentMethod')}
-          </h3>
+          <h3 className="font-semibold flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> {t('checkout.paymentMethod')}</h3>
           <div className="grid grid-cols-1 gap-2">
             {paymentMethods.map(pm => (
-              <button
-                key={pm.id}
-                type="button"
-                onClick={() => { setPaymentMethod(pm.id); setTrxId(''); }}
-                className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                  paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'
-                }`}
-              >
+              <button key={pm.id} type="button" onClick={() => { setPaymentMethod(pm.id); setTrxId(''); }}
+                className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
                 <span className={paymentMethod === pm.id ? 'text-primary' : 'text-muted-foreground'}>{pm.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{pm.label}</p>
-                  <p className="text-xs text-muted-foreground">{pm.description}</p>
-                </div>
+                <div className="flex-1 min-w-0"><p className="font-medium text-sm">{pm.label}</p><p className="text-xs text-muted-foreground">{pm.description}</p></div>
                 <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === pm.id ? 'border-primary' : 'border-muted-foreground/30'}`}>
                   {paymentMethod === pm.id && <div className="h-2 w-2 rounded-full bg-primary" />}
                 </div>
@@ -377,33 +280,13 @@ export default function Checkout() {
                 <div className="space-y-2">
                   <p className="text-xs font-semibold text-blue-600">{t('checkout.bankTransfer')}</p>
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">{t('checkout.bankName')}</p>
-                        <p className="text-xs font-medium">BRAC BANK</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">Account Name</p>
-                        <p className="text-xs font-medium">PINK CITY</p>
-                      </div>
-                    </div>
+                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border"><div><p className="text-[10px] text-muted-foreground">{t('checkout.bankName')}</p><p className="text-xs font-medium">BRAC BANK</p></div></div>
+                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border"><div><p className="text-[10px] text-muted-foreground">Account Name</p><p className="text-xs font-medium">PINK CITY</p></div></div>
                     <div className="flex items-center gap-2 bg-background rounded-lg p-2.5 border">
-                      <div className="flex-1">
-                        <p className="text-[10px] text-muted-foreground">{t('checkout.accountNumber')}</p>
-                        <p className="font-mono font-bold text-sm tracking-wider">1802204711537001</p>
-                      </div>
-                      <button type="button" onClick={() => copyToClipboard('1802204711537001')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">
-                        {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
-                      </button>
+                      <div className="flex-1"><p className="text-[10px] text-muted-foreground">{t('checkout.accountNumber')}</p><p className="font-mono font-bold text-sm tracking-wider">1802204711537001</p></div>
+                      <button type="button" onClick={() => copyToClipboard('1802204711537001')} className="p-1.5 rounded-md hover:bg-muted transition-colors text-primary">{copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}</button>
                     </div>
-                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">{t('checkout.branch')}</p>
-                        <p className="text-xs font-medium">FENI</p>
-                      </div>
-                    </div>
+                    <div className="flex items-center justify-between bg-background rounded-lg p-2.5 border"><div><p className="text-[10px] text-muted-foreground">{t('checkout.branch')}</p><p className="text-xs font-medium">FENI</p></div></div>
                   </div>
                 </div>
               )}
@@ -414,21 +297,15 @@ export default function Checkout() {
               </div>
             </div>
           )}
-
         </div>
 
-        {/* Quick summary */}
         <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.nItems', { n: itemCount })}</span><span>৳{total.toFixed(0)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
-          <div className="border-t pt-2 flex justify-between font-bold text-base">
-            <span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span>
-          </div>
+          <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
         </div>
 
-        <Button type="submit" size="lg" className="w-full rounded-full shadow-lg shadow-primary/20">
-          {t('checkout.reviewBtn')}
-        </Button>
+        <Button type="submit" size="lg" className="w-full rounded-full shadow-lg shadow-primary/20">{t('checkout.reviewBtn')}</Button>
       </form>
     </div>
   );

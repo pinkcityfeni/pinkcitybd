@@ -110,6 +110,9 @@ export default function Login() {
             <div>
               <Label htmlFor="password" className="text-xs">{t('auth.passwordLabel')}</Label>
               <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="rounded-lg" autoComplete="current-password" maxLength={128} />
+              <div className="flex justify-end mt-1">
+                <Link to="/forgot-password" className="text-[10px] text-primary hover:underline">পাসওয়ার্ড ভুলে গেছেন?</Link>
+              </div>
             </div>
             <Button type="submit" className="w-full rounded-lg h-10 font-semibold" disabled={loading}>
               {loading ? '...' : t('auth.signInBtn')}

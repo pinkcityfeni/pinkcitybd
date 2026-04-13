@@ -208,22 +208,20 @@ function BannerSlider({ banners }: { banners: Banner[] }) {
   return (
     <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <Link to={banner.link || '/shop'} className="relative block w-full cursor-pointer overflow-hidden" style={{ height: '94px' }}>
-        <div key={current} className="w-full h-full animate-banner-scale-in">
           {banner.image ? (
-            <>
+            <div key={current} className="w-full h-full">
               <img src={banner.image} alt={banner.title} className="w-full h-full object-cover" />
               {banner.title && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
                   <h2 className="text-white text-sm sm:text-2xl font-display font-bold drop-shadow-lg leading-snug">{banner.title}</h2>
                 </div>
               )}
-            </>
+            </div>
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-primary to-accent flex items-center justify-center px-8">
+            <div key={current} className="w-full h-full bg-gradient-to-r from-primary to-accent flex items-center justify-center px-8 animate-banner-scale-in">
               <h2 className="text-primary-foreground text-lg sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
             </div>
           )}
-        </div>
       </Link>
       {banners.length > 1 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">

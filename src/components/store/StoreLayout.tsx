@@ -90,17 +90,20 @@ export default function StoreLayout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
-            {/* Auth - desktop only */}
             {isAuthenticated ? (
               <>
-                <Link to="/account" className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
+                <Link to="/account" className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
                   <User className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 <button onClick={handleLogout} className="hidden sm:flex p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground">
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
               </>
-            ) : null}
+            ) : (
+              <Link to="/login" className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0">
+                <User className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            )}
           </div>
         </div>
 

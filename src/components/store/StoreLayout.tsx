@@ -57,7 +57,7 @@ export default function StoreLayout() {
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 bg-background border-b">
-        <div className="container mx-auto flex items-center justify-between h-14 px-1.5 sm:px-4">
+        <div className="container mx-auto flex items-center justify-between h-14 px-1.5 sm:px-4 relative">
           {/* Left: Hamburger */}
           <div className="flex items-center shrink-0 -ml-1 w-8">
             <button className="md:hidden p-1.5 rounded-lg hover:bg-muted shrink-0" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

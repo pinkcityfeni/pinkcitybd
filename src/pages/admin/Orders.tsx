@@ -1,19 +1,14 @@
 import { useState } from 'react';
-import { useStore, Order } from '@/data/store';
+import { Order } from '@/data/store';
+import { useOrders, useUpdateOrderStatus, useDeleteOrder } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { MapPin, Phone, Mail, ChevronDown, ChevronUp, Wallet, Banknote, Smartphone, CreditCard, Building2, Truck, Trash2 } from 'lucide-react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
 const PAYMENT_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -37,9 +32,9 @@ const STATUS_COLORS: Record<Order['status'], string> = {
 };
 
 export default function Orders() {
-  const orders = useStore(s => s.orders);
-  const updateOrderStatus = useStore(s => s.updateOrderStatus);
-  const deleteOrder = useStore(s => s.deleteOrder);
+  const { data: orders = [] } = useOrders();
+  const updateOrderStatusMut = useUpdateOrderStatus();
+  const deleteOrderMut = useDeleteOrder();
   const { t } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -47,7 +42,7 @@ export default function Orders() {
   const advance = (o: Order) => {
     const next: Record<string, Order['status']> = { pending: 'processing', processing: 'completed' };
     const ns = next[o.status];
-    if (ns) { updateOrderStatus(o.id, ns); toast.success(`Order ${o.id} → ${ns}`); }
+    if (ns) { updateOrderStatusMut.mutate({ orderId: o.id, status: ns }); toast.success(`Order → ${ns}`); }
   };
 
   return (
@@ -66,7 +61,7 @@ export default function Orders() {
                 <button className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors" onClick={() => setExpandedId(expanded ? null : o.id)}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs">{o.id}</span>
+                      <span className="font-mono text-xs">{o.id.slice(0, 8)}</span>
                       <Badge variant="outline" className="text-[10px]">{o.type.toUpperCase()}</Badge>
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${STATUS_COLORS[o.status]}`}>{o.status}</span>
                       {o.paymentMethod && (
@@ -135,7 +130,7 @@ export default function Orders() {
                        <div className="flex gap-2">
                          {o.status !== 'completed' && o.status !== 'cancelled' && (
                            <>
-                             <Button size="sm" variant="outline" onClick={() => { updateOrderStatus(o.id, 'cancelled'); toast.success(t('order.cancelled')); }}>{t('order.cancel')}</Button>
+                             <Button size="sm" variant="outline" onClick={() => { updateOrderStatusMut.mutate({ orderId: o.id, status: 'cancelled' }); toast.success(t('order.cancelled')); }}>{t('order.cancel')}</Button>
                              <Button size="sm" onClick={() => advance(o)}>{o.status === 'pending' ? t('order.process') : t('order.complete')}</Button>
                            </>
                          )}
@@ -162,7 +157,7 @@ export default function Orders() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrder(deleteId); toast.success('অর্ডার ডিলিট হয়েছে'); setDeleteId(null); } }}>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrderMut.mutate(deleteId); toast.success('অর্ডার ডিলিট হয়েছে'); setDeleteId(null); } }}>
               ডিলিট করুন
             </AlertDialogAction>
           </AlertDialogFooter>

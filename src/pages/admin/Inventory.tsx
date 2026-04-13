@@ -1,4 +1,4 @@
-import { useStore } from '@/data/store';
+import { useProducts, useCategories, useUpdateStock } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +7,9 @@ import { toast } from 'sonner';
 import { Plus, Minus, Search } from 'lucide-react';
 
 export default function Inventory() {
-  const products = useStore(s => s.products);
-  const categories = useStore(s => s.categories);
-  const updateStock = useStore(s => s.updateStock);
+  const { data: products = [] } = useProducts();
+  const { data: categories = [] } = useCategories();
+  const updateStockMut = useUpdateStock();
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
@@ -27,7 +27,7 @@ export default function Inventory() {
   const adjust = (id: string, dir: 1 | -1) => {
     const amt = Number(amounts[id] || 1);
     if (amt <= 0) return;
-    updateStock(id, amt * dir);
+    updateStockMut.mutate({ productId: id, change: amt * dir });
     toast.success(dir > 0 ? t('inv.stockAdded') : t('inv.stockRemoved'));
     setAmounts(a => ({ ...a, [id]: '' }));
   };

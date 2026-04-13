@@ -1,10 +1,10 @@
-import { useStore } from '@/data/store';
+import { useReviews, useProducts } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Star } from 'lucide-react';
 
 export default function Reviews() {
-  const reviews = useStore(s => s.reviews);
-  const products = useStore(s => s.products);
+  const { data: reviews = [] } = useReviews();
+  const { data: products = [] } = useProducts();
   const { t } = useLanguage();
 
   return (

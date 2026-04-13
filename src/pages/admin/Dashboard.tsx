@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import { useStore } from '@/data/store';
+import { useProducts, useOrders, useCategories } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
@@ -27,9 +27,9 @@ function getDateRange(filter: DateFilter): { start: Date; end: Date } {
 }
 
 export default function Dashboard() {
-  const products = useStore(s => s.products);
-  const orders = useStore(s => s.orders);
-  const categories = useStore(s => s.categories);
+  const { data: products = [] } = useProducts();
+  const { data: orders = [] } = useOrders();
+  const { data: categories = [] } = useCategories();
   const { t } = useLanguage();
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
 
@@ -56,7 +56,6 @@ export default function Dashboard() {
     const totalProfit = totalRevenue - totalCost;
     const lowStock = products.filter(p => p.stock < 15).sort((a, b) => a.stock - b.stock);
 
-    // Top selling products
     const productSales: Record<string, { name: string; category: string; qty: number; revenue: number }> = {};
     orders.forEach(o => {
       o.items.forEach(i => {
@@ -69,7 +68,6 @@ export default function Dashboard() {
     });
     const topProducts = Object.values(productSales).sort((a, b) => b.qty - a.qty).slice(0, 8);
 
-    // Today's top products
     const todayProductSales: Record<string, { name: string; qty: number; revenue: number }> = {};
     todayOrders.forEach(o => {
       o.items.forEach(i => {
@@ -96,7 +94,6 @@ export default function Dashboard() {
     return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly, topProducts, todayTopProducts };
   }, [orders, products]);
 
-  // Filtered stats based on selected date range
   const filtered = useMemo(() => {
     const { start, end } = getDateRange(dateFilter);
     const fOrders = orders.filter(o => {
@@ -131,8 +128,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  
-
   return (
     <div className="p-4 md:p-6 animate-fade-in space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -157,7 +152,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Filtered Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={TrendingUp} label={t('dash.sales')} value={`৳${filtered.sales.toFixed(0)}`} sub={t('dash.orders', { n: filtered.orders.length })} color="text-primary" bgColor="bg-primary/10" />
         <StatCard icon={ArrowUpRight} label={t('dash.profit')} value={`৳${filtered.profit.toFixed(0)}`} sub={`${t('dash.cost')}: ৳${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
@@ -230,7 +224,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Filtered Top Products + All Time Top */}
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl border bg-card p-5">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -297,7 +290,7 @@ export default function Dashboard() {
                 <div key={o.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] text-muted-foreground">{o.id}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">{o.id.slice(0, 8)}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${o.type === 'pos' ? 'bg-violet-500/10 text-violet-500' : 'bg-blue-500/10 text-blue-500'}`}>{o.type.toUpperCase()}</span>
                     </div>
                     <p className="text-sm mt-0.5">{o.customerName || 'Walk-in'}</p>
@@ -348,7 +341,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Order Type Comparison Bar Chart */}
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-semibold mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> {t('dash.monthlyComparison')}</h3>
         <ResponsiveContainer width="100%" height={200}>

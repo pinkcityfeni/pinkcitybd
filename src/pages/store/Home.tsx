@@ -207,7 +207,8 @@ function BannerSlider({ banners }: { banners: Banner[] }) {
 
   return (
     <section className="relative w-full overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <Link to={banner.link || '/shop'} className="relative block w-full cursor-pointer" style={{ height: '94px' }}>
+      <Link to={banner.link || '/shop'} className="relative block w-full cursor-pointer overflow-hidden" style={{ height: '94px' }}>
+        <div key={current} className="w-full h-full animate-banner-scale-in">
         {banner.image ? (
           <>
             <img src={banner.image} alt={banner.title} className="w-full h-full object-cover transition-opacity duration-500" />

@@ -218,7 +218,7 @@ function BannerSlider({ banners }: { banners: Banner[] }) {
               )}
             </div>
           ) : (
-            <div key={current} className="w-full h-full bg-gradient-to-r from-primary to-accent flex items-center justify-center px-8 animate-banner-scale-in">
+            <div key={current} className="w-full h-full bg-gradient-to-r from-primary to-accent flex items-center justify-center px-8">
               <h2 className="text-primary-foreground text-lg sm:text-3xl font-display font-bold text-center leading-snug drop-shadow-md">{banner.title}</h2>
             </div>
           )}

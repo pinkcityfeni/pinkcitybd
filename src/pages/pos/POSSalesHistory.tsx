@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useStore } from '@/data/store';
+import { useOrders } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import type { PaymentMethod, Order } from '@/data/store';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
 
 export default function POSSalesHistory() {
-  const allOrders = useStore(s => s.orders);
+  const { data: allOrders = [] } = useOrders();
   const { t } = useLanguage();
   const orders = useMemo(() => allOrders.filter(o => o.type === 'pos'), [allOrders]);
   const totalRev = useMemo(() => orders.reduce((s, o) => s + o.total, 0), [orders]);
@@ -43,18 +43,9 @@ export default function POSSalesHistory() {
         <p className="text-sm opacity-60 mb-6">{t('posHistory.nTransactions', { n: orders.length })}</p>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="pos-panel">
-            <p className="text-xs opacity-50">{t('posHistory.totalRevenue')}</p>
-            <p className="text-xl font-bold text-primary">৳{totalRev.toFixed(0)}</p>
-          </div>
-          <div className="pos-panel">
-            <p className="text-xs opacity-50">{t('posHistory.totalProfit')}</p>
-            <p className="text-xl font-bold text-success">৳{(totalRev - totalCost).toFixed(0)}</p>
-          </div>
-          <div className="pos-panel">
-            <p className="text-xs opacity-50">{t('posHistory.transactions')}</p>
-            <p className="text-xl font-bold">{orders.length}</p>
-          </div>
+          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.totalRevenue')}</p><p className="text-xl font-bold text-primary">৳{totalRev.toFixed(0)}</p></div>
+          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.totalProfit')}</p><p className="text-xl font-bold text-success">৳{(totalRev - totalCost).toFixed(0)}</p></div>
+          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.transactions')}</p><p className="text-xl font-bold">{orders.length}</p></div>
         </div>
 
         <div className="pos-panel overflow-auto">
@@ -76,7 +67,7 @@ export default function POSSalesHistory() {
                 const cost = o.items.reduce((s, i) => s + i.product.buyingPrice * i.quantity, 0);
                 return (
                   <tr key={o.id} className={`border-b last:border-0 cursor-pointer transition-colors hover:bg-primary/5 ${selectedOrder?.id === o.id ? 'bg-primary/10' : ''}`} style={{ borderColor: 'hsl(var(--pos-border))' }} onClick={() => setSelectedOrder(o)}>
-                    <td className="py-3 font-mono text-xs">{o.id}</td>
+                    <td className="py-3 font-mono text-xs">{o.id.slice(0, 8)}</td>
                     <td className="py-3 text-xs">{new Date(o.date).toLocaleString()}</td>
                     <td className="py-3">{o.items.length}</td>
                     <td className="py-3 text-right font-medium">৳{o.total.toFixed(0)}</td>

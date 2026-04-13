@@ -23,8 +23,8 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
   const navigate = useNavigate();
   const { t, lang, setLang } = useLanguage();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

@@ -36,12 +36,15 @@ function useDbUsers() {
     queryKey: ['db-users'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Not authenticated');
       const res = await supabase.functions.invoke('list-users', {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.error) throw res.error;
-      return res.data as DbUser[];
+      if (res.data?.error) throw new Error(res.data.error);
+      return (res.data || []) as DbUser[];
     },
+    retry: 2,
   });
 }
 

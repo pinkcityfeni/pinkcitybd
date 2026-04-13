@@ -45,11 +45,10 @@ export default function StoreLayout() {
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setMobileMenuOpen(false);
-      setSearchOpen(false);
     }
   };
 
-  const toggleLang = () => setLang(lang === 'bn' ? 'en' : 'bn');
+  const toggleLang = () => { setLang(lang === 'bn' ? 'en' : 'bn'); setLangDropdownOpen(false); };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

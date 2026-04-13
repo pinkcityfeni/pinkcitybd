@@ -5,26 +5,26 @@ import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, Truck, ShieldCheck
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useProducts, useCategories, useBanners, useProductRating } from '@/hooks/useSupabaseData';
+import type { Banner, Product, Category } from '@/data/store';
 
 export default function Home() {
-  const products = useStore(s => s.products);
-  const categories = useStore(s => s.categories);
+  const { data: products = [] } = useProducts();
+  const { data: categories = [] } = useCategories();
+  const { data: banners = [] } = useBanners();
   const addToCart = useStore(s => s.addToCart);
-  const banners = useStore(s => s.banners);
   const wishlist = useStore(s => s.wishlist);
   const toggleWishlist = useStore(s => s.toggleWishlist);
   const { t, lang } = useLanguage();
   const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
-  const [shuffled, setShuffled] = useState<typeof products>([]);
+  const [shuffled, setShuffled] = useState<Product[]>([]);
   useEffect(() => {
     setShuffled([...products].sort(() => Math.random() - 0.5));
   }, [products]);
   const trending = useMemo(() => [...products].sort((a, b) => a.stock - b.stock).slice(0, 6), [products]);
-  const newArrivals = useMemo(() => [...products].slice(-8), [products]);
 
   return (
     <div className="animate-fade-in">
-      {/* Hero Banner */}
       {activeBanners.length > 0 ? (
         <BannerSlider banners={activeBanners} />
       ) : (
@@ -42,7 +42,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Category Strip */}
       <section className="border-b bg-background">
         <div className="container mx-auto px-3 py-3">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-0.5">
@@ -58,13 +57,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trending Products */}
       {trending.length > 0 && (
         <section className="container mx-auto px-3 py-2">
           <div className="flex items-center justify-between mb-1.5">
-            <div>
-              <h2 className="text-sm font-semibold flex items-center gap-1.5">🔥 {t('home.trending')}</h2>
-            </div>
+            <h2 className="text-sm font-semibold flex items-center gap-1.5">🔥 {t('home.trending')}</h2>
             <Link to="/shop" className="text-[10px] text-primary font-semibold flex items-center gap-0.5 hover:gap-1 transition-all">
               {t('home.viewAll')} <ChevronRight className="h-3 w-3" />
             </Link>
@@ -77,7 +73,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Feature Banner */}
       <section className="bg-secondary/50 py-4">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-3 gap-4">
@@ -97,7 +92,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* All Products */}
       <section className="container mx-auto px-3 py-4">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -115,7 +109,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Banner */}
       <section className="container mx-auto px-4 pb-8">
         <div className="rounded-xl overflow-hidden relative bg-primary p-8 sm:p-12 text-center">
           <div className="relative z-10">
@@ -132,30 +125,19 @@ export default function Home() {
   );
 }
 
-/* ─── Product Card Component ─── */
 function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCart, t, compact }: any) {
   const cat = categories.find((c: any) => c.name === p.category);
   const isWished = wishlist.includes(p.id);
-  const getProductRating = useStore(s => s.getProductRating);
-  const rating = getProductRating(p.id);
+  const rating = useProductRating(p.id);
 
   return (
     <div className="group product-card relative rounded-lg overflow-hidden border bg-background">
-      {/* Wishlist */}
-      <button
-        onClick={() => toggleWishlist(p.id)}
-        className="absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-      >
+      <button onClick={() => toggleWishlist(p.id)} className="absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
         <Heart className={`h-3 w-3 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
       </button>
-
-      {/* Stock badge */}
       {p.stock < 5 && p.stock > 0 && (
-        <span className="absolute top-1 left-1 z-10 text-[7px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded font-semibold">
-          {t('shop.lowStock')}
-        </span>
+        <span className="absolute top-1 left-1 z-10 text-[7px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded font-semibold">{t('shop.lowStock')}</span>
       )}
-
       <Link to={`/product/${p.id}`}>
         <div className="aspect-[4/5] bg-secondary/30 flex items-center justify-center overflow-hidden relative">
           {p.image ? (
@@ -170,12 +152,10 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
           )}
         </div>
       </Link>
-
       <div className="p-1.5">
         <Link to={`/product/${p.id}`}>
           <h3 className="text-[10px] font-medium line-clamp-2 leading-tight group-hover:text-primary transition-colors">{p.name}</h3>
         </Link>
-
         {rating.count > 0 && (
           <div className="flex items-center gap-0.5 mt-0.5">
             <div className="flex">
@@ -186,7 +166,6 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
             <span className="text-[8px] text-muted-foreground">({rating.count})</span>
           </div>
         )}
-
         <div className="flex items-center justify-between mt-1">
           <span className="font-bold text-xs text-primary" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</span>
         </div>
@@ -195,8 +174,7 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
   );
 }
 
-/* ─── Banner Slider ─── */
-function BannerSlider({ banners }: { banners: import('@/data/store').Banner[] }) {
+function BannerSlider({ banners }: { banners: Banner[] }) {
   const [current, setCurrent] = useState(0);
   const pauseRef = useRef(false);
   const touchStartX = useRef(0);

@@ -246,5 +246,11 @@ function InfiniteScrollSentinel({ onVisible }: { onVisible: () => void }) {
     observer.observe(el);
     return () => observer.disconnect();
   }, [onVisible]);
-  return <div ref={ref} className="h-8 flex items-center justify-center"><span className="text-xs text-muted-foreground animate-pulse">{'\u00B7\u00B7\u00B7'}</span></div>;
+  return (
+    <div ref={ref} className="h-10 flex items-center justify-center gap-1.5 py-3">
+      <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+      <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+      <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+    </div>
+  );
 }

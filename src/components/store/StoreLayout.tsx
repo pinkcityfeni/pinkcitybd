@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, ChevronRight, ChevronDown, Truck, ShieldCheck, Headphones } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, Menu, X, Home, Grid3X3, Globe, MapPin, Heart, Phone, Mail, Facebook, ChevronRight, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useStore } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
@@ -156,16 +156,7 @@ export default function StoreLayout() {
         {/* Trust badges */}
         <div className="border-b border-background/10">
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="trust-badge">
-                <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <Truck className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">{lang === 'bn' ? 'দ্রুত ডেলিভারি' : 'Fast Delivery'}</p>
-                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'সারাদেশে' : 'Nationwide'}</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-6">
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
                   <ShieldCheck className="h-5 w-5" />
@@ -173,15 +164,6 @@ export default function StoreLayout() {
                 <div>
                   <p className="text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>
                   <p className="text-[10px] text-background/60">{lang === 'bn' ? 'গ্যারান্টেড' : 'Guaranteed'}</p>
-                </div>
-              </div>
-              <div className="trust-badge">
-                <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <Headphones className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">{lang === 'bn' ? '২৪/৭ সাপোর্ট' : '24/7 Support'}</p>
-                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'যেকোনো সময়' : 'Anytime'}</p>
                 </div>
               </div>
               <div className="trust-badge">

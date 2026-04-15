@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
-import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, Truck, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -75,11 +75,7 @@ export default function Home() {
 
       <section className="bg-secondary/50 py-4">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center text-center gap-2">
-              <Truck className="h-6 w-6 text-primary" />
-              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'দ্রুত ডেলিভারি' : 'Fast Delivery'}</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col items-center text-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
               <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>

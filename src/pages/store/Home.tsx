@@ -69,8 +69,16 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-            {trending.map(p => (
-              <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} compact />
+            {trending.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.4, delay: (i % 3) * 0.08 }}
+              >
+                <ProductCard product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} compact />
+              </motion.div>
             ))}
           </div>
         </section>

@@ -92,9 +92,19 @@ export default function Shop() {
         )}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {filtered.map(p => {
+        {filtered.map((p, i) => {
           const cat = categories.find(c => c.name === p.category);
-          return <ProductCard key={p.id} product={p} catIcon={cat?.icon || '📦'} isWished={wishlist.includes(p.id)} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />;
+          return (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.4, delay: (i % 2) * 0.08 }}
+            >
+              <ProductCard product={p} catIcon={cat?.icon || '📦'} isWished={wishlist.includes(p.id)} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
+            </motion.div>
+          );
         })}
         {filtered.length === 0 && (
           <div className="col-span-full text-center py-20 text-muted-foreground">

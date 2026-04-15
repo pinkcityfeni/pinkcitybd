@@ -7,13 +7,41 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAppSettings } from '@/hooks/useSupabaseData';
 
 function AnnouncementBar() {
   const { data: settings } = useAppSettings();
   const text = settings?.announcement_text || '🚚 ফেনীতে ফ্রি ডেলিভারি | সারাদেশে ক্যাশ অন ডেলিভারি';
-  return <div className="announcement-bar text-center py-1.5 text-xs font-medium tracking-wide"><span>{text}</span></div>;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      if (containerRef.current && textRef.current) {
+        setShouldScroll(textRef.current.scrollWidth > containerRef.current.clientWidth);
+      }
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [text]);
+
+  return (
+    <div ref={containerRef} className="announcement-bar py-1.5 text-xs font-medium tracking-wide overflow-hidden whitespace-nowrap">
+      {shouldScroll ? (
+        <div className="inline-flex animate-marquee">
+          <span className="px-8">{text}</span>
+          <span className="px-8">{text}</span>
+        </div>
+      ) : (
+        <div className="text-center"><span ref={textRef}>{text}</span></div>
+      )}
+      {/* Hidden measurer */}
+      {!shouldScroll && <span ref={textRef} className="invisible absolute whitespace-nowrap">{text}</span>}
+    </div>
+  );
 }
 import logoImg from '@/assets/logo.jpg';
 import logoIcon from '@/assets/logo-icon.png';

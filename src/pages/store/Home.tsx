@@ -101,10 +101,17 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-          {shuffled.map(p => (
+          {shuffled.slice(0, visibleCount).map(p => (
             <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
           ))}
         </div>
+        {visibleCount < shuffled.length && (
+          <div className="flex justify-center mt-4">
+            <Button variant="outline" size="sm" className="rounded-lg px-6 text-xs font-semibold" onClick={() => setVisibleCount(c => c + 12)}>
+              {lang === 'bn' ? 'আরও দেখুন' : 'Load More'}
+            </Button>
+          </div>
+        )}
       </section>
 
       <section className="container mx-auto px-4 pb-8">

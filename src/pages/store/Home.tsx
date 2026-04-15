@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePublicProducts, useCategories, useBanners, useProductRating } from '@/hooks/useSupabaseData';
 import type { Banner, Product, Category } from '@/data/store';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const { data: products = [] } = usePublicProducts();

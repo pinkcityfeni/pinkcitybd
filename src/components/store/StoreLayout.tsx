@@ -14,13 +14,13 @@ function AnnouncementBar() {
   const { data: settings } = useAppSettings();
   const text = settings?.announcement_text || '🚚 ফেনীতে ফ্রি ডেলিভারি | সারাদেশে ক্যাশ অন ডেলিভারি';
   const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
 
   useEffect(() => {
     const check = () => {
-      if (containerRef.current && textRef.current) {
-        setShouldScroll(textRef.current.scrollWidth > containerRef.current.clientWidth);
+      if (containerRef.current && measureRef.current) {
+        setShouldScroll(measureRef.current.scrollWidth > containerRef.current.clientWidth);
       }
     };
     check();
@@ -29,17 +29,16 @@ function AnnouncementBar() {
   }, [text]);
 
   return (
-    <div ref={containerRef} className="announcement-bar py-1.5 text-xs font-medium tracking-wide overflow-hidden whitespace-nowrap">
+    <div ref={containerRef} className="announcement-bar py-1.5 text-xs font-medium tracking-wide overflow-hidden whitespace-nowrap relative">
+      <span ref={measureRef} className="invisible absolute whitespace-nowrap">{text}</span>
       {shouldScroll ? (
         <div className="inline-flex animate-marquee">
           <span className="px-8">{text}</span>
           <span className="px-8">{text}</span>
         </div>
       ) : (
-        <div className="text-center"><span ref={textRef}>{text}</span></div>
+        <div className="text-center"><span>{text}</span></div>
       )}
-      {/* Hidden measurer */}
-      {!shouldScroll && <span ref={textRef} className="invisible absolute whitespace-nowrap">{text}</span>}
     </div>
   );
 }

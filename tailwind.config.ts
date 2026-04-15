@@ -61,6 +61,7 @@ export default {
         "slide-in": { from: { opacity: "0", transform: "translateX(-12px)" }, to: { opacity: "1", transform: "translateX(0)" } },
         "scale-in": { from: { opacity: "0", transform: "scale(0.95)" }, to: { opacity: "1", transform: "scale(1)" } },
         "banner-scale-in": { from: { opacity: "0", transform: "scale(0.92)" }, to: { opacity: "1", transform: "scale(1)" } },
+        "marquee": { from: { transform: "translateX(0)" }, to: { transform: "translateX(-50%)" } },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -70,6 +71,7 @@ export default {
         "slide-in": "slide-in 0.3s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "banner-scale-in": "banner-scale-in 0.6s ease-out",
+        "marquee": "marquee 15s linear infinite",
       },
     },
   },

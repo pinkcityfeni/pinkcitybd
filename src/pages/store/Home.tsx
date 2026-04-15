@@ -106,11 +106,7 @@ export default function Home() {
           ))}
         </div>
         {visibleCount < shuffled.length && (
-          <div className="flex justify-center mt-4">
-            <Button variant="outline" size="sm" className="rounded-lg px-6 text-xs font-semibold" onClick={() => setVisibleCount(c => c + 12)}>
-              {lang === 'bn' ? 'আরও দেখুন' : 'Load More'}
-            </Button>
-          </div>
+          <InfiniteScrollSentinel onVisible={() => setVisibleCount(c => Math.min(c + 12, shuffled.length))} />
         )}
       </section>
 

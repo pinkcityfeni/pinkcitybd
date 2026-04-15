@@ -53,6 +53,7 @@ export function usePublicProducts() {
         category: p.category || '',
         subcategory: p.subcategory || '',
         description: p.description || '',
+        trending: p.trending || false,
       }));
     },
   });
@@ -89,6 +90,7 @@ export function useUpdateProduct() {
       if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.subcategory !== undefined) dbUpdates.subcategory = updates.subcategory;
+      if (updates.trending !== undefined) dbUpdates.trending = updates.trending;
       const { error } = await supabase.from('products').update(dbUpdates).eq('id', id);
       if (error) throw error;
     },

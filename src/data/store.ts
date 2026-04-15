@@ -26,6 +26,7 @@ export interface Product {
   category: string;
   subcategory: string;
   description: string;
+  trending?: boolean;
 }
 
 export interface CartItem {
@@ -102,6 +103,7 @@ export function dbToProduct(p: any): Product {
     category: p.category || '',
     subcategory: p.subcategory || '',
     description: p.description || '',
+    trending: p.trending || false,
   };
 }
 

@@ -42,7 +42,7 @@ export default function Home() {
         </section>
       )}
 
-      <section className="border-b bg-background sticky top-0 z-30">
+      <section className="border-b bg-background sticky top-14 z-30">
         <div className="container mx-auto px-3 py-3">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-0.5">
             {categories.map(c => (

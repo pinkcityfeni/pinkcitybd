@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
 import { useLanguage } from '@/data/language';
-import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, Truck, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Heart, Star, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';

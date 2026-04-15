@@ -106,11 +106,7 @@ export default function Home() {
           ))}
         </div>
         {visibleCount < shuffled.length && (
-          <div className="flex justify-center mt-4">
-            <Button variant="outline" size="sm" className="rounded-lg px-6 text-xs font-semibold" onClick={() => setVisibleCount(c => c + 12)}>
-              {lang === 'bn' ? 'আরও দেখুন' : 'Load More'}
-            </Button>
-          </div>
+          <InfiniteScrollSentinel onVisible={() => setVisibleCount(c => Math.min(c + 12, shuffled.length))} />
         )}
       </section>
 
@@ -237,4 +233,18 @@ function BannerSlider({ banners }: { banners: Banner[] }) {
       )}
     </section>
   );
+}
+
+function InfiniteScrollSentinel({ onVisible }: { onVisible: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) onVisible();
+    }, { rootMargin: '200px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [onVisible]);
+  return <div ref={ref} className="h-8 flex items-center justify-center"><span className="text-xs text-muted-foreground animate-pulse">{'\u00B7\u00B7\u00B7'}</span></div>;
 }

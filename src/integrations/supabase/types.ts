@@ -172,6 +172,7 @@ export type Database = {
           price: number
           stock: number
           subcategory: string
+          trending: boolean
           updated_at: string
         }
         Insert: {
@@ -187,6 +188,7 @@ export type Database = {
           price?: number
           stock?: number
           subcategory?: string
+          trending?: boolean
           updated_at?: string
         }
         Update: {
@@ -202,6 +204,7 @@ export type Database = {
           price?: number
           stock?: number
           subcategory?: string
+          trending?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -311,6 +314,7 @@ export type Database = {
           price: number | null
           stock: number | null
           subcategory: string | null
+          trending: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -325,6 +329,7 @@ export type Database = {
           price?: number | null
           stock?: number | null
           subcategory?: string | null
+          trending?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -339,6 +344,7 @@ export type Database = {
           price?: number | null
           stock?: number | null
           subcategory?: string | null
+          trending?: boolean | null
           updated_at?: string | null
         }
         Relationships: []

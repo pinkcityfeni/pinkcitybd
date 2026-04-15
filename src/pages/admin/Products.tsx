@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Search, Camera, X as XIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
@@ -136,6 +136,7 @@ export default function Products() {
                 </div>
               </div>
               <div className="flex gap-1">
+                <button onClick={() => updateProductMut.mutate({ id: p.id, updates: { trending: !p.trending } })} className={`p-1.5 rounded-lg ${p.trending ? 'text-orange-500 bg-orange-500/10' : 'hover:text-orange-500 hover:bg-orange-500/10'}`} title="Trending"><Flame className="h-4 w-4" /></button>
                 <button onClick={() => openEdit(p)} className="p-1.5 hover:text-primary rounded-lg hover:bg-primary/10"><Pencil className="h-4 w-4" /></button>
                 <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
               </div>
@@ -185,6 +186,7 @@ export default function Products() {
                 <td className="py-3 text-right text-muted-foreground">৳{p.buyingPrice.toFixed(0)}</td>
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? 'text-destructive' : ''}`}>{p.stock}</td>
                 <td className="py-3 text-right">
+                  <button onClick={() => updateProductMut.mutate({ id: p.id, updates: { trending: !p.trending } })} className={`p-1 ${p.trending ? 'text-orange-500' : 'hover:text-orange-500'}`} title="Trending"><Flame className="h-4 w-4" /></button>
                   <button onClick={() => openEdit(p)} className="p-1 hover:text-primary"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
                 </td>

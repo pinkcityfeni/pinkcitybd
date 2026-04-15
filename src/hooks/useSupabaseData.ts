@@ -53,6 +53,7 @@ export function usePublicProducts() {
         category: p.category || '',
         subcategory: p.subcategory || '',
         description: p.description || '',
+        trending: p.trending || false,
       }));
     },
   });
@@ -66,7 +67,7 @@ export function useAddProduct() {
         name: product.name, description: product.description, image: product.image,
         images: product.images, price: product.price, buying_price: product.buyingPrice,
         barcode: product.barcode, stock: product.stock, category: product.category,
-        subcategory: product.subcategory,
+        subcategory: product.subcategory, trending: product.trending || false,
       });
       if (error) throw error;
     },
@@ -89,6 +90,7 @@ export function useUpdateProduct() {
       if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.subcategory !== undefined) dbUpdates.subcategory = updates.subcategory;
+      if (updates.trending !== undefined) dbUpdates.trending = updates.trending;
       const { error } = await supabase.from('products').update(dbUpdates).eq('id', id);
       if (error) throw error;
     },

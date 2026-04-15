@@ -21,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     setShuffled([...products].sort(() => Math.random() - 0.5));
   }, [products]);
-  const trending = useMemo(() => [...products].sort((a, b) => a.stock - b.stock).slice(0, 6), [products]);
+  const trending = useMemo(() => products.filter(p => p.trending), [products]);
 
   return (
     <div className="animate-fade-in">
@@ -42,7 +42,7 @@ export default function Home() {
         </section>
       )}
 
-      <section className="border-b bg-background">
+      <section className="border-b bg-background sticky top-0 z-30">
         <div className="container mx-auto px-3 py-3">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-0.5">
             {categories.map(c => (

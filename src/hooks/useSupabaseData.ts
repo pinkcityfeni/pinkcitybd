@@ -67,7 +67,7 @@ export function useAddProduct() {
         name: product.name, description: product.description, image: product.image,
         images: product.images, price: product.price, buying_price: product.buyingPrice,
         barcode: product.barcode, stock: product.stock, category: product.category,
-        subcategory: product.subcategory,
+        subcategory: product.subcategory, trending: product.trending || false,
       });
       if (error) throw error;
     },

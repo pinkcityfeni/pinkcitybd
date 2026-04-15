@@ -18,8 +18,10 @@ export default function Home() {
   const { t, lang } = useLanguage();
   const activeBanners = useMemo(() => banners.filter(b => b.active), [banners]);
   const [shuffled, setShuffled] = useState<Product[]>([]);
+  const [visibleCount, setVisibleCount] = useState(12);
   useEffect(() => {
     setShuffled([...products].sort(() => Math.random() - 0.5));
+    setVisibleCount(12);
   }, [products]);
   const trending = useMemo(() => products.filter(p => p.trending), [products]);
 

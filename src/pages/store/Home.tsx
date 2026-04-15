@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePublicProducts, useCategories, useBanners, useProductRating } from '@/hooks/useSupabaseData';
 import type { Banner, Product, Category } from '@/data/store';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const { data: products = [] } = usePublicProducts();
@@ -101,8 +102,16 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-          {shuffled.slice(0, visibleCount).map(p => (
-            <ProductCard key={p.id} product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
+          {shuffled.slice(0, visibleCount).map((p, i) => (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.4, delay: (i % 3) * 0.08 }}
+            >
+              <ProductCard product={p} categories={categories} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} t={t} />
+            </motion.div>
           ))}
         </div>
         {visibleCount < shuffled.length && (

@@ -8,7 +8,7 @@ import autoTable from 'jspdf-autotable';
 
 export default function Sales() {
   const { data: orders = [] } = useOrders();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const completed = orders.filter(o => o.status === 'completed');
   const totalRevenue = completed.reduce((s, o) => s + o.total, 0);
   const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
@@ -79,7 +79,7 @@ export default function Sales() {
             <thead><tr className="border-b text-left text-muted-foreground"><th className="pb-3 font-medium">{t('sales.order')}</th><th className="pb-3 font-medium">{t('sales.date')}</th><th className="pb-3 font-medium">{t('sales.channel')}</th><th className="pb-3 font-medium text-right">{t('sales.revenue')}</th><th className="pb-3 font-medium text-right">{t('sales.cost')}</th><th className="pb-3 font-medium text-right">{t('sales.profit')}</th></tr></thead>
             <tbody>
               {completed.map(o => { const cost = o.items.reduce((s, i) => s + i.product.buyingPrice * i.quantity, 0); return (
-                <tr key={o.id} className="border-b last:border-0"><td className="py-3 font-mono text-xs">{o.id.slice(0, 8)}</td><td className="py-3 text-xs">{new Date(o.date).toLocaleDateString()}</td><td className="py-3 text-xs uppercase">{o.type}</td><td className="py-3 text-right">৳{o.total.toFixed(0)}</td><td className="py-3 text-right text-muted-foreground">৳{cost.toFixed(0)}</td><td className="py-3 text-right text-success font-medium">৳{(o.total - cost).toFixed(0)}</td></tr>
+                <tr key={o.id} className="border-b last:border-0"><td className="py-3 font-mono text-xs">{o.id.slice(0, 8)}</td><td className="py-3 text-xs">{new Date(o.date).toLocaleDateString(locale)}</td><td className="py-3 text-xs uppercase">{o.type}</td><td className="py-3 text-right">৳{o.total.toFixed(0)}</td><td className="py-3 text-right text-muted-foreground">৳{cost.toFixed(0)}</td><td className="py-3 text-right text-success font-medium">৳{(o.total - cost).toFixed(0)}</td></tr>
               ); })}
             </tbody>
           </table>

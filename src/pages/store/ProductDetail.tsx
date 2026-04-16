@@ -84,7 +84,7 @@ export default function ProductDetail() {
   const { data: reviews = [] } = useReviews(id);
   const addReviewMut = useAddReview();
   const rating = useProductRating(id || '');
-  const { t, lang } = useLanguage();
+  const { t, lang, locale } = useLanguage();
   const navigate = useNavigate();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);
@@ -241,7 +241,7 @@ export default function ProductDetail() {
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">{r.customerName.charAt(0).toUpperCase()}</div>
                       <div><span className="font-medium text-sm">{r.customerName}</span><div className="flex items-center gap-0.5 mt-0.5"><StarRating rating={r.rating} size="sm" /></div></div>
                     </div>
-                    <span className="text-[10px] text-muted-foreground">{new Date(r.date).toLocaleDateString('bn-BD')}</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(r.date).toLocaleDateString(locale)}</span>
                   </div>
                   <p className="text-sm text-muted-foreground ml-[42px]">{r.comment}</p>
                 </div>

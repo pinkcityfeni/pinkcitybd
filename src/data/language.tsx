@@ -518,6 +518,7 @@ export type TranslationKey = keyof typeof translations;
 // ─── Context ───
 interface LanguageContextType {
   lang: Lang;
+  locale: string;
   setLang: (lang: Lang) => void;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
 }
@@ -548,7 +549,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang: handleSetLang, t }}>
+    <LanguageContext.Provider value={{ lang, locale: lang === 'bn' ? 'bn-BD' : 'en-US', setLang: handleSetLang, t }}>
       {children}
     </LanguageContext.Provider>
   );

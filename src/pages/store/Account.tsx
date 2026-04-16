@@ -9,7 +9,7 @@ import { useOrders } from '@/hooks/useSupabaseData';
 export default function Account() {
   const { data: allOrders = [] } = useOrders();
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const navigate = useNavigate();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);
@@ -43,7 +43,7 @@ export default function Account() {
           return (
             <div key={o.id} className="rounded-xl border bg-card overflow-hidden">
               <button className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/30 transition-colors" onClick={() => setExpandedOrder(expanded ? null : o.id)}>
-                <div><p className="font-mono text-xs text-muted-foreground">{o.id}</p><p className="text-[10px] text-muted-foreground">{new Date(o.date).toLocaleDateString('bn-BD')}</p></div>
+                <div><p className="font-mono text-xs text-muted-foreground">{o.id}</p><p className="text-[10px] text-muted-foreground">{new Date(o.date).toLocaleDateString(locale)}</p></div>
                 <div className="flex items-center gap-3">
                   <div className="text-right"><p className="font-bold text-sm" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{o.total.toFixed(0)}</p><p className={`text-[10px] capitalize font-medium ${o.status === 'completed' ? 'text-success' : o.status === 'cancelled' ? 'text-destructive' : o.status === 'pending' ? 'text-warning' : 'text-info'}`}>{o.status}</p></div>
                   {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}

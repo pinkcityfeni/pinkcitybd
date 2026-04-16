@@ -117,7 +117,7 @@ function useDeleteUser() {
 }
 
 export default function Users() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { user: currentUser } = useAuth();
   const { data: users = [], isLoading, error, refetch, isFetching } = useDbUsers();
   const updateRoleMut = useUpdateUserRole();
@@ -221,7 +221,7 @@ export default function Users() {
                       )}
                     </td>
                     <td className="py-3 text-muted-foreground text-xs">
-                      {new Date(u.created_at).toLocaleDateString('bn-BD')}
+                      {new Date(u.created_at).toLocaleDateString(locale)}
                     </td>
                     <td className="py-3">
                       {!isSelf && (

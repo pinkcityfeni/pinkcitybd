@@ -312,10 +312,23 @@ export function usePlaceOrder() {
         body: { type, items, data },
       });
 
-      if (error) throw error;
-      if (!result?.id) throw new Error('Order failed');
+      if (error) {
+        // Try to extract message from error
+        const msg = typeof error === 'object' && error !== null && 'message' in error
+          ? (error as any).message
+          : typeof error === 'string' ? error : 'Order failed';
+        throw new Error(msg);
+      }
 
-      return { id: result.id as string, total: Number(result.total || 0) };
+      // result may be a string if response wasn't auto-parsed
+      let parsed = result;
+      if (typeof result === 'string') {
+        try { parsed = JSON.parse(result); } catch { throw new Error('Invalid response'); }
+      }
+
+      if (!parsed?.id) throw new Error('Order failed');
+
+      return { id: parsed.id as string, total: Number(parsed.total || 0) };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });

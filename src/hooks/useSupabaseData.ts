@@ -308,47 +308,14 @@ export function usePlaceOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ type, items, data }: { type: 'online' | 'pos'; items: CartItem[]; data?: PlaceOrderData }) => {
-      const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-      const deliveryCharge = data?.deliveryCharge || 0;
-      const discountAmount = data?.discount
-        ? (data.discountType === 'percent' ? Math.round(subtotal * data.discount / 100) : data.discount)
-        : 0;
-      const total = Math.max(0, subtotal - discountAmount) + deliveryCharge;
-
-      const orderItems = items.map(i => ({
-        product: { id: i.product.id, name: i.product.name, price: i.product.price, buyingPrice: i.product.buyingPrice, barcode: i.product.barcode, image: i.product.image },
-        quantity: i.quantity,
-      }));
-
-      const { data: orderData, error } = await supabase.from('orders').insert({
-        items: orderItems as any,
-        total,
-        status: 'pending',
-        type,
-        customer_name: data?.customerName || (type === 'pos' ? 'Walk-in Customer' : 'Guest'),
-        customer_email: data?.customerEmail,
-        customer_phone: data?.customerPhone,
-        delivery_address: data?.deliveryAddress,
-        delivery_zone: data?.deliveryZone,
-        delivery_charge: deliveryCharge,
-        payment_method: data?.paymentMethod,
-        payment_status: data?.paymentStatus || (data?.paymentMethod === 'cod' ? 'pending' : 'paid'),
-        split_payment: data?.splitPayment as any,
-        discount: data?.discount || 0,
-        discount_type: data?.discountType,
-      }).select().single();
+      const { data: result, error } = await supabase.functions.invoke('place-order', {
+        body: { type, items, data },
+      });
 
       if (error) throw error;
+      if (!result?.id) throw new Error('Order failed');
 
-      // Update stock for each item
-      for (const item of items) {
-        const { data: prod } = await supabase.from('products').select('stock').eq('id', item.product.id).single();
-        if (prod) {
-          await supabase.from('products').update({ stock: Math.max(0, prod.stock - item.quantity) }).eq('id', item.product.id);
-        }
-      }
-
-      return { id: orderData.id, total };
+      return { id: result.id as string, total: Number(result.total || 0) };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });

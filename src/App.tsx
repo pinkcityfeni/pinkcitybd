@@ -53,7 +53,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+       <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* ─── Public: Customer Storefront ─── */}
             <Route element={<StoreLayout />}>

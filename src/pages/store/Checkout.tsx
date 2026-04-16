@@ -70,6 +70,7 @@ export default function Checkout() {
     if (!address.trim()) { toast.error(t('checkout.enterAddress')); return; }
     if (needsTrxId && !trxId.trim()) { toast.error(t('checkout.enterTrxId')); return; }
     setStep('review');
+    window.scrollTo(0, 0);
   };
 
   const handlePlaceOrder = async () => {

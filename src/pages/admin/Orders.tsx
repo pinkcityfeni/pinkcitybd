@@ -35,7 +35,7 @@ export default function Orders() {
   const { data: orders = [] } = useOrders();
   const updateOrderStatusMut = useUpdateOrderStatus();
   const deleteOrderMut = useDeleteOrder();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 

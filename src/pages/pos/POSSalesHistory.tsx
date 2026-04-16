@@ -11,7 +11,7 @@ import POSInvoice from '@/components/pos/POSInvoice';
 
 export default function POSSalesHistory() {
   const { data: allOrders = [] } = useOrders();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const orders = useMemo(() => allOrders.filter(o => o.type === 'pos'), [allOrders]);
   const totalRev = useMemo(() => orders.reduce((s, o) => s + o.total, 0), [orders]);
   const totalCost = useMemo(() => orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0), [orders]);

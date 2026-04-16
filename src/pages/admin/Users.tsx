@@ -117,7 +117,7 @@ function useDeleteUser() {
 }
 
 export default function Users() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { user: currentUser } = useAuth();
   const { data: users = [], isLoading, error, refetch, isFetching } = useDbUsers();
   const updateRoleMut = useUpdateUserRole();

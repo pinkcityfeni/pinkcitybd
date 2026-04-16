@@ -84,7 +84,7 @@ export default function ProductDetail() {
   const { data: reviews = [] } = useReviews(id);
   const addReviewMut = useAddReview();
   const rating = useProductRating(id || '');
-  const { t, lang } = useLanguage();
+  const { t, lang, locale } = useLanguage();
   const navigate = useNavigate();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);

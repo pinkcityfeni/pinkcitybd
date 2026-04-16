@@ -7,7 +7,7 @@ interface POSInvoiceProps {
 }
 
 const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) => {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const subtotal = order.items.reduce((s, i) => s + i.product.price * i.quantity, 0);
   const itemCount = order.items.reduce((s, i) => s + i.quantity, 0);
 

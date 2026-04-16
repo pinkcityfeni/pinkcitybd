@@ -8,7 +8,7 @@ import autoTable from 'jspdf-autotable';
 
 export default function Sales() {
   const { data: orders = [] } = useOrders();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const completed = orders.filter(o => o.status === 'completed');
   const totalRevenue = completed.reduce((s, o) => s + o.total, 0);
   const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);

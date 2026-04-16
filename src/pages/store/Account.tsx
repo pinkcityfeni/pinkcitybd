@@ -9,7 +9,7 @@ import { useOrders } from '@/hooks/useSupabaseData';
 export default function Account() {
   const { data: allOrders = [] } = useOrders();
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const navigate = useNavigate();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);

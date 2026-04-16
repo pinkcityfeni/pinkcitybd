@@ -30,7 +30,7 @@ export default function Dashboard() {
   const { data: products = [] } = useProducts();
   const { data: orders = [] } = useOrders();
   const { data: categories = [] } = useCategories();
-  const { t } = useLanguage();
+  const { t, lang, locale } = useLanguage();
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
 
   const DATE_FILTERS: { value: DateFilter; label: string }[] = [

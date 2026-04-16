@@ -5,7 +5,7 @@ import { Star } from 'lucide-react';
 export default function Reviews() {
   const { data: reviews = [] } = useReviews();
   const { data: products = [] } = useProducts();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   return (
     <div className="p-6 animate-fade-in">

@@ -78,7 +78,7 @@ export default function Orders() {
                     <div className="flex items-center gap-3 mt-1 text-sm">
                       <span className="font-medium">{o.customerName || 'Guest'}</span>
                       <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground text-xs">{new Date(o.date).toLocaleString()}</span>
+                      <span className="text-muted-foreground text-xs">{new Date(o.date).toLocaleString(locale)}</span>
                     </div>
                   </div>
                   <span className="font-bold text-primary">৳{o.total.toFixed(0)}</span>

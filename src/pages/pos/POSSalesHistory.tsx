@@ -68,7 +68,7 @@ export default function POSSalesHistory() {
                 return (
                   <tr key={o.id} className={`border-b last:border-0 cursor-pointer transition-colors hover:bg-primary/5 ${selectedOrder?.id === o.id ? 'bg-primary/10' : ''}`} style={{ borderColor: 'hsl(var(--pos-border))' }} onClick={() => setSelectedOrder(o)}>
                     <td className="py-3 font-mono text-xs">{o.id.slice(0, 8)}</td>
-                    <td className="py-3 text-xs">{new Date(o.date).toLocaleString()}</td>
+                    <td className="py-3 text-xs">{new Date(o.date).toLocaleString(locale)}</td>
                     <td className="py-3">{o.items.length}</td>
                     <td className="py-3 text-right font-medium">৳{o.total.toFixed(0)}</td>
                     <td className="py-3 text-xs">

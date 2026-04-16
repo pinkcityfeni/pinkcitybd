@@ -85,7 +85,7 @@ export default function Dashboard() {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      const label = d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short', year: '2-digit' });
       const mo = orders.filter(o => o.date.slice(0, 7) === key);
       const rev = mo.reduce((s, o) => s + o.total, 0);
       const cost = mo.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);

@@ -34,8 +34,8 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
           <p><span className="text-gray-500">{t('invoice.customer')}:</span> {order.customerName || t('invoice.walkIn')}</p>
         </div>
         <div className="text-right">
-          <p>{new Date(order.date).toLocaleDateString()}</p>
-          <p>{new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <p>{new Date(order.date).toLocaleDateString(locale)}</p>
+          <p>{new Date(order.date).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</p>
         </div>
       </div>
 

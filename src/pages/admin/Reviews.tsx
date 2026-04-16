@@ -25,7 +25,7 @@ export default function Reviews() {
                     <p className="font-medium text-sm">{r.customerName}</p>
                     <p className="text-xs text-muted-foreground">{product?.name || 'Unknown Product'}</p>
                   </div>
-                  <span className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString(locale)}</span>
                 </div>
                 <div className="flex items-center gap-0.5 mb-2">
                   {[1, 2, 3, 4, 5].map(s => (

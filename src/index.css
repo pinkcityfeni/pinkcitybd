@@ -165,6 +165,39 @@
   to { filter: drop-shadow(0 0 10px hsl(340 82% 52% / 0.8)) drop-shadow(0 0 24px hsl(340 82% 52% / 0.5)) drop-shadow(0 0 48px hsl(340 82% 52% / 0.3)); }
 }
 
+/* Falling rose petals over the Pink City logo */
+.petal-field {
+  position: absolute;
+  inset: -10px -20px -10px -20px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+.petal {
+  position: absolute;
+  top: -14px;
+  font-size: 10px;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px hsl(340 82% 60% / 0.5));
+  will-change: transform, opacity;
+  animation-name: petal-fall;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in;
+}
+.petal-1 { left: 10%; animation-duration: 6s; animation-delay: 0s; }
+.petal-2 { left: 28%; animation-duration: 7.5s; animation-delay: 1.2s; font-size: 8px; }
+.petal-3 { left: 50%; animation-duration: 5.5s; animation-delay: 2.4s; font-size: 11px; }
+.petal-4 { left: 72%; animation-duration: 8s; animation-delay: 0.8s; font-size: 9px; }
+.petal-5 { left: 88%; animation-duration: 6.8s; animation-delay: 3.1s; }
+
+@keyframes petal-fall {
+  0%   { transform: translateY(-12px) translateX(0) rotate(0deg);    opacity: 0; }
+  15%  { opacity: 0.85; }
+  50%  { transform: translateY(28px) translateX(-6px) rotate(180deg); opacity: 0.9; }
+  85%  { opacity: 0.6; }
+  100% { transform: translateY(58px) translateX(6px) rotate(360deg); opacity: 0; }
+}
+
 /* Scrollbar hide */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

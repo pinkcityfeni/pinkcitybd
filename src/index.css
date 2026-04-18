@@ -194,11 +194,11 @@
 .petal-8 { left: 94%; animation-duration: 7.8s; animation-delay: 1.6s; font-size: 11px; }
 
 @keyframes petal-fall {
-  0%   { transform: translateY(-12px) translateX(0) rotate(0deg);    opacity: 0; }
+  0%   { transform: translateY(-16px) translateX(0) rotate(0deg);    opacity: 0; }
   15%  { opacity: 0.85; }
-  50%  { transform: translateY(28px) translateX(-6px) rotate(180deg); opacity: 0.9; }
-  85%  { opacity: 0.6; }
-  100% { transform: translateY(58px) translateX(6px) rotate(360deg); opacity: 0; }
+  50%  { transform: translateY(30px) translateX(-8px) rotate(180deg); opacity: 0.9; }
+  85%  { opacity: 0.55; }
+  100% { transform: translateY(70px) translateX(8px) rotate(360deg); opacity: 0; }
 }
 
 /* Scrollbar hide */

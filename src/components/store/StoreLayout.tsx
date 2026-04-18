@@ -94,6 +94,13 @@ export default function StoreLayout() {
           <span className="petal petal-6">🌸</span>
           <span className="petal petal-7">🌸</span>
           <span className="petal petal-8">🌸</span>
+          <span className="petal petal-9">🌸</span>
+          <span className="petal petal-10">🌸</span>
+          <span className="petal petal-11">🌸</span>
+          <span className="petal petal-12">🌸</span>
+          <span className="petal petal-13">🌸</span>
+          <span className="petal petal-14">🌸</span>
+          <span className="petal petal-15">🌸</span>
         </div>
         <div className="container mx-auto flex items-center justify-between h-14 px-1.5 sm:px-4 relative">
           {/* Left: Hamburger + Logo icon */}

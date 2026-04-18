@@ -108,14 +108,6 @@ export default function FacebookImport() {
     toast.success('Text parse হয়েছে');
   };
 
-  const addImageUrl = () => {
-    const url = imageInput.trim();
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url)) { toast.error('Valid image URL দিন'); return; }
-    setForm(f => ({ ...f, imageUrls: [...f.imageUrls, url] }));
-    setImageInput('');
-  };
-
   const removeImage = (i: number) => {
     setForm(f => ({ ...f, imageUrls: f.imageUrls.filter((_, idx) => idx !== i) }));
   };

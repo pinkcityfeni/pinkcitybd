@@ -84,6 +84,17 @@ export default function StoreLayout() {
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 bg-background border-b">
+        {/* Falling rose petals across the header */}
+        <div className="petal-field" aria-hidden="true">
+          <span className="petal petal-1">🌸</span>
+          <span className="petal petal-2">🌸</span>
+          <span className="petal petal-3">🌸</span>
+          <span className="petal petal-4">🌸</span>
+          <span className="petal petal-5">🌸</span>
+          <span className="petal petal-6">🌸</span>
+          <span className="petal petal-7">🌸</span>
+          <span className="petal petal-8">🌸</span>
+        </div>
         <div className="container mx-auto flex items-center justify-between h-14 px-1.5 sm:px-4 relative">
           {/* Left: Hamburger + Logo icon */}
           <div className="flex items-center gap-1 shrink-0 -ml-1">
@@ -95,18 +106,9 @@ export default function StoreLayout() {
             </Link>
           </div>
 
-          {/* Center: Pink City text image with glow + falling petals */}
+          {/* Center: Pink City text image */}
           <Link to="/" className="flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="relative">
-              <div className="petal-field" aria-hidden="true">
-                <span className="petal petal-1">🌸</span>
-                <span className="petal petal-2">🌸</span>
-                <span className="petal petal-3">🌸</span>
-                <span className="petal petal-4">🌸</span>
-                <span className="petal petal-5">🌸</span>
-              </div>
-              <img src={pinkCityText} alt="Pink City" className="h-12 object-contain pink-city-glow relative z-10" />
-            </div>
+            <img src={pinkCityText} alt="Pink City" className="h-12 object-contain" />
           </Link>
 
           {/* Desktop Nav */}

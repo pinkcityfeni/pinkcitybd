@@ -211,6 +211,7 @@ const translations = {
   'admin.panel': { bn: 'অ্যাডমিন প্যানেল', en: 'Admin Panel' },
   'admin.dashboard': { bn: 'ড্যাশবোর্ড', en: 'Dashboard' },
   'admin.products': { bn: 'প্রোডাক্ট', en: 'Products' },
+  'admin.fbImport': { bn: 'FB থেকে Import', en: 'FB Import' },
   'admin.categories': { bn: 'ক্যাটাগরি', en: 'Categories' },
   'admin.banners': { bn: 'ব্যানার', en: 'Banners' },
   'admin.orders': { bn: 'অর্ডার', en: 'Orders' },

@@ -89,7 +89,6 @@ export default function FacebookImport() {
 
   // ===== Single import state =====
   const [pastedText, setPastedText] = useState('');
-  const [imageInput, setImageInput] = useState('');
   const [form, setForm] = useState(EMPTY);
   const [importing, setImporting] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -106,14 +105,6 @@ export default function FacebookImport() {
     const price = priceMatch ? priceMatch[1] : '';
     setForm(f => ({ ...f, name, description, price: price || f.price }));
     toast.success('Text parse হয়েছে');
-  };
-
-  const addImageUrl = () => {
-    const url = imageInput.trim();
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url)) { toast.error('Valid image URL দিন'); return; }
-    setForm(f => ({ ...f, imageUrls: [...f.imageUrls, url] }));
-    setImageInput('');
   };
 
   const removeImage = (i: number) => {
@@ -147,6 +138,7 @@ export default function FacebookImport() {
         barcode: form.barcode.trim(), category: form.category, subcategory: form.subcategory,
         stock: Number(form.stock) || 0,
         image: finalImages[0], images: finalImages, trending: false,
+        source: 'fb',
       };
       await addProductMut.mutateAsync(data);
       toast.success(`✅ "${form.name}" add হয়েছে!`);
@@ -205,9 +197,15 @@ export default function FacebookImport() {
     toast.success('Stock apply হয়েছে');
   };
 
-  const addRowImage = (id: string, url: string) => {
-    if (!url.trim() || !/^https?:\/\//i.test(url)) { toast.error('Valid URL দিন'); return; }
-    setRows(rs => rs.map(r => r.id === id ? { ...r, imageUrls: [...r.imageUrls, url.trim()] } : r));
+  const uploadRowImages = async (id: string, files: FileList | null) => {
+    if (!files) return;
+    for (const file of Array.from(files)) {
+      if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); continue; }
+      try {
+        const url = await uploadImage(file);
+        setRows(rs => rs.map(r => r.id === id ? { ...r, imageUrls: [...r.imageUrls, url] } : r));
+      } catch { toast.error('Upload failed'); }
+    }
   };
 
   const removeRowImage = (id: string, idx: number) => {
@@ -233,6 +231,7 @@ export default function FacebookImport() {
           category: row.category, subcategory: '',
           stock: Number(row.stock) || 0,
           image: finalImages[0], images: finalImages, trending: false,
+          source: 'fb',
         };
         await addProductMut.mutateAsync(data);
         updateRow(row.id, { status: 'success' });
@@ -276,8 +275,8 @@ export default function FacebookImport() {
               <ol className="mt-3 space-y-2 text-sm text-muted-foreground list-decimal list-inside">
                 <li>Facebook-এ আপনার page-এর post-টা open করুন।</li>
                 <li>Post-এর <strong>text/caption</strong> select করে copy করুন → "Post Text" box-এ paste → <strong>"Auto-fill Form"</strong>।</li>
-                <li>Post-এর <strong>ছবিতে right-click</strong> → "Copy image address" → image URL box-এ paste করে "Add"।</li>
-                <li>অথবা ছবিটা download করে <strong>"Upload File"</strong> button দিয়ে upload করুন (recommended)।</li>
+                <li>Post-এর ছবি গুলো আপনার ফোন/computer-এ <strong>save/download</strong> করুন।</li>
+                <li>"ছবি upload করুন" section থেকে save করা ছবি গুলো <strong>upload</strong> করুন (একসাথে একাধিক select করতে পারবেন)।</li>
                 <li>Price, stock, category check করে <strong>"Import as Product"</strong> চাপুন।</li>
               </ol>
             )}
@@ -297,22 +296,14 @@ export default function FacebookImport() {
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
-              <h2 className="font-semibold">ছবি যোগ করুন</h2>
-            </div>
-            <div className="flex gap-2">
-              <Input placeholder="Image URL paste করুন (https://...)" value={imageInput}
-                onChange={e => setImageInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addImageUrl())} />
-              <Button onClick={addImageUrl} type="button"><Plus className="h-4 w-4" /></Button>
+              <h2 className="font-semibold">ছবি upload করুন</h2>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>অথবা</span>
-              <label className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-dashed cursor-pointer hover:bg-muted/50">
-                <ImageIcon className="h-3.5 w-3.5" />
-                <span>Upload File</span>
+              <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-dashed cursor-pointer hover:bg-muted/50">
+                <ImageIcon className="h-4 w-4" />
+                <span>Upload ছবি (একাধিক select করতে পারেন)</span>
                 <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileUpload} />
               </label>
-              <span className="text-[10px]">(recommended)</span>
             </div>
             {form.imageUrls.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
@@ -381,18 +372,15 @@ export default function FacebookImport() {
             </button>
             {showBulkGuide && (
               <div className="mt-3 text-sm text-muted-foreground space-y-2">
-                <p>প্রতিটা product আলাদা করার জন্য একটা লাইনে শুধু <code className="bg-muted px-1 rounded">---</code> দিন। ছবির URL <code className="bg-muted px-1 rounded">IMG:</code> দিয়ে শুরু করুন।</p>
+                <p>প্রতিটা product আলাদা করার জন্য একটা লাইনে শুধু <code className="bg-muted px-1 rounded">---</code> দিন। Parse হওয়ার পর table-এর প্রতিটা row-এ <strong>+</strong> button দিয়ে ছবি upload করুন।</p>
                 <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">{`Gold Necklace Set
 Beautiful party design
 Price: 1500 tk
-IMG: https://example.com/n1.jpg
-IMG: https://example.com/n2.jpg
 ---
 Pink Lipstick Matte
 Long lasting color
-Price: 350 tk
-IMG: https://example.com/lip.jpg`}</pre>
-                <p>Parse করার পর table-এ সব edit করতে পারবেন।</p>
+Price: 350 tk`}</pre>
+                <p>Parse → table-এ ছবি upload + edit → select → Import।</p>
               </div>
             )}
           </Card>
@@ -401,7 +389,7 @@ IMG: https://example.com/lip.jpg`}</pre>
           <Card className="p-4 space-y-3">
             <Label>একসাথে অনেকগুলো post paste করুন (<code className="bg-muted px-1 rounded text-xs">---</code> দিয়ে আলাদা)</Label>
             <Textarea rows={10} value={bulkText} onChange={e => setBulkText(e.target.value)}
-              placeholder={`Product 1\nDescription\nPrice: 500 tk\nIMG: https://...\n---\nProduct 2\n...`} />
+              placeholder={`Product 1\nDescription\nPrice: 500 tk\n---\nProduct 2\n...`} />
             <div className="flex flex-wrap gap-3 items-end">
               <div>
                 <Label className="text-xs">Default Stock</Label>
@@ -471,7 +459,7 @@ IMG: https://example.com/lip.jpg`}</pre>
                               onCheckedChange={c => updateRow(row.id, { selected: !!c })} />
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-wrap gap-1 max-w-[120px]">
+                            <div className="flex flex-wrap gap-1 max-w-[140px]">
                               {row.imageUrls.map((u, i) => (
                                 <div key={i} className="relative w-10 h-10 rounded border overflow-hidden group">
                                   <img src={u} alt="" className="w-full h-full object-cover"
@@ -482,12 +470,11 @@ IMG: https://example.com/lip.jpg`}</pre>
                                   </button>
                                 </div>
                               ))}
-                              <button onClick={() => {
-                                const u = prompt('Image URL:');
-                                if (u) addRowImage(row.id, u);
-                              }} className="w-10 h-10 rounded border border-dashed flex items-center justify-center hover:bg-muted">
+                              <label className="w-10 h-10 rounded border border-dashed flex items-center justify-center hover:bg-muted cursor-pointer" title="Upload images">
                                 <Plus className="h-3 w-3" />
-                              </button>
+                                <input type="file" accept="image/*" multiple className="hidden"
+                                  onChange={e => { uploadRowImages(row.id, e.target.files); e.target.value = ''; }} />
+                              </label>
                             </div>
                           </TableCell>
                           <TableCell>

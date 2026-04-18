@@ -27,6 +27,7 @@ export interface Product {
   subcategory: string;
   description: string;
   trending?: boolean;
+  source?: 'manual' | 'fb' | 'pos';
 }
 
 export interface CartItem {
@@ -104,6 +105,7 @@ export function dbToProduct(p: any): Product {
     subcategory: p.subcategory || '',
     description: p.description || '',
     trending: p.trending || false,
+    source: (p.source as 'manual' | 'fb' | 'pos') || 'manual',
   };
 }
 

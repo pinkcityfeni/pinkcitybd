@@ -170,6 +170,7 @@ export type Database = {
           images: string[]
           name: string
           price: number
+          source: string
           stock: number
           subcategory: string
           trending: boolean
@@ -186,6 +187,7 @@ export type Database = {
           images?: string[]
           name: string
           price?: number
+          source?: string
           stock?: number
           subcategory?: string
           trending?: boolean
@@ -202,6 +204,7 @@ export type Database = {
           images?: string[]
           name?: string
           price?: number
+          source?: string
           stock?: number
           subcategory?: string
           trending?: boolean

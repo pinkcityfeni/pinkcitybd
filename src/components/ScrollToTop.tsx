@@ -6,9 +6,10 @@ export default function ScrollToTop() {
   const navigationType = useNavigationType();
 
   useEffect(() => {
-    // Only scroll to top on PUSH (new navigation), not on POP (back/forward)
-    if (navigationType === 'PUSH') {
-      window.scrollTo(0, 0);
+    // Scroll to top on every navigation EXCEPT browser back/forward (POP).
+    // POP keeps the previous scroll position so users return where they left off.
+    if (navigationType !== 'POP') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
   }, [pathname, navigationType]);
 

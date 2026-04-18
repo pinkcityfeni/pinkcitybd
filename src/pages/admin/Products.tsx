@@ -87,7 +87,7 @@ export default function Products() {
     if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
     const allImages = form.images;
     const mainImage = allImages[0] || form.image || '';
-    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages };
+    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual' };
     if (editProduct) { updateProductMut.mutate({ id: editProduct.id, updates: data }); toast.success(t('prod.updated')); }
     else { addProductMut.mutate(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
@@ -141,10 +141,12 @@ export default function Products() {
                 <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-xs flex-wrap">
               <Badge variant="outline" className="text-[10px]">{p.barcode}</Badge>
               <span className={`font-medium ${p.stock < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>{t('prod.stock')}: {p.stock}</span>
               {(p.images?.length || 0) > 0 && <Badge variant="secondary" className="text-[10px]">📷 {p.images.length}</Badge>}
+              {p.source === 'fb' && <Badge className="text-[10px] bg-[#1877F2] text-white hover:bg-[#1877F2]">FB</Badge>}
+              {p.source === 'pos' && <Badge variant="secondary" className="text-[10px]">POS</Badge>}
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="font-bold text-primary">৳{p.price.toFixed(0)}</span>
@@ -177,6 +179,8 @@ export default function Products() {
                   <div className="flex items-center gap-2">
                     {(p.images?.[0] || p.image) && <img src={p.images?.[0] || p.image} alt="" className="w-8 h-8 rounded-md object-cover border" />}
                     <span>{p.name}</span>
+                    {p.source === 'fb' && <Badge className="text-[9px] h-4 px-1 bg-[#1877F2] text-white hover:bg-[#1877F2]">FB</Badge>}
+                    {p.source === 'pos' && <Badge variant="secondary" className="text-[9px] h-4 px-1">POS</Badge>}
                   </div>
                 </td>
                 <td className="py-3 font-mono text-xs">{p.barcode}</td>

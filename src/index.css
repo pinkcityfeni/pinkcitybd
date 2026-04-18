@@ -165,30 +165,33 @@
   to { filter: drop-shadow(0 0 10px hsl(340 82% 52% / 0.8)) drop-shadow(0 0 24px hsl(340 82% 52% / 0.5)) drop-shadow(0 0 48px hsl(340 82% 52% / 0.3)); }
 }
 
-/* Falling rose petals over the Pink City logo */
+/* Falling rose petals across the entire header */
 .petal-field {
   position: absolute;
-  inset: -10px -20px -10px -20px;
+  inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 5;
+  z-index: 1;
 }
 .petal {
   position: absolute;
-  top: -14px;
-  font-size: 10px;
+  top: -16px;
+  font-size: 11px;
   opacity: 0;
-  filter: drop-shadow(0 0 3px hsl(340 82% 60% / 0.5));
+  filter: drop-shadow(0 0 3px hsl(340 82% 60% / 0.45));
   will-change: transform, opacity;
   animation-name: petal-fall;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in;
 }
-.petal-1 { left: 10%; animation-duration: 6s; animation-delay: 0s; }
-.petal-2 { left: 28%; animation-duration: 7.5s; animation-delay: 1.2s; font-size: 8px; }
-.petal-3 { left: 50%; animation-duration: 5.5s; animation-delay: 2.4s; font-size: 11px; }
-.petal-4 { left: 72%; animation-duration: 8s; animation-delay: 0.8s; font-size: 9px; }
-.petal-5 { left: 88%; animation-duration: 6.8s; animation-delay: 3.1s; }
+.petal-1 { left: 5%;  animation-duration: 6s;   animation-delay: 0s;   font-size: 10px; }
+.petal-2 { left: 18%; animation-duration: 7.5s; animation-delay: 1.2s; font-size: 8px;  }
+.petal-3 { left: 30%; animation-duration: 5.5s; animation-delay: 2.4s; font-size: 12px; }
+.petal-4 { left: 42%; animation-duration: 8s;   animation-delay: 0.8s; font-size: 9px;  }
+.petal-5 { left: 58%; animation-duration: 6.8s; animation-delay: 3.1s; font-size: 11px; }
+.petal-6 { left: 70%; animation-duration: 7s;   animation-delay: 0.4s; font-size: 10px; }
+.petal-7 { left: 82%; animation-duration: 6.2s; animation-delay: 2s;   font-size: 9px;  }
+.petal-8 { left: 94%; animation-duration: 7.8s; animation-delay: 1.6s; font-size: 11px; }
 
 @keyframes petal-fall {
   0%   { transform: translateY(-12px) translateX(0) rotate(0deg);    opacity: 0; }

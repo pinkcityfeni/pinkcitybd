@@ -89,7 +89,6 @@ export default function FacebookImport() {
 
   // ===== Single import state =====
   const [pastedText, setPastedText] = useState('');
-  const [imageInput, setImageInput] = useState('');
   const [form, setForm] = useState(EMPTY);
   const [importing, setImporting] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -197,9 +196,15 @@ export default function FacebookImport() {
     toast.success('Stock apply হয়েছে');
   };
 
-  const addRowImage = (id: string, url: string) => {
-    if (!url.trim() || !/^https?:\/\//i.test(url)) { toast.error('Valid URL দিন'); return; }
-    setRows(rs => rs.map(r => r.id === id ? { ...r, imageUrls: [...r.imageUrls, url.trim()] } : r));
+  const uploadRowImages = async (id: string, files: FileList | null) => {
+    if (!files) return;
+    for (const file of Array.from(files)) {
+      if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); continue; }
+      try {
+        const url = await uploadImage(file);
+        setRows(rs => rs.map(r => r.id === id ? { ...r, imageUrls: [...r.imageUrls, url] } : r));
+      } catch { toast.error('Upload failed'); }
+    }
   };
 
   const removeRowImage = (id: string, idx: number) => {
@@ -289,22 +294,14 @@ export default function FacebookImport() {
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
-              <h2 className="font-semibold">ছবি যোগ করুন</h2>
-            </div>
-            <div className="flex gap-2">
-              <Input placeholder="Image URL paste করুন (https://...)" value={imageInput}
-                onChange={e => setImageInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addImageUrl())} />
-              <Button onClick={addImageUrl} type="button"><Plus className="h-4 w-4" /></Button>
+              <h2 className="font-semibold">ছবি upload করুন</h2>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>অথবা</span>
-              <label className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-dashed cursor-pointer hover:bg-muted/50">
-                <ImageIcon className="h-3.5 w-3.5" />
-                <span>Upload File</span>
+              <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-dashed cursor-pointer hover:bg-muted/50">
+                <ImageIcon className="h-4 w-4" />
+                <span>Upload ছবি (একাধিক select করতে পারেন)</span>
                 <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileUpload} />
               </label>
-              <span className="text-[10px]">(recommended)</span>
             </div>
             {form.imageUrls.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">

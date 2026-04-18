@@ -372,18 +372,15 @@ export default function FacebookImport() {
             </button>
             {showBulkGuide && (
               <div className="mt-3 text-sm text-muted-foreground space-y-2">
-                <p>প্রতিটা product আলাদা করার জন্য একটা লাইনে শুধু <code className="bg-muted px-1 rounded">---</code> দিন। ছবির URL <code className="bg-muted px-1 rounded">IMG:</code> দিয়ে শুরু করুন।</p>
+                <p>প্রতিটা product আলাদা করার জন্য একটা লাইনে শুধু <code className="bg-muted px-1 rounded">---</code> দিন। Parse হওয়ার পর table-এর প্রতিটা row-এ <strong>+</strong> button দিয়ে ছবি upload করুন।</p>
                 <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">{`Gold Necklace Set
 Beautiful party design
 Price: 1500 tk
-IMG: https://example.com/n1.jpg
-IMG: https://example.com/n2.jpg
 ---
 Pink Lipstick Matte
 Long lasting color
-Price: 350 tk
-IMG: https://example.com/lip.jpg`}</pre>
-                <p>Parse করার পর table-এ সব edit করতে পারবেন।</p>
+Price: 350 tk`}</pre>
+                <p>Parse → table-এ ছবি upload + edit → select → Import।</p>
               </div>
             )}
           </Card>
@@ -392,7 +389,7 @@ IMG: https://example.com/lip.jpg`}</pre>
           <Card className="p-4 space-y-3">
             <Label>একসাথে অনেকগুলো post paste করুন (<code className="bg-muted px-1 rounded text-xs">---</code> দিয়ে আলাদা)</Label>
             <Textarea rows={10} value={bulkText} onChange={e => setBulkText(e.target.value)}
-              placeholder={`Product 1\nDescription\nPrice: 500 tk\nIMG: https://...\n---\nProduct 2\n...`} />
+              placeholder={`Product 1\nDescription\nPrice: 500 tk\n---\nProduct 2\n...`} />
             <div className="flex flex-wrap gap-3 items-end">
               <div>
                 <Label className="text-xs">Default Stock</Label>

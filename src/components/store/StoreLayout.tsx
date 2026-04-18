@@ -95,9 +95,18 @@ export default function StoreLayout() {
             </Link>
           </div>
 
-          {/* Center: Pink City text image */}
+          {/* Center: Pink City text image with glow + falling petals */}
           <Link to="/" className="flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <img src={pinkCityText} alt="Pink City" className="h-12 object-contain" />
+            <div className="relative">
+              <div className="petal-field" aria-hidden="true">
+                <span className="petal petal-1">🌸</span>
+                <span className="petal petal-2">🌸</span>
+                <span className="petal petal-3">🌸</span>
+                <span className="petal petal-4">🌸</span>
+                <span className="petal petal-5">🌸</span>
+              </div>
+              <img src={pinkCityText} alt="Pink City" className="h-12 object-contain pink-city-glow relative z-10" />
+            </div>
           </Link>
 
           {/* Desktop Nav */}

@@ -138,6 +138,7 @@ export default function FacebookImport() {
         barcode: form.barcode.trim(), category: form.category, subcategory: form.subcategory,
         stock: Number(form.stock) || 0,
         image: finalImages[0], images: finalImages, trending: false,
+        source: 'fb',
       };
       await addProductMut.mutateAsync(data);
       toast.success(`✅ "${form.name}" add হয়েছে!`);
@@ -274,8 +275,8 @@ export default function FacebookImport() {
               <ol className="mt-3 space-y-2 text-sm text-muted-foreground list-decimal list-inside">
                 <li>Facebook-এ আপনার page-এর post-টা open করুন।</li>
                 <li>Post-এর <strong>text/caption</strong> select করে copy করুন → "Post Text" box-এ paste → <strong>"Auto-fill Form"</strong>।</li>
-                <li>Post-এর <strong>ছবিতে right-click</strong> → "Copy image address" → image URL box-এ paste করে "Add"।</li>
-                <li>অথবা ছবিটা download করে <strong>"Upload File"</strong> button দিয়ে upload করুন (recommended)।</li>
+                <li>Post-এর ছবি গুলো আপনার ফোন/computer-এ <strong>save/download</strong> করুন।</li>
+                <li>"ছবি upload করুন" section থেকে save করা ছবি গুলো <strong>upload</strong> করুন (একসাথে একাধিক select করতে পারবেন)।</li>
                 <li>Price, stock, category check করে <strong>"Import as Product"</strong> চাপুন।</li>
               </ol>
             )}

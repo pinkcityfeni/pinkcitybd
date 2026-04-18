@@ -93,7 +93,7 @@ export default function StoreLayout() {
           </div>
 
           {/* Center: Logo */}
-          <Link to="/" className="flex items-center gap-1 absolute left-1/2 -translate-x-[47%]">
+          <Link to="/" className="flex items-center gap-1 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <img src={logoIcon} alt="PINK CITY" className="h-10 w-10 object-contain shrink-0" />
             <img src={pinkCityText} alt="Pink City" className="h-12 object-contain" />
           </Link>

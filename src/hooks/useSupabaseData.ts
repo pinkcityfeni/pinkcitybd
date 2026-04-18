@@ -68,7 +68,8 @@ export function useAddProduct() {
         images: product.images, price: product.price, buying_price: product.buyingPrice,
         barcode: product.barcode, stock: product.stock, category: product.category,
         subcategory: product.subcategory, trending: product.trending || false,
-      });
+        source: product.source || 'manual',
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),

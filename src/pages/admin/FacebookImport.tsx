@@ -230,6 +230,7 @@ export default function FacebookImport() {
           category: row.category, subcategory: '',
           stock: Number(row.stock) || 0,
           image: finalImages[0], images: finalImages, trending: false,
+          source: 'fb',
         };
         await addProductMut.mutateAsync(data);
         updateRow(row.id, { status: 'success' });
@@ -460,7 +461,7 @@ IMG: https://example.com/lip.jpg`}</pre>
                               onCheckedChange={c => updateRow(row.id, { selected: !!c })} />
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-wrap gap-1 max-w-[120px]">
+                            <div className="flex flex-wrap gap-1 max-w-[140px]">
                               {row.imageUrls.map((u, i) => (
                                 <div key={i} className="relative w-10 h-10 rounded border overflow-hidden group">
                                   <img src={u} alt="" className="w-full h-full object-cover"
@@ -471,12 +472,11 @@ IMG: https://example.com/lip.jpg`}</pre>
                                   </button>
                                 </div>
                               ))}
-                              <button onClick={() => {
-                                const u = prompt('Image URL:');
-                                if (u) addRowImage(row.id, u);
-                              }} className="w-10 h-10 rounded border border-dashed flex items-center justify-center hover:bg-muted">
+                              <label className="w-10 h-10 rounded border border-dashed flex items-center justify-center hover:bg-muted cursor-pointer" title="Upload images">
                                 <Plus className="h-3 w-3" />
-                              </button>
+                                <input type="file" accept="image/*" multiple className="hidden"
+                                  onChange={e => { uploadRowImages(row.id, e.target.files); e.target.value = ''; }} />
+                              </label>
                             </div>
                           </TableCell>
                           <TableCell>

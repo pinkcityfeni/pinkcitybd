@@ -53,6 +53,7 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
+  approved: boolean;
 }
 
 export interface Order {

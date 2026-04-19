@@ -233,6 +233,7 @@ export function useReviews(productId?: string) {
       return (data || []).map((r: any): Review => ({
         id: r.id, productId: r.product_id, customerName: r.customer_name,
         rating: r.rating, comment: r.comment, date: r.created_at,
+        approved: r.approved ?? false,
       }));
     },
   });
@@ -245,13 +246,35 @@ export function useAddReview() {
       const { error } = await supabase.from('reviews').insert({
         product_id: review.productId, customer_name: review.customerName,
         rating: review.rating, comment: review.comment,
-      });
+      } as any);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['reviews'] });
       qc.invalidateQueries({ queryKey: ['reviews', vars.productId] });
     },
+  });
+}
+
+export function useApproveReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, approved }: { id: string; approved: boolean }) => {
+      const { error } = await supabase.from('reviews').update({ approved } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['reviews'] }),
+  });
+}
+
+export function useDeleteReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['reviews'] }),
   });
 }
 

@@ -241,6 +241,7 @@ export type Database = {
       }
       reviews: {
         Row: {
+          approved: boolean
           comment: string
           created_at: string
           customer_name: string
@@ -250,6 +251,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          approved?: boolean
           comment?: string
           created_at?: string
           customer_name?: string
@@ -259,6 +261,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          approved?: boolean
           comment?: string
           created_at?: string
           customer_name?: string

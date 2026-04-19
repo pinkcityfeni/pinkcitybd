@@ -154,6 +154,9 @@
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .no-x-overflow {
+    overflow-x: hidden;
+  }
   .pink-city-glow {
     filter: drop-shadow(0 0 6px hsl(340 82% 52% / 0.6)) drop-shadow(0 0 16px hsl(340 82% 52% / 0.4)) drop-shadow(0 0 32px hsl(340 82% 52% / 0.25));
     animation: neon-pulse 2.5s ease-in-out infinite alternate;

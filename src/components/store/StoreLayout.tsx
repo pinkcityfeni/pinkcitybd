@@ -316,7 +316,7 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom overflow-hidden">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom pt-6">
       <div className="relative bg-background/95 backdrop-blur-xl border-t h-14 grid grid-cols-5 items-center px-1">
         {tabs.map(tab => {
           const isHome = tab.to === '/';

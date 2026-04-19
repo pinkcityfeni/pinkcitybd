@@ -16,6 +16,7 @@ function AnnouncementBar() {
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
+  const safeText = text.trim();
 
   useEffect(() => {
     const check = () => {
@@ -30,14 +31,14 @@ function AnnouncementBar() {
 
   return (
     <div ref={containerRef} className="announcement-bar py-1.5 text-xs font-medium tracking-wide overflow-hidden whitespace-nowrap relative">
-      <span ref={measureRef} className="invisible absolute whitespace-nowrap">{text}</span>
+      <span ref={measureRef} className="invisible absolute whitespace-nowrap">{safeText}</span>
       {shouldScroll ? (
-        <div className="inline-flex animate-marquee">
-          <span className="px-8">{text}</span>
-          <span className="px-8">{text}</span>
+        <div className="flex min-w-max animate-marquee">
+          <span className="px-4 sm:px-8">{safeText}</span>
+          <span className="px-4 sm:px-8">{safeText}</span>
         </div>
       ) : (
-        <div className="text-center"><span>{text}</span></div>
+        <div className="px-3 text-center truncate"><span>{safeText}</span></div>
       )}
     </div>
   );
@@ -102,7 +103,7 @@ export default function StoreLayout() {
           <span className="petal petal-14">🌸</span>
           <span className="petal petal-15">🌸</span>
         </div>
-        <div className="container mx-auto flex items-center justify-between h-14 px-1.5 sm:px-4 relative">
+        <div className="container mx-auto flex items-center justify-between h-14 px-2 sm:px-4 relative gap-2 overflow-hidden">
           {/* Left: Hamburger + Logo icon */}
           <div className="flex items-center gap-1 shrink-0 -ml-1">
             <button className="md:hidden p-1.5 rounded-lg hover:bg-muted shrink-0" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -114,8 +115,8 @@ export default function StoreLayout() {
           </div>
 
           {/* Center: Pink City text image */}
-          <Link to="/" className="flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <img src={pinkCityText} alt="Pink City" className="h-12 object-contain" />
+          <Link to="/" className="flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[56vw] sm:max-w-none pointer-events-auto">
+            <img src={pinkCityText} alt="Pink City" className="h-10 sm:h-12 max-w-full object-contain" />
           </Link>
 
           {/* Desktop Nav */}
@@ -155,7 +156,7 @@ export default function StoreLayout() {
         </div>
 
         {/* Search Bar below header */}
-        <div className="border-t px-3 py-1.5 bg-background">
+        <div className="border-t px-3 py-1.5 bg-background overflow-hidden">
           <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
@@ -315,32 +316,32 @@ function MobileBottomNav({ cartCount, wishlistCount }: { cartCount: number; wish
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
-      <div className="relative bg-background/95 backdrop-blur-xl border-t h-14 grid grid-cols-5 items-center">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom overflow-hidden">
+      <div className="relative bg-background/95 backdrop-blur-xl border-t h-14 grid grid-cols-5 items-center px-1">
         {tabs.map(tab => {
           const isHome = tab.to === '/';
           const active = isHome ? location.pathname === '/' : location.pathname.startsWith(tab.to);
 
           if (isHome) {
             return (
-              <Link key={tab.to} to={tab.to} className="flex flex-col items-center -mt-5 relative z-10 justify-self-center">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${active ? 'bg-primary text-primary-foreground shadow-primary/30' : 'bg-primary text-primary-foreground shadow-primary/20'}`}>
+              <Link key={tab.to} to={tab.to} className="flex min-w-0 flex-col items-center -mt-5 relative z-10 justify-self-center">
+                <div className={`h-11 w-11 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${active ? 'bg-primary text-primary-foreground shadow-primary/30' : 'bg-primary text-primary-foreground shadow-primary/20'}`}>
                   <tab.icon className="h-5 w-5" />
                 </div>
-                <span className={`text-[9px] font-semibold mt-0.5 ${active ? 'text-primary' : 'text-muted-foreground'}`}>{tab.label}</span>
+                <span className={`mt-0.5 max-w-full truncate px-1 text-[9px] font-semibold ${active ? 'text-primary' : 'text-muted-foreground'}`}>{tab.label}</span>
               </Link>
             );
           }
 
           return (
-            <Link key={tab.to} to={tab.to} className={`flex flex-col items-center gap-0.5 py-1 relative transition-colors justify-self-center ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Link key={tab.to} to={tab.to} className={`flex min-w-0 flex-col items-center gap-0.5 py-1 relative transition-colors justify-self-center ${active ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className="relative">
                 <tab.icon className="h-5 w-5" />
                 {tab.badge !== undefined && tab.badge > 0 && (
                   <span className="absolute -top-1.5 -right-2 h-4 min-w-[16px] px-1 flex items-center justify-center text-[9px] font-bold bg-primary text-primary-foreground rounded-full">{tab.badge}</span>
                 )}
               </div>
-              <span className="text-[9px] font-medium">{tab.label}</span>
+              <span className="max-w-full truncate px-1 text-[9px] font-medium">{tab.label}</span>
             </Link>
           );
         })}

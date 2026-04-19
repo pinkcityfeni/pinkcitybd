@@ -133,13 +133,13 @@ export default function ProductDetail() {
 
   return (
     <div className="animate-fade-in">
-      <div className="container mx-auto px-4 pt-4 pb-2">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-foreground transition-colors">{t('nav.home')}</Link>
+      <div className="container mx-auto px-4 pt-4 pb-2 overflow-hidden">
+        <div className="flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-muted-foreground">
+          <Link to="/" className="shrink-0 hover:text-foreground transition-colors">{t('nav.home')}</Link>
           <span>/</span>
-          <Link to="/shop" className="hover:text-foreground transition-colors">{t('nav.shop')}</Link>
+          <Link to="/shop" className="shrink-0 hover:text-foreground transition-colors">{t('nav.shop')}</Link>
           <span>/</span>
-          <span className="text-foreground font-medium truncate max-w-[200px]">{product.name}</span>
+          <span className="min-w-0 flex-1 truncate text-foreground font-medium">{product.name}</span>
         </div>
       </div>
 
@@ -162,20 +162,20 @@ export default function ProductDetail() {
               <Badge variant="secondary" className="rounded text-[10px] px-2.5 py-0.5">{product.category}</Badge>
               <Badge variant="outline" className="rounded text-[10px] px-2.5 py-0.5">{product.subcategory}</Badge>
             </div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold mb-2 leading-tight">{product.name}</h1>
+            <h1 className="font-display text-xl md:text-3xl font-bold mb-2 leading-tight break-words">{product.name}</h1>
             {rating.count > 0 && (
               <div className="flex items-center gap-2 mb-3">
                 <StarRating rating={Math.round(rating.avg)} size="sm" />
-                <span className="text-sm text-muted-foreground">{rating.avg.toFixed(1)} · {t('product.reviews', { n: rating.count })}</span>
+                <span className="min-w-0 text-sm text-muted-foreground break-words">{rating.avg.toFixed(1)} · {t('product.reviews', { n: rating.count })}</span>
               </div>
             )}
-            <p className="text-muted-foreground text-sm leading-relaxed mb-4">{product.description}</p>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-4 break-words line-clamp-4 sm:line-clamp-none">{product.description}</p>
             <div className="mb-4"><p className="text-3xl font-bold text-foreground" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{product.price.toFixed(0)}</p></div>
             <div className="flex items-center gap-2 mb-5">
               <Package className="h-4 w-4 text-muted-foreground" />
               {product.stock > 0 ? <span className="text-sm text-success font-medium">{t('product.inStock', { n: product.stock })}</span> : <span className="text-sm text-destructive font-medium">{t('home.outOfStock')}</span>}
             </div>
-            <div className="flex items-center gap-4 mb-4">
+            <div className="mb-4 flex flex-col gap-3 xs:flex-row xs:items-center xs:gap-4">
               <div className="flex items-center border rounded-lg overflow-hidden">
                 <button className="px-3.5 py-2 hover:bg-muted text-sm font-bold transition-colors" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
                 <span className="px-4 py-2 min-w-[3rem] text-center font-semibold text-sm border-x">{qty}</span>
@@ -183,15 +183,15 @@ export default function ProductDetail() {
               </div>
               <p className="text-sm text-muted-foreground">= <span className="font-bold text-foreground">৳{(product.price * qty).toFixed(0)}</span></p>
             </div>
-            <div className="flex gap-3 mb-6">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row">
               <Button variant="outline" onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 rounded-lg h-11 font-semibold"><ShoppingCart className="h-4 w-4 mr-2" /> {t('product.addToCart')}</Button>
               <Button onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1 rounded-lg h-11 font-semibold"><Zap className="h-4 w-4 mr-2" /> {t('product.buyNow')}</Button>
             </div>
-            <div className="grid grid-cols-2 gap-3 border rounded-lg p-3">
+            <div className="grid grid-cols-1 gap-3 border rounded-lg p-3 sm:grid-cols-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Truck className="h-4 w-4 text-primary shrink-0" /><span>{lang === 'bn' ? 'দ্রুত ডেলিভারি' : 'Fast Delivery'}</span></div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 text-primary shrink-0" /><span>{lang === 'bn' ? 'অরিজিনাল' : 'Original'}</span></div>
             </div>
-            <p className="text-[10px] text-muted-foreground mt-4 font-mono">{t('product.barcode')}: {product.barcode}</p>
+            <p className="mt-4 break-all text-[10px] text-muted-foreground font-mono">{t('product.barcode')}: {product.barcode}</p>
           </div>
         </div>
       </div>

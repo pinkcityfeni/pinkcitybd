@@ -143,18 +143,20 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-8">
+      <div className="container mx-auto px-4 pb-8 overflow-hidden">
         <div className="grid md:grid-cols-2 gap-6 lg:gap-10">
-          <div className="relative">
-            <ProductImageGallery product={product} cat={cat} />
-            <button onClick={() => toggleWishlist(product.id)} className={`absolute top-4 right-4 z-10 h-10 w-10 rounded-lg backdrop-blur-md flex items-center justify-center shadow-sm transition-all ${isWished ? 'bg-destructive text-white' : 'bg-background/80 text-muted-foreground hover:text-destructive'}`}>
-              <Heart className={`h-5 w-5 ${isWished ? 'fill-white' : ''}`} />
-            </button>
-            {product.stock <= 5 && product.stock > 0 && (
-              <Badge className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground rounded text-[10px]">
-                {lang === 'bn' ? `মাত্র ${product.stock}টি বাকি` : `Only ${product.stock} left`}
-              </Badge>
-            )}
+          <div className="relative min-w-0 w-full">
+            <div className="relative w-full">
+              <ProductImageGallery product={product} cat={cat} />
+              <button onClick={() => toggleWishlist(product.id)} className={`absolute top-3 right-3 z-20 h-9 w-9 rounded-lg backdrop-blur-md flex items-center justify-center shadow-sm transition-all ${isWished ? 'bg-destructive text-white' : 'bg-background/80 text-muted-foreground hover:text-destructive'}`}>
+                <Heart className={`h-4 w-4 ${isWished ? 'fill-white' : ''}`} />
+              </button>
+              {product.stock <= 5 && product.stock > 0 && (
+                <Badge className="absolute top-3 left-3 z-20 bg-destructive text-destructive-foreground rounded text-[10px]">
+                  {lang === 'bn' ? `মাত্র ${product.stock}টি বাকি` : `Only ${product.stock} left`}
+                </Badge>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col">

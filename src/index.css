@@ -85,6 +85,14 @@
   * {
     @apply border-border;
   }
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -153,6 +161,9 @@
   }
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+  .no-x-overflow {
+    overflow-x: hidden;
   }
   .pink-city-glow {
     filter: drop-shadow(0 0 6px hsl(340 82% 52% / 0.6)) drop-shadow(0 0 16px hsl(340 82% 52% / 0.4)) drop-shadow(0 0 32px hsl(340 82% 52% / 0.25));

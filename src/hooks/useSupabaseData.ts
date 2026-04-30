@@ -47,6 +47,7 @@ export function usePublicProducts() {
         image: p.image || '',
         images: p.images || [],
         price: Number(p.price),
+        compareAtPrice: Number(p.compare_at_price || 0),
         buyingPrice: 0,
         barcode: p.barcode || '',
         stock: p.stock || 0,
@@ -66,6 +67,7 @@ export function useAddProduct() {
       const { error } = await supabase.from('products').insert({
         name: product.name, description: product.description, image: product.image,
         images: product.images, price: product.price, buying_price: product.buyingPrice,
+        compare_at_price: product.compareAtPrice || 0,
         barcode: product.barcode, stock: product.stock, category: product.category,
         subcategory: product.subcategory, trending: product.trending || false,
         source: product.source || 'manual',
@@ -86,6 +88,7 @@ export function useUpdateProduct() {
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.images !== undefined) dbUpdates.images = updates.images;
       if (updates.price !== undefined) dbUpdates.price = updates.price;
+      if (updates.compareAtPrice !== undefined) dbUpdates.compare_at_price = updates.compareAtPrice;
       if (updates.buyingPrice !== undefined) dbUpdates.buying_price = updates.buyingPrice;
       if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode;
       if (updates.stock !== undefined) dbUpdates.stock = updates.stock;

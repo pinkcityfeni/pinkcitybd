@@ -268,7 +268,12 @@ export default function POSSales() {
             {filteredProducts.map(p => (
               <button key={p.id} onClick={() => { if (p.stock <= 0) { toast.error(t('pos.outOfStock')); return; } addToPosCart(p); toast.success(`✓ ${p.name}`, { duration: 1500 }); focusBarcode(); }} className="p-3 rounded-lg text-left transition-all hover:bg-primary/10 hover:scale-[1.02] disabled:opacity-40" style={{ background: 'hsl(var(--pos-bg))' }} disabled={p.stock === 0}>
                 <p className="text-xs truncate font-medium">{p.name}</p>
-                <p className="text-sm font-bold text-primary mt-1">৳{p.price.toFixed(0)}</p>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <p className="text-sm font-bold text-primary">৳{p.price.toFixed(0)}</p>
+                  {p.compareAtPrice && p.compareAtPrice > p.price && (
+                    <span className="text-[9px] line-through opacity-50">৳{p.compareAtPrice.toFixed(0)}</span>
+                  )}
+                </div>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-[10px] font-mono opacity-50">#{p.barcode}</span>
                   <span className={`text-[10px] font-medium ${p.stock < 10 ? 'text-destructive' : 'text-success'}`}>{t('pos.left', { n: p.stock })}</span>

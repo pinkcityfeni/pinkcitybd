@@ -20,6 +20,7 @@ export interface Product {
   image: string;
   images: string[];
   price: number;
+  compareAtPrice?: number;
   buyingPrice: number;
   barcode: string;
   stock: number;
@@ -101,6 +102,7 @@ export function dbToProduct(p: any): Product {
     image: p.image || '',
     images: p.images || [],
     price: Number(p.price),
+    compareAtPrice: Number(p.compare_at_price || 0),
     buyingPrice: Number(p.buying_price),
     barcode: p.barcode || '',
     stock: p.stock || 0,

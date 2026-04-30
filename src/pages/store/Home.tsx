@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePublicProducts, useCategories, useBanners, useProductRating } from '@/hooks/useSupabaseData';
 import type { Banner, Product, Category } from '@/data/store';
 import { motion } from 'framer-motion';
+import { PriceTag, SaleBadge } from '@/components/store/PriceTag';
 
 export default function Home() {
   const { data: products = [] } = usePublicProducts();
@@ -153,8 +154,9 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
       <button onClick={() => toggleWishlist(p.id)} className="absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
         <Heart className={`h-3 w-3 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
       </button>
+      <SaleBadge price={p.price} compareAt={p.compareAtPrice} className="top-1 left-1 text-[8px] px-1.5 py-0" />
       {p.stock < 5 && p.stock > 0 && (
-        <span className="absolute top-1 left-1 z-10 text-[7px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded font-semibold">{t('shop.lowStock')}</span>
+        <span className="absolute top-1 right-8 z-10 text-[7px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded font-semibold">{t('shop.lowStock')}</span>
       )}
       <Link to={`/product/${p.id}`}>
         <div className="aspect-[4/5] bg-secondary/30 flex items-center justify-center overflow-hidden relative">
@@ -184,8 +186,8 @@ function ProductCard({ product: p, categories, wishlist, toggleWishlist, addToCa
             <span className="text-[8px] text-muted-foreground">({rating.count})</span>
           </div>
         )}
-        <div className="flex items-center justify-between mt-1">
-          <span className="font-bold text-xs text-primary" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</span>
+        <div className="mt-1">
+          <PriceTag price={p.price} compareAt={p.compareAtPrice} size="sm" />
         </div>
       </div>
     </div>

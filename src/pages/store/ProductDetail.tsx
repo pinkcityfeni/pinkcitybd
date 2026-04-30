@@ -8,6 +8,7 @@ import { ShoppingCart, ArrowLeft, Package, Zap, Star, Heart, Send, Truck, Shield
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { PriceTag } from '@/components/store/PriceTag';
 
 function StarRating({ rating, size = 'sm', interactive = false, onChange }: { rating: number; size?: 'sm' | 'md' | 'lg'; interactive?: boolean; onChange?: (r: number) => void }) {
   const cls = size === 'lg' ? 'h-6 w-6' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5';
@@ -172,7 +173,14 @@ export default function ProductDetail() {
               </div>
             )}
             <p className="text-muted-foreground text-sm leading-relaxed mb-4 break-words line-clamp-4 sm:line-clamp-none">{product.description}</p>
-            <div className="mb-4"><p className="text-3xl font-bold text-foreground" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{product.price.toFixed(0)}</p></div>
+            <div className="mb-4">
+              <PriceTag price={product.price} compareAt={product.compareAtPrice} size="lg" />
+              {product.compareAtPrice && product.compareAtPrice > product.price && (
+                <p className="text-xs text-success font-medium mt-1">
+                  আপনি বাঁচাচ্ছেন ৳{(product.compareAtPrice - product.price).toFixed(0)}
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-2 mb-5">
               <Package className="h-4 w-4 text-muted-foreground" />
               {product.stock > 0 ? <span className="text-sm text-success font-medium">{t('product.inStock', { n: product.stock })}</span> : <span className="text-sm text-destructive font-medium">{t('home.outOfStock')}</span>}
@@ -264,7 +272,7 @@ export default function ProductDetail() {
                 </div>
                 <div className="p-3">
                   <h3 className="text-sm font-medium line-clamp-1 group-hover:text-primary transition-colors">{r.name}</h3>
-                  <p className="font-bold text-sm mt-1" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{r.price.toFixed(0)}</p>
+                  <div className="mt-1"><PriceTag price={r.price} compareAt={r.compareAtPrice} size="sm" /></div>
                 </div>
               </Link>
             ))}

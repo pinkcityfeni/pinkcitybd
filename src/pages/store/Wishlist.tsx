@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useMemo } from 'react';
 import { usePublicProducts } from '@/hooks/useSupabaseData';
+import { PriceTag } from '@/components/store/PriceTag';
 
 export default function Wishlist() {
   const wishlist = useStore(s => s.wishlist);
@@ -38,7 +39,7 @@ export default function Wishlist() {
             </Link>
             <div className="p-3 space-y-2">
               <Link to={`/product/${p.id}`}><p className="text-sm font-medium line-clamp-1 hover:text-primary transition-colors">{p.name}</p></Link>
-              <p className="font-bold text-sm" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{p.price.toFixed(0)}</p>
+              <PriceTag price={p.price} compareAt={p.compareAtPrice} size="sm" />
               <div className="flex gap-1.5">
                 <Button size="sm" className="flex-1 rounded-lg text-xs h-8 font-semibold" onClick={() => { addToCart(p); toast.success(t('home.added', { name: p.name })); }}><ShoppingCart className="h-3 w-3 mr-1" /> {t('product.addToCart')}</Button>
                 <Button size="sm" variant="ghost" className="rounded-lg h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => toggleWishlist(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>

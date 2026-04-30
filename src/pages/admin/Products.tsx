@@ -10,7 +10,7 @@ import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
-const EMPTY_FORM = { name: '', description: '', price: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '', images: [] as string[] };
+const EMPTY_FORM = { name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '', images: [] as string[] };
 
 function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[]; onChange: (imgs: string[]) => void; uploadLabel: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -79,15 +79,21 @@ export default function Products() {
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
-    setForm({ name: p.name, description: p.description, price: String(p.price), buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [] });
+    setForm({ name: p.name, description: p.description, price: String(p.price), compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '', buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [] });
     setDialogOpen(true);
   };
 
   const handleSave = () => {
     if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
+    const compareAt = Number(form.compareAtPrice) || 0;
+    const sellPrice = Number(form.price);
+    if (compareAt > 0 && compareAt <= sellPrice) {
+      toast.error('পুরাতন দাম বর্তমান দামের চেয়ে বেশি হতে হবে');
+      return;
+    }
     const allImages = form.images;
     const mainImage = allImages[0] || form.image || '';
-    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: Number(form.price), buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual' };
+    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual' };
     if (editProduct) { updateProductMut.mutate({ id: editProduct.id, updates: data }); toast.success(t('prod.updated')); }
     else { addProductMut.mutate(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
@@ -214,6 +220,11 @@ export default function Products() {
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{t('prod.sellingPrice')}</Label><Input type="number" step="1" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
               <div><Label>{t('prod.buyingPrice')}</Label><Input type="number" step="1" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
+            </div>
+            <div>
+              <Label>পুরাতন দাম / MRP <span className="text-muted-foreground text-xs">(ঐচ্ছিক — ডিসকাউন্ট দেখাতে)</span></Label>
+              <Input type="number" step="1" placeholder="যেমন 700" value={form.compareAtPrice} onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
+              <p className="text-[11px] text-muted-foreground mt-1">সেলিং দামের চেয়ে বেশি দিলে কাস্টমার কাটা দাগ ও ডিসকাউন্ট % দেখবে। খালি রাখলে কিছু দেখাবে না।</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{t('prod.barcode')}</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>

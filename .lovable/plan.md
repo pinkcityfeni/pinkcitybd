@@ -1,111 +1,67 @@
-# Reward Point System Plan
 
-**নিয়ম:**
-- প্রতি ১০০ টাকা খরচে ১ পয়েন্ট জমা হবে
-- ১ পয়েন্ট = ১ টাকা (redeem করার সময়)
-- ২০০ পয়েন্ট হলে redeem করা যাবে (minimum threshold)
-- Online: শুধু logged-in customer পয়েন্ট পাবে
-- POS: customer-এর phone number দিলে পয়েন্ট তার account-এ যাবে (phone দিয়ে customer খুঁজে বের করা হবে)
+# Daraz-স্টাইল ডিসকাউন্ট সিস্টেম
 
----
+প্রোডাক্টের আসল সেলিং দাম একই রেখে একটা "MRP / আগের দাম" (compare_at_price) সেট করার সুবিধা যোগ করব। তখন স্টোরে দেখাবে:
 
-## 1. Database Changes (migration)
-
-**নতুন table — `customer_points`:**
 ```
-- id (uuid)
-- user_id (uuid, nullable) — logged-in customer হলে
-- phone (text) — primary lookup key (POS-এ phone দিয়ে customer match হবে)
-- name (text)
-- points (int, default 0) — current balance
-- total_earned (int, default 0) — lifetime earned
-- total_redeemed (int, default 0)
-- created_at, updated_at
-- UNIQUE on phone
+৳৫০০  ̶৳̶৭̶০̶০̶   [-29%]
 ```
 
-**নতুন table — `point_transactions`** (history/audit):
+কাটা দাগের দামটা শুধু দেখানোর জন্য — চেকআউট, কার্ট, POS সব হিসাব হবে আসল `price` দিয়েই (কোনো হিসাব বদলাবে না)।
+
+---
+
+## কী কী হবে
+
+### ১. ডাটাবেইজ
+`products` টেবিলে নতুন একটা কলাম যোগ:
+- `compare_at_price` (numeric, default 0) — এটাই কাটা দামে দেখাবে।
+
+`0` হলে কোনো ডিসকাউন্ট ব্যাজ দেখাবে না (একদম স্বাভাবিক প্রোডাক্টের মতো)।
+
+### ২. অ্যাডমিন → Products পেজ
+"Add / Edit Product" ফর্মে নতুন একটা ফিল্ড:
+- **পুরাতন দাম / MRP (ঐচ্ছিক)** — Selling Price এর পাশে।
+- হেল্প টেক্সট: *"এটা সেলিং দামের চেয়ে বেশি দিলে কাস্টমার কাটা দাগ ও ডিসকাউন্ট % দেখবে। খালি/0 রাখলে কিছু দেখাবে না।"*
+- ভ্যালিডেশন: যদি দেওয়া হয় তাহলে সেলিং দামের চেয়ে বেশি হতে হবে, না হলে এরর।
+
+### ৩. স্টোরফ্রন্টে ডিসপ্লে
+সব জায়গায় একই প্যাটার্ন — যেখানে যেখানে দাম দেখায়:
+- `Home.tsx` (trending/featured cards)
+- `Shop.tsx`, `Category.tsx` (প্রোডাক্ট লিস্ট)
+- `ProductDetail.tsx` (প্রোডাক্ট পেজ)
+- `Cart.tsx`, `Wishlist.tsx`
+
+ডিসপ্লে রুল:
+- compare_at_price > price হলে:
+  - বড় করে: **৳{price}** (primary color)
+  - পাশে ছোট করে কাটা দাগ: ~~৳{compare_at_price}~~ (muted)
+  - একটা ছোট ব্যাজ: **−{%}** (rose/red color, rounded-full)
+- নাহলে: শুধু ৳{price}
+
+প্রোডাক্ট কার্ডের কোণায় একটা সুন্দর "SALE" ব্যাজ ও দেখাবে যেগুলোতে ডিসকাউন্ট আছে।
+
+### ৪. POS
+POSSales-এ প্রোডাক্ট কার্ডে শুধু রেফারেন্সের জন্য ছোট করে কাটা দাম দেখাবে (ক্যাশিয়ার বুঝবে কোনটা সেলে আছে), কিন্তু চার্জ হবে আসল `price` দিয়েই।
+
+---
+
+## টেকনিক্যাল ডিটেইল
+
+**Migration:**
+```sql
+ALTER TABLE public.products
+  ADD COLUMN compare_at_price numeric NOT NULL DEFAULT 0;
 ```
-- id, customer_id (FK customer_points), order_id, type ('earn'|'redeem'),
-  points (int), created_at
-```
 
-**`orders` table-এ ৩টি নতুন column:**
-- `customer_phone_normalized` (text) — phone-based lookup
-- `points_earned` (int, default 0)
-- `points_redeemed` (int, default 0)
+**Type updates:**
+- `Product` ইন্টারফেসে `compareAtPrice: number` যোগ।
+- `useSupabaseData.ts`-এর product mapper-এ snake_case ↔ camelCase কনভার্ট।
 
-**RLS:**
-- `customer_points`: Admin/cashier ALL; user নিজের row দেখতে পারবে (user_id match)
-- `point_transactions`: Admin/cashier ALL; user নিজেরটা SELECT
+**Reusable component:** `src/components/store/PriceTag.tsx` — সব জায়গায় কনসিস্টেন্ট ডিসপ্লের জন্য একটা ছোট কম্পোনেন্ট। Props: `price`, `compareAt`, `size` ('sm'|'md'|'lg')। `%` হিসাব: `Math.round((compareAt - price) / compareAt * 100)`।
+
+**হিসাবের কোনো জায়গায় হাত দেওয়া হবে না** — cart total, checkout, points earned, POS subtotal সব আগের মতোই `price` দিয়েই চলবে। compare_at_price নিছক ডিসপ্লে।
 
 ---
 
-## 2. Backend — `place-order` edge function update
-
-Order place করার সময়:
-
-**Earning logic:**
-- Online order: `userId` থাকলে ওই user-এর `customer_points` row find/create (phone দিয়ে), points যোগ
-- POS order: `customer_phone` দিলে phone দিয়ে row find/create, points যোগ
-- Earned points = `Math.floor(total / 100)` (delivery charge বাদে product subtotal-এর উপর)
-- `total_earned`, `points` update + `point_transactions` insert
-- `orders.points_earned` save
-
-**Redeem logic:**
-- Frontend থেকে `redeemPoints` (int) আসবে
-- Validate: customer-এর `points >= redeemPoints` এবং `points >= 200` (minimum)
-- Order total থেকে redeemPoints টাকা বাদ যাবে (discount-এর মতো)
-- Customer-এর points minus, `total_redeemed` plus, transaction log
-
----
-
-## 3. Frontend Changes
-
-### A. Online Checkout (`src/pages/store/Checkout.tsx`)
-- Logged-in হলে customer-এর current points show করা (Lovable Cloud থেকে fetch)
-- যদি points >= 200 → "Redeem Points" section: কতগুলো পয়েন্ট ব্যবহার করতে চায় slider/input
-- Order summary-তে redeem amount দেখানো
-- Order success page-এ "আপনি X পয়েন্ট অর্জন করেছেন" message
-
-### B. POS Sales (`src/pages/pos/POSSales.tsx`)
-- Cart panel-এ নতুন **Customer section**:
-  - Phone input + "Find" button
-  - Phone match হলে customer-এর name + current points দেখাবে (অটো)
-  - Match না হলে "New customer" — name input (optional, পরে save হবে)
-- Points >= 200 হলে "Redeem" toggle + amount input
-- Sale complete হলে invoice-এ "Earned: X points, New balance: Y" দেখাবে
-
-### C. Account page (`src/pages/store/Account.tsx`)
-- নতুন "My Points" card: current balance, lifetime earned, recent transactions
-
-### D. Admin — নতুন page `src/pages/admin/Customers.tsx`
-- `customer_points` table list (search by phone/name)
-- Manual point adjust (admin override)
-- AdminLayout nav-এ "Customers" link যোগ
-
----
-
-## 4. Settings (admin configurable later)
-আপাতত hard-coded:
-- `EARN_RATE = 100` (১০০ টাকা = ১ পয়েন্ট)
-- `MIN_REDEEM = 200`
-- `POINT_VALUE = 1` (১ পয়েন্ট = ১ টাকা)
-
-পরে চাইলে `app_settings` table-এ rule গুলো রাখা যাবে।
-
----
-
-## Files to Touch
-- `supabase/migrations/...` (new tables + orders columns + RLS)
-- `supabase/functions/place-order/index.ts` (earn + redeem logic)
-- `src/hooks/useSupabaseData.ts` (useCustomerPoints, useFindCustomerByPhone hooks)
-- `src/pages/store/Checkout.tsx` (redeem UI + earning preview)
-- `src/pages/pos/POSSales.tsx` (customer phone + redeem UI)
-- `src/pages/store/Account.tsx` (points card)
-- `src/pages/admin/Customers.tsx` (new — list + adjust)
-- `src/components/admin/AdminLayout.tsx` (nav link)
-- `src/App.tsx` (route)
-- `src/data/language.tsx` (translations)
-
-Approve করলে সবগুলো একসাথে implement করব।
+কোনো অংশে পরিবর্তন চাইলে বলুন, না হলে Approve করলে শুরু করব।

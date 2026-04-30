@@ -568,3 +568,65 @@ export function useMyPointTransactions(customerId?: string | null) {
     },
   });
 }
+
+// ─── POS Returns ───
+export interface PosReturn {
+  id: string;
+  order_id: string;
+  items: { product_id: string; name: string; price: number; quantity: number }[];
+  total_refund: number;
+  refund_method: string;
+  reason: string;
+  points_reverted: number;
+  processed_by: string | null;
+  created_at: string;
+}
+
+export function useReturns() {
+  const queryKey = ['pos_returns'];
+  useRealtimeSubscription('pos_returns', queryKey);
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pos_returns' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return ((data as any[]) || []) as PosReturn[];
+    },
+  });
+}
+
+export function useProcessReturn() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      order_id: string;
+      items: { product_id: string; quantity: number }[];
+      refund_method: string;
+      reason?: string;
+    }) => {
+      const { data, error } = await supabase.functions.invoke('process-return', {
+        body: payload,
+      });
+      if (error) {
+        const msg = typeof error === 'object' && error !== null && 'message' in error
+          ? (error as any).message : 'Return failed';
+        throw new Error(msg);
+      }
+      let parsed = data;
+      if (typeof data === 'string') {
+        try { parsed = JSON.parse(data); } catch { throw new Error('Invalid response'); }
+      }
+      if (parsed?.error) throw new Error(parsed.error);
+      return parsed as { id: string; total_refund: number; points_reverted: number; status: string };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['pos_returns'] });
+      qc.invalidateQueries({ queryKey: ['customer_points'] });
+    },
+  });
+}

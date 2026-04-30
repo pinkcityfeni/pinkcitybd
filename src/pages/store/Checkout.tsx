@@ -41,6 +41,7 @@ export default function Checkout() {
   const [orderTotal, setOrderTotal] = useState(0);
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [pointsEarnedSuccess, setPointsEarnedSuccess] = useState(0);
+  const [pointsRedeemedSuccess, setPointsRedeemedSuccess] = useState(0);
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -111,6 +112,7 @@ export default function Checkout() {
       setOrderId(result.id);
       setOrderTotal(result.total);
       setPointsEarnedSuccess(result.pointsEarned || 0);
+      setPointsRedeemedSuccess(result.pointsRedeemed || effectiveRedeem || 0);
       clearCart();
       setStep('done');
       toast.success(t('checkout.orderPlaced'));
@@ -127,10 +129,20 @@ export default function Checkout() {
         <CheckCircle2 className="h-16 w-16 text-success mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-1">{t('checkout.orderConfirmed')}</h2>
         <p className="text-muted-foreground text-sm mb-6">{t('checkout.orderSuccess')}</p>
-        {pointsEarnedSuccess > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 flex items-center gap-2 justify-center">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <p className="text-sm font-medium">আপনি <span className="text-primary font-bold">{pointsEarnedSuccess}</span> পয়েন্ট অর্জন করেছেন!</p>
+        {(pointsEarnedSuccess > 0 || pointsRedeemedSuccess > 0) && (
+          <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 space-y-1">
+            {pointsRedeemedSuccess > 0 && (
+              <div className="flex items-center gap-2 justify-center text-sm">
+                <Wallet className="h-4 w-4 text-primary" />
+                <p>রিডিম: <span className="text-primary font-bold">{pointsRedeemedSuccess}</span> পয়েন্ট (-৳{pointsRedeemedSuccess})</p>
+              </div>
+            )}
+            {pointsEarnedSuccess > 0 && (
+              <div className="flex items-center gap-2 justify-center text-sm">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <p>অর্জিত: <span className="text-primary font-bold">+{pointsEarnedSuccess}</span> পয়েন্ট</p>
+              </div>
+            )}
           </div>
         )}
         <div className="text-left space-y-3 mb-6">

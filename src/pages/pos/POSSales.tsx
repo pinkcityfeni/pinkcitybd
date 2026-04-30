@@ -195,6 +195,12 @@ export default function POSSales() {
           <p className="text-sm opacity-70 mb-1">{t('pos.nItemsSold', { n: saleItemCount })}</p>
           <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
           <p className="text-sm text-success font-medium mb-2">{t('pos.profitLabel')}: ৳{saleComplete.profit.toFixed(0)}</p>
+          {(saleComplete.pointsEarned > 0 || saleComplete.pointsRedeemed > 0) && (
+            <div className="mb-3 p-2.5 rounded-lg bg-primary/10 border border-primary/20 inline-block text-xs space-y-0.5">
+              {saleComplete.pointsRedeemed > 0 && <p>রিডিম: <span className="font-bold">{saleComplete.pointsRedeemed} পয়েন্ট</span></p>}
+              {saleComplete.pointsEarned > 0 && <p>অর্জিত: <span className="font-bold text-primary">+{saleComplete.pointsEarned} পয়েন্ট</span></p>}
+            </div>
+          )}
           {saleComplete.order.splitPayment ? (
             <div className="text-xs opacity-70 mb-4 space-y-0.5">
               <p>{getMethodLabel(saleComplete.order.splitPayment.method1)}: ৳{saleComplete.order.splitPayment.amount1.toFixed(0)}</p>

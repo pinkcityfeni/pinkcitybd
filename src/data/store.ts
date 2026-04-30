@@ -12,6 +12,7 @@ export interface Category {
   image?: string | null;
   subcategories: string[];
   sort_order?: number;
+  brandId?: string;
 }
 
 export interface Product {
@@ -29,6 +30,7 @@ export interface Product {
   description: string;
   trending?: boolean;
   source?: 'manual' | 'fb' | 'pos';
+  brandId?: string;
 }
 
 export interface CartItem {
@@ -88,6 +90,15 @@ export interface Banner {
   active: boolean;
 }
 
+export interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
+  isDefault: boolean;
+  sortOrder: number;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -112,6 +123,7 @@ export function dbToProduct(p: any): Product {
     description: p.description || '',
     trending: p.trending || false,
     source: (p.source as 'manual' | 'fb' | 'pos') || 'manual',
+    brandId: p.brand_id,
   };
 }
 
@@ -123,6 +135,18 @@ export function dbToCategory(c: any): Category {
     image: c.image,
     subcategories: c.subcategories || [],
     sort_order: c.sort_order,
+    brandId: c.brand_id,
+  };
+}
+
+export function dbToBrand(b: any): Brand {
+  return {
+    id: b.id,
+    name: b.name,
+    slug: b.slug,
+    color: b.color || '#ec4899',
+    isDefault: b.is_default ?? false,
+    sortOrder: b.sort_order ?? 0,
   };
 }
 

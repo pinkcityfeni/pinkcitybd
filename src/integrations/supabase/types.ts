@@ -62,8 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      brands: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
+          brand_id: string
           created_at: string
           icon: string
           id: string
@@ -73,6 +107,7 @@ export type Database = {
           subcategories: string[]
         }
         Insert: {
+          brand_id: string
           created_at?: string
           icon?: string
           id?: string
@@ -82,6 +117,7 @@ export type Database = {
           subcategories?: string[]
         }
         Update: {
+          brand_id?: string
           created_at?: string
           icon?: string
           id?: string
@@ -283,6 +319,7 @@ export type Database = {
       products: {
         Row: {
           barcode: string
+          brand_id: string
           buying_price: number
           category: string
           compare_at_price: number
@@ -301,6 +338,7 @@ export type Database = {
         }
         Insert: {
           barcode?: string
+          brand_id: string
           buying_price?: number
           category?: string
           compare_at_price?: number
@@ -319,6 +357,7 @@ export type Database = {
         }
         Update: {
           barcode?: string
+          brand_id?: string
           buying_price?: number
           category?: string
           compare_at_price?: number

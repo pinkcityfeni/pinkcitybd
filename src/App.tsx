@@ -45,6 +45,7 @@ import AdminBanners from "@/pages/admin/Banners";
 import AdminReviews from "@/pages/admin/Reviews";
 import AdminCustomers from "@/pages/admin/Customers";
 import FacebookImport from "@/pages/admin/FacebookImport";
+import Brands from "@/pages/admin/Brands";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -103,6 +104,7 @@ const App = () => (
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="products" element={<Products />} />
               <Route path="fb-import" element={<FacebookImport />} />
+              <Route path="brands" element={<Brands />} />
               <Route path="categories" element={<AdminCategories />} />
               <Route path="banners" element={<AdminBanners />} />
               <Route path="orders" element={<Orders />} />

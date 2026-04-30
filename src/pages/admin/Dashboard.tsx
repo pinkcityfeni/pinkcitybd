@@ -1,9 +1,9 @@
 import { useMemo, useEffect, useState } from 'react';
-import { useProducts, useOrders, useCategories } from '@/hooks/useSupabaseData';
+import { useProducts, useOrders, useCategories, useBrands } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import {
   Package, ShoppingCart, TrendingUp, AlertTriangle,
-  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown
+  Monitor, ScanBarcode, ArrowUpRight, ArrowDownRight, BarChart3, Crown, Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { startOfDay, startOfWeek, startOfMonth, subDays } from 'date-fns';
@@ -30,6 +30,7 @@ export default function Dashboard() {
   const { data: products = [] } = useProducts();
   const { data: orders = [] } = useOrders();
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
   const { t, lang, locale } = useLanguage();
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
 
@@ -121,6 +122,36 @@ export default function Dashboard() {
     return { sales, profit, cost, orders: fOrders, online, pos, topProducts };
   }, [orders, dateFilter]);
 
+  // ─── Brand Performance ───
+  const productBrandMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    products.forEach(p => { if (p.brandId) m[p.id] = p.brandId; });
+    return m;
+  }, [products]);
+
+  const brandStats = useMemo(() => {
+    return brands.map(b => {
+      let revenue = 0, profit = 0, orderCount = 0;
+      const orderIds = new Set<string>();
+      orders.filter(o => o.status === 'completed').forEach(o => {
+        let hit = false;
+        o.items.forEach(i => {
+          const bId = (i.product as any)?.brandId || productBrandMap[(i.product as any)?.id];
+          if (bId === b.id) {
+            revenue += Number(i.product.price) * i.quantity;
+            profit += (Number(i.product.price) - Number(i.product.buyingPrice)) * i.quantity;
+            hit = true;
+          }
+        });
+        if (hit) orderIds.add(o.id);
+      });
+      orderCount = orderIds.size;
+      const brandProducts = products.filter(p => p.brandId === b.id);
+      const stockValue = brandProducts.reduce((s, p) => s + p.buyingPrice * p.stock, 0);
+      return { brand: b, revenue, profit, orderCount, stockValue, productCount: brandProducts.length };
+    });
+  }, [brands, orders, products, productBrandMap]);
+
   useEffect(() => {
     const critical = stats.lowStock.filter(p => p.stock <= 5);
     if (critical.length > 0) {
@@ -165,6 +196,60 @@ export default function Dashboard() {
         <StatCard icon={ArrowUpRight} label={t('dash.todayProfit')} value={`৳${stats.todayProfit.toFixed(0)}`} sub={t('dash.fromSales', { n: stats.todayOrders.length })} color="text-success" bgColor="bg-success/10" />
         <StatCard icon={ShoppingCart} label={t('dash.pendingOrders')} value={orders.filter(o => o.status === 'pending').length.toString()} sub={t('dash.waitingProcess')} color="text-warning" bgColor="bg-warning/10" />
       </div>
+
+      {/* ─── Brand Performance ─── */}
+      {brands.length > 0 && (
+        <div className="rounded-xl border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold flex items-center gap-2"><Tag className="h-4 w-4 text-primary" /> Brand Performance</h3>
+            <span className="text-[10px] text-muted-foreground">All-time completed orders</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+            {brandStats.map(({ brand, revenue, profit, orderCount, stockValue, productCount }) => (
+              <div key={brand.id} className="rounded-xl border p-4 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: brand.color }} />
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: brand.color }}>
+                    {brand.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{brand.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{productCount} products · {orderCount} orders</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Revenue</p>
+                    <p className="text-sm font-bold">৳{revenue.toFixed(0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Profit</p>
+                    <p className="text-sm font-bold text-success">৳{profit.toFixed(0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Stock</p>
+                    <p className="text-sm font-bold text-primary">৳{stockValue.toFixed(0)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {brandStats.some(s => s.revenue > 0) && (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={brandStats.map(s => ({ name: s.brand.name, Revenue: s.revenue, Profit: s.profit, color: s.brand.color }))} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} formatter={(value: number) => `৳${value.toFixed(0)}`} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="Revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Profit" fill="hsl(142 71% 45%)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-xl border bg-card p-5">

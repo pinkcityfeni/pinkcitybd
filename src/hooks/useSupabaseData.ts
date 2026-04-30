@@ -326,6 +326,7 @@ interface PlaceOrderData {
   splitPayment?: SplitPayment;
   discount?: number;
   discountType?: 'fixed' | 'percent';
+  redeemPoints?: number;
 }
 
 export function usePlaceOrder() {
@@ -352,11 +353,17 @@ export function usePlaceOrder() {
 
       if (!parsed?.id) throw new Error('Order failed');
 
-      return { id: parsed.id as string, total: Number(parsed.total || 0) };
+      return {
+        id: parsed.id as string,
+        total: Number(parsed.total || 0),
+        pointsEarned: Number(parsed.pointsEarned || 0),
+        pointsRedeemed: Number(parsed.pointsRedeemed || 0),
+      };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['customer_points'] });
     },
   });
 }

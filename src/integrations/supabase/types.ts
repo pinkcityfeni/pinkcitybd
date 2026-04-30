@@ -246,6 +246,7 @@ export type Database = {
           barcode: string
           buying_price: number
           category: string
+          compare_at_price: number
           created_at: string
           description: string
           id: string
@@ -263,6 +264,7 @@ export type Database = {
           barcode?: string
           buying_price?: number
           category?: string
+          compare_at_price?: number
           created_at?: string
           description?: string
           id?: string
@@ -280,6 +282,7 @@ export type Database = {
           barcode?: string
           buying_price?: number
           category?: string
+          compare_at_price?: number
           created_at?: string
           description?: string
           id?: string

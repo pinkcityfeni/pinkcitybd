@@ -43,6 +43,7 @@ import Users from "@/pages/admin/Users";
 import AdminCategories from "@/pages/admin/Categories";
 import AdminBanners from "@/pages/admin/Banners";
 import AdminReviews from "@/pages/admin/Reviews";
+import AdminCustomers from "@/pages/admin/Customers";
 import FacebookImport from "@/pages/admin/FacebookImport";
 import NotFound from "./pages/NotFound";
 

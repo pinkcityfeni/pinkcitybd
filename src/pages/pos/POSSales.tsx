@@ -68,6 +68,17 @@ export default function POSSales() {
   const maxRedeem = Math.min(availablePoints, Math.max(0, subtotal - discountAmount));
   const effectiveRedeem = canRedeem ? Math.max(0, Math.min(redeemNum, maxRedeem)) : 0;
 
+  const redeemError =
+    redeemNum > 0 && !customer
+      ? 'প্রথমে কাস্টমার খুঁজুন'
+      : redeemNum > 0 && !canRedeem
+      ? `রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন (বর্তমানে ${availablePoints})`
+      : redeemNum > availablePoints
+      ? `কাস্টমারের কাছে মাত্র ${availablePoints} পয়েন্ট আছে`
+      : redeemNum > Math.max(0, subtotal - discountAmount)
+      ? `সর্বোচ্চ ${Math.max(0, subtotal - discountAmount)} পয়েন্ট রিডিম করা যাবে`
+      : '';
+
   const total = Math.max(0, subtotal - discountAmount - effectiveRedeem);
   const profit = total - totalCost;
   const willEarn = Math.floor(total / 100);
@@ -94,6 +105,7 @@ export default function POSSales() {
 
   const handleCompleteSale = async () => {
     if (posCart.length === 0) return;
+    if (redeemError) { toast.error(redeemError); return; }
     if (isSplit && splitAmt1 <= 0) { toast.error(t('pos.splitError1')); return; }
     if (isSplit && splitAmt1 >= total) { toast.error(t('pos.splitError2')); return; }
 

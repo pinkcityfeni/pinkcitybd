@@ -55,7 +55,51 @@ Deno.serve(async (req) => {
         ? Math.round((subtotal * discountValue) / 100)
         : discountValue
       : 0;
-    const total = Math.max(0, subtotal - discountAmount) + deliveryCharge;
+    // Points redeem (1 point = 1 taka) — applied like extra discount
+    const requestedRedeem = Math.max(0, Math.floor(Number(data?.redeemPoints || 0)));
+    const phoneRaw: string = (data?.customerPhone || "").toString().trim();
+    const phoneNorm = phoneRaw.replace(/\D/g, "");
+
+    // Find/load customer if we have a phone OR a logged-in user
+    let customer: any = null;
+    if (phoneNorm) {
+      const { data: cp } = await adminClient
+        .from("customer_points")
+        .select("*")
+        .eq("phone", phoneNorm)
+        .maybeSingle();
+      customer = cp;
+    }
+    if (!customer && userId) {
+      const { data: cp } = await adminClient
+        .from("customer_points")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+      customer = cp;
+    }
+
+    // Validate redeem
+    let redeemPoints = 0;
+    if (requestedRedeem > 0) {
+      if (!customer) {
+        return new Response(JSON.stringify({ error: "No customer account for redeem" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (customer.points < 200) {
+        return new Response(JSON.stringify({ error: "Minimum 200 points required to redeem" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      redeemPoints = Math.min(requestedRedeem, customer.points, Math.max(0, subtotal - discountAmount));
+    }
+
+    const totalAfterDiscount = Math.max(0, subtotal - discountAmount - redeemPoints);
+    const total = totalAfterDiscount + deliveryCharge;
+
+    // Earn points: 1 point per 100 taka spent (on goods value AFTER discount & redeem, excluding delivery)
+    const pointsEarned = Math.floor(totalAfterDiscount / 100);
 
     const orderItems = items.map((item: any) => ({
       product: {
@@ -88,6 +132,9 @@ Deno.serve(async (req) => {
       split_payment: data?.splitPayment || null,
       discount: discountValue,
       discount_type: data?.discountType || null,
+      customer_phone_normalized: phoneNorm || null,
+      points_earned: pointsEarned,
+      points_redeemed: redeemPoints,
     };
 
     const { data: orderRow, error: orderError } = await adminClient
@@ -102,6 +149,52 @@ Deno.serve(async (req) => {
     }
 
     console.log("Order created:", orderRow.id);
+
+    // Upsert customer_points row + log transactions
+    if (phoneNorm || userId) {
+      let cpId = customer?.id as string | undefined;
+      if (!customer) {
+        const { data: created, error: cpErr } = await adminClient
+          .from("customer_points")
+          .insert({
+            user_id: userId,
+            phone: phoneNorm || `user-${userId}`,
+            name: data?.customerName || "",
+            points: 0,
+            total_earned: 0,
+            total_redeemed: 0,
+          })
+          .select("*")
+          .single();
+        if (cpErr) console.error("customer_points insert error:", cpErr);
+        customer = created;
+        cpId = created?.id;
+      } else if (userId && !customer.user_id) {
+        await adminClient.from("customer_points").update({ user_id: userId }).eq("id", customer.id);
+      }
+
+      if (cpId) {
+        const newBalance = (customer?.points || 0) - redeemPoints + pointsEarned;
+        await adminClient.from("customer_points").update({
+          points: newBalance,
+          total_earned: (customer?.total_earned || 0) + pointsEarned,
+          total_redeemed: (customer?.total_redeemed || 0) + redeemPoints,
+        }).eq("id", cpId);
+
+        if (redeemPoints > 0) {
+          await adminClient.from("point_transactions").insert({
+            customer_id: cpId, order_id: orderRow.id, type: "redeem", points: -redeemPoints,
+            note: `Redeemed on order ${orderRow.id.slice(0,8)}`,
+          });
+        }
+        if (pointsEarned > 0) {
+          await adminClient.from("point_transactions").insert({
+            customer_id: cpId, order_id: orderRow.id, type: "earn", points: pointsEarned,
+            note: `Earned on order ${orderRow.id.slice(0,8)}`,
+          });
+        }
+      }
+    }
 
     // Update stock
     for (const item of items) {
@@ -120,7 +213,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ id: orderRow.id, total: Number(orderRow.total) }), {
+    return new Response(JSON.stringify({
+      id: orderRow.id,
+      total: Number(orderRow.total),
+      pointsEarned,
+      pointsRedeemed: redeemPoints,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {

@@ -110,6 +110,7 @@ const App = () => (
               <Route path="sales" element={<Sales />} />
               <Route path="reviews" element={<AdminReviews />} />
               <Route path="users" element={<Users />} />
+              <Route path="customers" element={<AdminCustomers />} />
             </Route>
 
             {/* ─── Catch-all ─── */}

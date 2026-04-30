@@ -357,6 +357,7 @@ export default function POSSales() {
                 <button type="button" onClick={() => setRedeemPoints(String(maxRedeem))} className="text-[10px] text-primary px-1.5">Max</button>
               </div>
             )}
+            {redeemError && <p className="text-[10px] text-destructive font-medium">{redeemError}</p>}
           </div>
 
           <div className="flex justify-between text-xs opacity-70"><span>{t('pos.subtotal')} ({t('pos.items', { n: itemCount })})</span><span>৳{subtotal.toFixed(0)}</span></div>

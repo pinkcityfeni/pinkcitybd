@@ -144,6 +144,8 @@ export default function POSSales() {
         splitPayment,
         discount: discountNum > 0 ? discountNum : undefined,
         discountType: discountNum > 0 ? discountType : undefined,
+        pointsEarned: result.pointsEarned || 0,
+        pointsRedeemed: result.pointsRedeemed || 0,
       };
 
       setSaleComplete({

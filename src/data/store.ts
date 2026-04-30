@@ -74,6 +74,8 @@ export interface Order {
   splitPayment?: SplitPayment;
   discount?: number;
   discountType?: 'fixed' | 'percent';
+  pointsEarned?: number;
+  pointsRedeemed?: number;
 }
 
 export interface Banner {
@@ -150,6 +152,8 @@ export function dbToOrder(o: any): Order {
     splitPayment: o.split_payment as SplitPayment | undefined,
     discount: Number(o.discount || 0),
     discountType: o.discount_type as 'fixed' | 'percent' | undefined,
+    pointsEarned: o.points_earned || 0,
+    pointsRedeemed: o.points_redeemed || 0,
   };
 }
 

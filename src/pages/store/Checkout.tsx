@@ -205,7 +205,7 @@ export default function Checkout() {
         </div>
       </div>
 
-      <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending}>
+      <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending || !!redeemError}>
         {placeOrderMut.isPending ? 'Processing...' : `${t('checkout.confirmBtn')} — ৳${grandTotal.toFixed(0)}`}
       </Button>
     </div>

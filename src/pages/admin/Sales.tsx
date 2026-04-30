@@ -1,19 +1,66 @@
-import { useOrders } from '@/hooks/useSupabaseData';
+import { useOrders, useProducts, useBrands } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useState, useMemo } from 'react';
+import { BrandFilter } from '@/components/admin/BrandFilter';
 
 export default function Sales() {
   const { data: orders = [] } = useOrders();
+  const { data: products = [] } = useProducts();
+  const { data: brands = [] } = useBrands();
   const { t, locale } = useLanguage();
-  const completed = orders.filter(o => o.status === 'completed');
-  const totalRevenue = completed.reduce((s, o) => s + o.total, 0);
-  const totalCost = completed.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
-  const totalProfit = totalRevenue - totalCost;
+  const [filterBrand, setFilterBrand] = useState('');
+
+  // Map productId -> brandId for orders that don't carry brand on the item snapshot
+  const productBrandMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    products.forEach(p => { if (p.brandId) m[p.id] = p.brandId; });
+    return m;
+  }, [products]);
+
+  // Brand-scoped completed orders & metrics
+  const completedAll = orders.filter(o => o.status === 'completed');
+
+  // For brand filter, we keep order rows where any item belongs to selected brand,
+  // and revenue/cost/profit are aggregated only for that brand's items.
+  const aggregateForBrand = (brandId: string) => {
+    let revenue = 0, cost = 0;
+    const filteredOrders: typeof completedAll = [];
+    completedAll.forEach(o => {
+      let oRev = 0, oCost = 0, hit = false;
+      o.items.forEach(i => {
+        const pid = (i.product as any)?.id;
+        const bId = (i.product as any)?.brandId || productBrandMap[pid];
+        if (!brandId || bId === brandId) {
+          oRev += Number(i.product.price) * i.quantity;
+          oCost += Number(i.product.buyingPrice) * i.quantity;
+          hit = true;
+        }
+      });
+      if (!brandId) {
+        revenue += Number(o.total);
+        cost += o.items.reduce((s, i) => s + Number(i.product.buyingPrice) * i.quantity, 0);
+        filteredOrders.push(o);
+      } else if (hit) {
+        revenue += oRev;
+        cost += oCost;
+        filteredOrders.push(o);
+      }
+    });
+    return { revenue, cost, profit: revenue - cost, orders: filteredOrders };
+  };
+
+  const agg = aggregateForBrand(filterBrand);
+  const completed = agg.orders;
+  const totalRevenue = agg.revenue;
+  const totalCost = agg.cost;
+  const totalProfit = agg.profit;
   const margin = totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0;
+  const activeBrand = brands.find(b => b.id === filterBrand);
 
   const exportCSV = () => {
     const headers = ['Order ID', 'Date', 'Channel', 'Revenue', 'Cost', 'Profit', 'Payment', 'Customer'];
@@ -63,6 +110,10 @@ export default function Sales() {
           <Button variant="outline" size="sm" onClick={exportPDF}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
           <Button variant="outline" size="sm" onClick={exportCSV}><Download className="h-4 w-4 mr-1" /> CSV</Button>
         </div>
+      </div>
+      <div className="mb-4">
+        <BrandFilter value={filterBrand} onChange={setFilterBrand} allLabel="All Brands" />
+        {activeBrand && <p className="text-xs text-muted-foreground mt-2">Showing data for <span className="font-semibold" style={{ color: activeBrand.color }}>{activeBrand.name}</span> brand only</p>}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
         <div className="stat-card"><p className="text-sm text-muted-foreground">{t('sales.revenue')}</p><p className="text-2xl font-bold">৳{totalRevenue.toFixed(0)}</p></div>

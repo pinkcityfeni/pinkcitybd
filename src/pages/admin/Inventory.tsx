@@ -1,28 +1,34 @@
-import { useProducts, useCategories, useUpdateStock } from '@/hooks/useSupabaseData';
+import { useProducts, useCategories, useUpdateStock, useBrands } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Plus, Minus, Search } from 'lucide-react';
+import { BrandFilter } from '@/components/admin/BrandFilter';
 
 export default function Inventory() {
   const { data: products = [] } = useProducts();
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
   const updateStockMut = useUpdateStock();
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
+  const [filterBrand, setFilterBrand] = useState('');
   const [amounts, setAmounts] = useState<Record<string, string>>({});
 
   const filtered = products.filter(p => {
+    if (filterBrand && p.brandId !== filterBrand) return false;
     if (filterCat && p.category !== filterCat) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
-  const lowStock = products.filter(p => p.stock < 20).length;
-  const outOfStock = products.filter(p => p.stock === 0).length;
-  const totalValue = products.reduce((s, p) => s + p.buyingPrice * p.stock, 0);
+  const scoped = filterBrand ? products.filter(p => p.brandId === filterBrand) : products;
+  const lowStock = scoped.filter(p => p.stock < 20).length;
+  const outOfStock = scoped.filter(p => p.stock === 0).length;
+  const totalValue = scoped.reduce((s, p) => s + p.buyingPrice * p.stock, 0);
+  const filterBrandCategories = filterBrand ? categories.filter(c => c.brandId === filterBrand) : categories;
 
   const adjust = (id: string, dir: 1 | -1) => {
     const amt = Number(amounts[id] || 1);
@@ -37,6 +43,10 @@ export default function Inventory() {
       <h1 className="page-header">{t('inv.title')}</h1>
       <p className="page-subheader mb-6">{t('inv.subtitle')}</p>
 
+      <div className="mb-4">
+        <BrandFilter value={filterBrand} onChange={(b) => { setFilterBrand(b); setFilterCat(''); }} allLabel="All Brands" />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="stat-card"><p className="text-sm text-muted-foreground">{t('inv.totalValue')}</p><p className="text-2xl font-bold">৳{totalValue.toFixed(0)}</p></div>
         <div className="stat-card"><p className="text-sm text-muted-foreground">{t('inv.lowStockItems')}</p><p className="text-2xl font-bold text-warning">{lowStock}</p></div>
@@ -50,7 +60,7 @@ export default function Inventory() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant={!filterCat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat('')}>{t('general.all')}</Button>
-          {categories.map(c => (
+          {filterBrandCategories.map(c => (
             <Button key={c.id} variant={filterCat === c.name ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat(c.name)}>{c.icon} {c.name}</Button>
           ))}
         </div>
@@ -61,6 +71,7 @@ export default function Inventory() {
           <thead>
             <tr className="border-b text-left text-muted-foreground">
               <th className="pb-3 font-medium">{t('inv.product')}</th>
+              <th className="pb-3 font-medium">Brand</th>
               <th className="pb-3 font-medium">{t('inv.category')}</th>
               <th className="pb-3 font-medium">{t('inv.barcode')}</th>
               <th className="pb-3 font-medium text-right">{t('inv.stock')}</th>
@@ -69,9 +80,10 @@ export default function Inventory() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(p => (
+            {filtered.map(p => { const b = brands.find(x => x.id === p.brandId); return (
               <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30">
                 <td className="py-3 font-medium">{p.name}</td>
+                <td className="py-3">{b && <span className="text-[10px] font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color }}>{b.name}</span>}</td>
                 <td className="py-3 text-xs">{p.category} · {p.subcategory}</td>
                 <td className="py-3 font-mono text-xs">{p.barcode}</td>
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? p.stock === 0 ? 'text-destructive' : 'text-warning' : ''}`}>{p.stock}</td>
@@ -84,7 +96,7 @@ export default function Inventory() {
                   </div>
                 </td>
               </tr>
-            ))}
+            ); })}
           </tbody>
         </table>
       </div>

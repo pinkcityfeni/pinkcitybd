@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { usePlaceOrder } from '@/hooks/useSupabaseData';
+import { usePlaceOrder, useMyPoints } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles } from 'lucide-react';
 import type { PaymentMethod, DeliveryZone, Order } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
@@ -26,6 +26,7 @@ export default function Checkout() {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { data: myPoints } = useMyPoints(user?.id);
 
   const [step, setStep] = useState<Step>('details');
   const [name, setName] = useState(user?.name || '');
@@ -38,6 +39,8 @@ export default function Checkout() {
   const [copied, setCopied] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [orderTotal, setOrderTotal] = useState(0);
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [pointsEarnedSuccess, setPointsEarnedSuccess] = useState(0);
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -47,7 +50,12 @@ export default function Checkout() {
 
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const deliveryCharge = DELIVERY_CHARGES[deliveryZone];
-  const grandTotal = total + deliveryCharge;
+  const availablePoints = myPoints?.points || 0;
+  const canRedeem = isAuthenticated && availablePoints >= 200;
+  const maxRedeem = Math.min(availablePoints, total);
+  const effectiveRedeem = Math.max(0, Math.min(redeemPoints, maxRedeem));
+  const grandTotal = Math.max(0, total - effectiveRedeem) + deliveryCharge;
+  const willEarn = Math.floor(Math.max(0, total - effectiveRedeem) / 100);
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   if (cart.length === 0 && step !== 'done') {
@@ -87,10 +95,12 @@ export default function Checkout() {
           deliveryCharge,
           paymentMethod,
           paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+          redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
         },
       });
       setOrderId(result.id);
       setOrderTotal(result.total);
+      setPointsEarnedSuccess(result.pointsEarned || 0);
       clearCart();
       setStep('done');
       toast.success(t('checkout.orderPlaced'));

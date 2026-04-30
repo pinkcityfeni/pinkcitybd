@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, SlidersHorizontal, Heart, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePublicProducts, useCategories, useProductRating } from '@/hooks/useSupabaseData';
+import { PriceTag } from '@/components/store/PriceTag';
 
 function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t }: any) {
   const rating = useProductRating(product.id);
@@ -32,8 +33,8 @@ function ProductCard({ product, catIcon, isWished, toggleWishlist, addToCart, t 
             <span className="text-[10px] text-muted-foreground">({rating.count})</span>
           </div>
         )}
-        <div className="flex items-center justify-between mt-2.5">
-          <span className="font-bold text-base text-foreground" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{product.price.toFixed(0)}</span>
+        <div className="flex items-center justify-between gap-2 mt-2.5">
+          <PriceTag price={product.price} compareAt={product.compareAtPrice} size="md" />
           <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-semibold" onClick={() => { addToCart(product); toast.success(t('home.added', { name: product.name })); }} disabled={product.stock === 0}>
             <ShoppingCart className="h-3 w-3 mr-1" /> {t('home.addBtn')}
           </Button>

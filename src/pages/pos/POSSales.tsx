@@ -438,7 +438,7 @@ export default function POSSales() {
             )}
           </div>
 
-          <Button className="w-full" size="lg" disabled={posCart.length === 0} onClick={handleCompleteSale}>
+          <Button className="w-full" size="lg" disabled={posCart.length === 0 || !!redeemError} onClick={handleCompleteSale}>
             {t('pos.completeSale')} — ৳{total.toFixed(0)}
           </Button>
         </div>

@@ -412,3 +412,110 @@ export async function uploadImage(file: File, path?: string): Promise<string> {
   const { data } = supabase.storage.from('images').getPublicUrl(filePath);
   return data.publicUrl;
 }
+
+// ─── Reward Points ───
+export interface CustomerPoints {
+  id: string;
+  user_id: string | null;
+  phone: string;
+  name: string;
+  points: number;
+  total_earned: number;
+  total_redeemed: number;
+}
+
+export function normalizePhone(p: string): string {
+  return (p || '').replace(/\D/g, '');
+}
+
+// Current user's points (for Account/Checkout)
+export function useMyPoints(userId?: string | null) {
+  return useQuery({
+    queryKey: ['customer_points', 'me', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('customer_points' as any)
+        .select('*')
+        .eq('user_id', userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as any) as CustomerPoints | null;
+    },
+  });
+}
+
+// Lookup customer by phone (POS)
+export function useFindCustomerByPhone() {
+  return useMutation({
+    mutationFn: async (phone: string): Promise<CustomerPoints | null> => {
+      const norm = normalizePhone(phone);
+      if (!norm) return null;
+      const { data, error } = await supabase
+        .from('customer_points' as any)
+        .select('*')
+        .eq('phone', norm)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as any) as CustomerPoints | null;
+    },
+  });
+}
+
+// Admin: list all customer points
+export function useAllCustomerPoints() {
+  const queryKey = ['customer_points', 'all'];
+  useRealtimeSubscription('customer_points', queryKey);
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('customer_points' as any)
+        .select('*')
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return ((data as any[]) || []) as CustomerPoints[];
+    },
+  });
+}
+
+// Admin: manual points adjustment
+export function useAdjustPoints() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ customerId, delta, note }: { customerId: string; delta: number; note?: string }) => {
+      const { data: cp, error: e1 } = await supabase
+        .from('customer_points' as any).select('*').eq('id', customerId).single();
+      if (e1) throw e1;
+      const cur = cp as any;
+      const newPoints = Math.max(0, (cur.points || 0) + delta);
+      const { error: e2 } = await supabase
+        .from('customer_points' as any)
+        .update({ points: newPoints })
+        .eq('id', customerId);
+      if (e2) throw e2;
+      await supabase.from('point_transactions' as any).insert({
+        customer_id: customerId, type: 'adjust', points: delta, note: note || 'Manual adjustment',
+      } as any);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['customer_points'] }),
+  });
+}
+
+// User's transactions
+export function useMyPointTransactions(customerId?: string | null) {
+  return useQuery({
+    queryKey: ['point_transactions', customerId],
+    enabled: !!customerId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('point_transactions' as any)
+        .select('*')
+        .eq('customer_id', customerId!)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data as any[]) || [];
+    },
+  });
+}

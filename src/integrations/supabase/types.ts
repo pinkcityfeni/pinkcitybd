@@ -92,12 +92,49 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_points: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          points: number
+          total_earned: number
+          total_redeemed: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone: string
+          points?: number
+          total_earned?: number
+          total_redeemed?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          points?: number
+          total_earned?: number
+          total_redeemed?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          customer_phone_normalized: string | null
           delivery_address: string | null
           delivery_charge: number | null
           delivery_zone: string | null
@@ -107,6 +144,8 @@ export type Database = {
           items: Json
           payment_method: string | null
           payment_status: string | null
+          points_earned: number
+          points_redeemed: number
           split_payment: Json | null
           status: string
           total: number
@@ -119,6 +158,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          customer_phone_normalized?: string | null
           delivery_address?: string | null
           delivery_charge?: number | null
           delivery_zone?: string | null
@@ -128,6 +168,8 @@ export type Database = {
           items?: Json
           payment_method?: string | null
           payment_status?: string | null
+          points_earned?: number
+          points_redeemed?: number
           split_payment?: Json | null
           status?: string
           total?: number
@@ -140,6 +182,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          customer_phone_normalized?: string | null
           delivery_address?: string | null
           delivery_charge?: number | null
           delivery_zone?: string | null
@@ -149,6 +192,8 @@ export type Database = {
           items?: Json
           payment_method?: string | null
           payment_status?: string | null
+          points_earned?: number
+          points_redeemed?: number
           split_payment?: Json | null
           status?: string
           total?: number
@@ -157,6 +202,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      point_transactions: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          note: string | null
+          order_id: string | null
+          points: number
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          points: number
+          type: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          points?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_points"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {

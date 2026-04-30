@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -16,6 +16,7 @@ const NAV_KEYS = [
   { to: '/admin/sales', key: 'admin.sales' as const, icon: BarChart3 },
   { to: '/admin/reviews', key: 'admin.reviews' as const, icon: Star },
   { to: '/admin/users', key: 'admin.users' as const, icon: Users },
+  { to: '/admin/customers', key: 'admin.customers' as const, icon: Sparkles },
 ];
 
 function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed?: boolean }) {

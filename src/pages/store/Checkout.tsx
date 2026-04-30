@@ -366,6 +366,7 @@ export default function Checkout() {
                   <Button type="button" size="sm" variant="outline" onClick={() => setRedeemPoints(maxRedeem)}>সর্বোচ্চ</Button>
                   {redeemPoints > 0 && <Button type="button" size="sm" variant="ghost" onClick={() => setRedeemPoints(0)}>বাতিল</Button>}
                 </div>
+                {redeemError && <p className="text-xs text-destructive font-medium">{redeemError}</p>}
               </>
             ) : (
               <p className="text-xs text-muted-foreground">রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন। (বর্তমানে {availablePoints})</p>

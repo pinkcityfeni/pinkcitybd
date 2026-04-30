@@ -1,8 +1,73 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
-import { dbToProduct, dbToCategory, dbToBanner, dbToOrder } from '@/data/store';
-import type { Product, Category, Banner, Order, Review, PaymentMethod, SplitPayment, DeliveryZone, CartItem } from '@/data/store';
+import { dbToProduct, dbToCategory, dbToBanner, dbToOrder, dbToBrand } from '@/data/store';
+import type { Product, Category, Banner, Order, Review, PaymentMethod, SplitPayment, DeliveryZone, CartItem, Brand } from '@/data/store';
+
+// ─── Brands ───
+export function useBrands() {
+  const queryKey = ['brands'];
+  useRealtimeSubscription('brands', queryKey);
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('brands' as any).select('*').order('sort_order');
+      if (error) throw error;
+      return ((data as any[]) || []).map(dbToBrand);
+    },
+  });
+}
+
+export function useDefaultBrand(): Brand | undefined {
+  const { data: brands = [] } = useBrands();
+  return brands.find(b => b.isDefault) || brands[0];
+}
+
+export function useAddBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (brand: { name: string; slug: string; color?: string }) => {
+      const { error } = await supabase.from('brands' as any).insert({
+        name: brand.name,
+        slug: brand.slug,
+        color: brand.color || '#ec4899',
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
+  });
+}
+
+export function useUpdateBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Brand> }) => {
+      const dbUpdates: any = {};
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
+      if (updates.color !== undefined) dbUpdates.color = updates.color;
+      if (updates.sortOrder !== undefined) dbUpdates.sort_order = updates.sortOrder;
+      const { error } = await supabase.from('brands' as any).update(dbUpdates).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
+  });
+}
+
+export function useDeleteBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('brands' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['brands'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+}
 
 // ─── Realtime subscription helper ───
 function useRealtimeSubscription(tableName: string, queryKey: string[]) {
@@ -71,6 +136,7 @@ export function useAddProduct() {
         barcode: product.barcode, stock: product.stock, category: product.category,
         subcategory: product.subcategory, trending: product.trending || false,
         source: product.source || 'manual',
+        brand_id: product.brandId,
       } as any);
       if (error) throw error;
     },
@@ -95,6 +161,7 @@ export function useUpdateProduct() {
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.subcategory !== undefined) dbUpdates.subcategory = updates.subcategory;
       if (updates.trending !== undefined) dbUpdates.trending = updates.trending;
+      if (updates.brandId !== undefined) dbUpdates.brand_id = updates.brandId;
       const { error } = await supabase.from('products').update(dbUpdates).eq('id', id);
       if (error) throw error;
     },
@@ -144,11 +211,12 @@ export function useCategories() {
 export function useAddCategory() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (cat: { name: string; icon?: string; image?: string; subcategories?: string[] }) => {
+    mutationFn: async (cat: { name: string; icon?: string; image?: string; subcategories?: string[]; brandId: string }) => {
       const { error } = await supabase.from('categories').insert({
         name: cat.name, icon: cat.icon || '📦', image: cat.image,
         subcategories: cat.subcategories || [],
-      });
+        brand_id: cat.brandId,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
@@ -159,7 +227,14 @@ export function useUpdateCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Category> }) => {
-      const { error } = await supabase.from('categories').update(updates).eq('id', id);
+      const dbUpdates: any = {};
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
+      if (updates.image !== undefined) dbUpdates.image = updates.image;
+      if (updates.subcategories !== undefined) dbUpdates.subcategories = updates.subcategories;
+      if (updates.sort_order !== undefined) dbUpdates.sort_order = updates.sort_order;
+      if (updates.brandId !== undefined) dbUpdates.brand_id = updates.brandId;
+      const { error } = await supabase.from('categories').update(dbUpdates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),

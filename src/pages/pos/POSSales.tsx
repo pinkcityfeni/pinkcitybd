@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
-import { useProducts, useOrders, usePlaceOrder, useFindCustomerByPhone, type CustomerPoints } from '@/hooks/useSupabaseData';
+import { useProducts, useOrders, usePlaceOrder, useFindCustomerByPhone, useBrands, type CustomerPoints } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { dbToOrder } from '@/data/store';
 
 export default function POSSales() {
   const { data: products = [] } = useProducts();
+  const { data: brands = [] } = useBrands();
   const posCart = useStore(s => s.posCart);
   const addToPosCart = useStore(s => s.addToPosCart);
   const removeFromPosCart = useStore(s => s.removeFromPosCart);
@@ -22,6 +23,7 @@ export default function POSSales() {
   const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
+  const [filterBrand, setFilterBrand] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number; pointsEarned: number; pointsRedeemed: number; customer: CustomerPoints | null } | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
@@ -191,9 +193,10 @@ export default function POSSales() {
     printWindow.print();
   };
 
+  const brandedProducts = filterBrand ? products.filter(p => p.brandId === filterBrand) : products;
   const filteredProducts = search
-    ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search) || p.category.toLowerCase().includes(search.toLowerCase()))
-    : products.slice(0, 12);
+    ? brandedProducts.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search) || p.category.toLowerCase().includes(search.toLowerCase()))
+    : brandedProducts.slice(0, 12);
 
   const saleItemCount = saleComplete ? saleComplete.order.items.reduce((s, i) => s + i.quantity, 0) : 0;
 
@@ -264,6 +267,32 @@ export default function POSSales() {
             <Search className="h-4 w-4 opacity-50" />
             <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('pos.searchPlaceholder')} className="bg-transparent border-pos-border" />
           </div>
+          {brands.length > 0 && (
+            <div className="flex gap-1.5 flex-wrap mb-3">
+              <button
+                type="button"
+                onClick={() => setFilterBrand('')}
+                className={`text-[11px] px-2.5 py-1 rounded-lg font-medium transition-colors ${!filterBrand ? 'bg-primary text-primary-foreground' : 'bg-muted/50 hover:bg-muted'}`}
+              >
+                All
+              </button>
+              {brands.map(b => {
+                const active = filterBrand === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => setFilterBrand(b.id)}
+                    className="text-[11px] px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5"
+                    style={active ? { backgroundColor: b.color, color: 'white' } : { backgroundColor: 'hsl(var(--muted) / 0.5)' }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: active ? 'white' : b.color }} />
+                    {b.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {filteredProducts.map(p => (
               <button key={p.id} onClick={() => { if (p.stock <= 0) { toast.error(t('pos.outOfStock')); return; } addToPosCart(p); toast.success(`✓ ${p.name}`, { duration: 1500 }); focusBarcode(); }} className="p-3 rounded-lg text-left transition-all hover:bg-primary/10 hover:scale-[1.02] disabled:opacity-40" style={{ background: 'hsl(var(--pos-bg))' }} disabled={p.stock === 0}>

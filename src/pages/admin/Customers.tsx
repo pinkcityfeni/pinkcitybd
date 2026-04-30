@@ -1,12 +1,67 @@
 import { useState, useMemo } from 'react';
-import { useAllCustomerPoints, useAdjustPoints, type CustomerPoints } from '@/hooks/useSupabaseData';
+import { useAllCustomerPoints, useAdjustPoints, useCreateOrGrantCustomer, type CustomerPoints } from '@/hooks/useSupabaseData';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Search, Plus, Minus, Phone } from 'lucide-react';
+import { Sparkles, Search, Plus, Minus, Phone, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
+
+function GrantDialog() {
+  const [open, setOpen] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
+  const [points, setPoints] = useState('');
+  const [note, setNote] = useState('');
+  const grant = useCreateOrGrantCustomer();
+
+  const handleSubmit = async () => {
+    const p = parseInt(points);
+    if (!phone.trim()) { toast.error('ফোন নাম্বার দিন'); return; }
+    if (!p || p <= 0) { toast.error('পয়েন্ট সঠিকভাবে দিন'); return; }
+    try {
+      await grant.mutateAsync({ phone, name: name.trim(), points: p, note: note.trim() });
+      toast.success(`${p} পয়েন্ট যোগ হয়েছে`);
+      setOpen(false); setPhone(''); setName(''); setPoints(''); setNote('');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed');
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm"><UserPlus className="h-4 w-4 mr-1.5" />কাস্টমারকে পয়েন্ট দিন</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>যেকোনো নাম্বারে পয়েন্ট দিন</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">ফোন নাম্বার *</label>
+            <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">নাম (নতুন কাস্টমার হলে)</label>
+            <Input value={name} onChange={e => setName(e.target.value)} placeholder="কাস্টমারের নাম" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">পয়েন্ট *</label>
+            <Input type="number" min={1} value={points} onChange={e => setPoints(e.target.value)} placeholder="যেমন: 100" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">কারণ (optional)</label>
+            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="যেমন: প্রথম পরিদর্শন বোনাস" />
+          </div>
+          <p className="text-[11px] text-muted-foreground">কাস্টমার থাকলে পয়েন্ট যোগ হবে, না থাকলে নতুন অ্যাকাউন্ট তৈরি হবে।</p>
+          <Button onClick={handleSubmit} disabled={grant.isPending} className="w-full">
+            {grant.isPending ? 'সংরক্ষণ হচ্ছে...' : 'পয়েন্ট দিন'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function AdjustDialog({ customer }: { customer: CustomerPoints }) {
   const [open, setOpen] = useState(false);
@@ -68,9 +123,12 @@ export default function Customers() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
-      <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-primary" />
-        <h1 className="text-xl font-bold">কাস্টমার পয়েন্ট</h1>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-bold">কাস্টমার পয়েন্ট</h1>
+        </div>
+        <GrantDialog />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

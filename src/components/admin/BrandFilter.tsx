@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useBrands } from '@/hooks/useSupabaseData';
 
@@ -8,10 +9,13 @@ interface BrandFilterProps {
   allLabel?: string;
 }
 
-export function BrandFilter({ value, onChange, showAll = true, allLabel = 'All Brands' }: BrandFilterProps) {
+export const BrandFilter = forwardRef<HTMLDivElement, BrandFilterProps>(function BrandFilter(
+  { value, onChange, showAll = true, allLabel = 'All Brands' },
+  ref,
+) {
   const { data: brands = [] } = useBrands();
   return (
-    <div className="flex gap-1.5 flex-wrap">
+    <div ref={ref} className="flex gap-1.5 flex-wrap">
       {showAll && (
         <Button
           variant={!value ? 'default' : 'outline'}
@@ -40,4 +44,4 @@ export function BrandFilter({ value, onChange, showAll = true, allLabel = 'All B
       })}
     </div>
   );
-}
+});

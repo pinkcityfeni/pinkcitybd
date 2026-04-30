@@ -29,6 +29,7 @@ const STATUS_COLORS: Record<Order['status'], string> = {
   processing: 'bg-info/10 text-info border-info/20',
   completed: 'bg-success/10 text-success border-success/20',
   cancelled: 'bg-destructive/10 text-destructive border-destructive/20',
+  returned: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
 };
 
 export default function Orders() {

@@ -5,9 +5,10 @@ import type { PaymentMethod, Order } from '@/data/store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useMemo } from 'react';
-import { Printer, Eye, X } from 'lucide-react';
+import { Printer, Eye, X, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
+import ReturnDialog from '@/components/pos/ReturnDialog';
 
 export default function POSSalesHistory() {
   const { data: allOrders = [] } = useOrders();
@@ -17,6 +18,7 @@ export default function POSSalesHistory() {
   const totalCost = useMemo(() => orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0), [orders]);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [returnOrder, setReturnOrder] = useState<Order | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const getMethodLabel = (m: PaymentMethod): string => {
@@ -60,6 +62,7 @@ export default function POSSalesHistory() {
                 <th className="pb-3 font-medium text-right">{t('posHistory.profit')}</th>
                 <th className="pb-3 font-medium">{t('posHistory.status')}</th>
                 <th className="pb-3 font-medium text-center">{t('posHistory.invoice')}</th>
+                <th className="pb-3 font-medium text-center">Return</th>
               </tr>
             </thead>
             <tbody>
@@ -82,10 +85,29 @@ export default function POSSalesHistory() {
                       )}
                     </td>
                     <td className="py-3 text-right text-success">৳{(o.total - cost).toFixed(0)}</td>
-                    <td className="py-3"><Badge variant="outline" className="text-xs capitalize">{o.status}</Badge></td>
+                    <td className="py-3">
+                      <Badge
+                        variant="outline"
+                        className={`text-xs capitalize ${
+                          o.status === 'returned' ? 'border-orange-500/40 text-orange-600' :
+                          o.status === 'cancelled' ? 'border-destructive/40 text-destructive' : ''
+                        }`}
+                      >{o.status}</Badge>
+                    </td>
                     <td className="py-3 text-center">
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); setSelectedOrder(o); }}>
                         <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
+                    <td className="py-3 text-center">
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0"
+                        disabled={o.status === 'cancelled'}
+                        onClick={(e) => { e.stopPropagation(); setReturnOrder(o); }}
+                        title="Return / Refund"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
                       </Button>
                     </td>
                   </tr>
@@ -116,6 +138,14 @@ export default function POSSalesHistory() {
             </div>
           </div>
         </div>
+      )}
+
+      {returnOrder && (
+        <ReturnDialog
+          order={returnOrder}
+          open={!!returnOrder}
+          onOpenChange={(v) => { if (!v) setReturnOrder(null); }}
+        />
       )}
     </div>
   );

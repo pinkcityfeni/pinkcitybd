@@ -62,7 +62,7 @@ export interface Order {
   items: CartItem[];
   total: number;
   date: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'returned';
   type: 'online' | 'pos';
   customerName?: string;
   customerEmail?: string;
@@ -77,6 +77,7 @@ export interface Order {
   discountType?: 'fixed' | 'percent';
   pointsEarned?: number;
   pointsRedeemed?: number;
+  returnedItems?: { product_id: string; quantity: number }[];
 }
 
 export interface Banner {
@@ -156,6 +157,7 @@ export function dbToOrder(o: any): Order {
     discountType: o.discount_type as 'fixed' | 'percent' | undefined,
     pointsEarned: o.points_earned || 0,
     pointsRedeemed: o.points_redeemed || 0,
+    returnedItems: (o.returned_items as any[]) || [],
   };
 }
 

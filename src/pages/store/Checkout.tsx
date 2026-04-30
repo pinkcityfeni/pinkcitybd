@@ -184,6 +184,9 @@ export default function Checkout() {
         ))}
         <div className="border-t pt-2 space-y-1 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
+          {effectiveRedeem > 0 && (
+            <div className="flex justify-between text-primary"><span>পয়েন্ট রিডিম ({effectiveRedeem})</span><span>-৳{effectiveRedeem.toFixed(0)}</span></div>
+          )}
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">

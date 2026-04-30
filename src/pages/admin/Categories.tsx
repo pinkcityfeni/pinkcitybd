@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Category } from '@/data/store';
-import { useCategories, useProducts, useAddCategory, useUpdateCategory, useDeleteCategory, uploadImage } from '@/hooks/useSupabaseData';
+import { useCategories, useProducts, useAddCategory, useUpdateCategory, useDeleteCategory, uploadImage, useBrands, useDefaultBrand } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Pencil, Trash2, X, FolderPlus, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { BrandFilter } from '@/components/admin/BrandFilter';
 
 export default function Categories() {
   const { data: categories = [] } = useCategories();
   const { data: products = [] } = useProducts();
+  const { data: brands = [] } = useBrands();
+  const defaultBrand = useDefaultBrand();
   const addCategoryMut = useAddCategory();
   const updateCategoryMut = useUpdateCategory();
   const deleteCategoryMut = useDeleteCategory();
@@ -22,11 +25,23 @@ export default function Categories() {
   const [catName, setCatName] = useState('');
   const [catIcon, setCatIcon] = useState('📦');
   const [catImage, setCatImage] = useState('');
+  const [catBrandId, setCatBrandId] = useState<string>('');
+  const [filterBrand, setFilterBrand] = useState<string>('');
   const [subInput, setSubInput] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const openNew = () => { setEditCat(null); setCatName(''); setCatIcon('📦'); setCatImage(''); setDialogOpen(true); };
-  const openEdit = (c: Category) => { setEditCat(c); setCatName(c.name); setCatIcon(c.icon); setCatImage(c.image || ''); setDialogOpen(true); };
+  const openNew = () => {
+    setEditCat(null); setCatName(''); setCatIcon('📦'); setCatImage('');
+    setCatBrandId(filterBrand || defaultBrand?.id || '');
+    setDialogOpen(true);
+  };
+  const openEdit = (c: Category) => {
+    setEditCat(c); setCatName(c.name); setCatIcon(c.icon); setCatImage(c.image || '');
+    setCatBrandId(c.brandId || defaultBrand?.id || '');
+    setDialogOpen(true);
+  };
+
+  const visibleCategories = filterBrand ? categories.filter(c => c.brandId === filterBrand) : categories;
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,11 +55,12 @@ export default function Categories() {
 
   const handleSave = () => {
     if (!catName.trim()) return;
+    if (!catBrandId) { toast.error('Brand select করুন'); return; }
     if (editCat) {
-      updateCategoryMut.mutate({ id: editCat.id, updates: { name: catName.trim(), icon: catIcon, image: catImage || undefined } });
+      updateCategoryMut.mutate({ id: editCat.id, updates: { name: catName.trim(), icon: catIcon, image: catImage || undefined, brandId: catBrandId } });
       toast.success(t('cat.categoryUpdated'));
     } else {
-      addCategoryMut.mutate({ name: catName.trim(), icon: catIcon, image: catImage || undefined });
+      addCategoryMut.mutate({ name: catName.trim(), icon: catIcon, image: catImage || undefined, brandId: catBrandId });
       toast.success(t('cat.categoryAdded'));
     }
     setDialogOpen(false);
@@ -88,21 +104,33 @@ export default function Categories() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="page-header">{t('cat.title')}</h1>
-          <p className="page-subheader">{t('cat.nCategories', { n: categories.length })}</p>
+          <p className="page-subheader">{t('cat.nCategories', { n: visibleCategories.length })}</p>
         </div>
         <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> {t('cat.addCategory')}</Button>
       </div>
 
+      <div className="mb-4">
+        <BrandFilter value={filterBrand} onChange={setFilterBrand} allLabel="All Brands" />
+      </div>
+
       <div className="grid gap-4">
-        {categories.map(c => {
+        {visibleCategories.map(c => {
           const catProducts = products.filter(p => p.category === c.name);
+          const catBrand = brands.find(b => b.id === c.brandId);
           return (
             <div key={c.id} className="stat-card">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <CategoryIcon cat={c} />
                   <div>
-                    <h3 className="font-semibold text-base">{c.name}</h3>
+                    <h3 className="font-semibold text-base flex items-center gap-2">
+                      {c.name}
+                      {catBrand && (
+                        <span className="inline-flex items-center rounded-full text-[9px] px-1.5 py-0 font-semibold text-white" style={{ backgroundColor: catBrand.color }}>
+                          {catBrand.name}
+                        </span>
+                      )}
+                    </h3>
                     <p className="text-xs text-muted-foreground">{t('cat.nProducts', { n: catProducts.length })}</p>
                   </div>
                 </div>
@@ -172,6 +200,13 @@ export default function Categories() {
           <DialogHeader><DialogTitle>{editCat ? t('cat.editCategory') : t('cat.newCategory')}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
             <div><Label>{t('cat.categoryName')}</Label><Input value={catName} onChange={e => setCatName(e.target.value)} placeholder={t('cat.namePlaceholder')} /></div>
+            <div>
+              <Label>Brand</Label>
+              <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={catBrandId} onChange={e => setCatBrandId(e.target.value)}>
+                <option value="">-- Brand --</option>
+                {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
             <div><Label>{t('cat.icon')}</Label><Input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="📦" className="w-20" /></div>
 
             {/* Image upload */}

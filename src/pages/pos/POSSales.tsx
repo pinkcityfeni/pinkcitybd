@@ -300,6 +300,53 @@ export default function POSSales() {
         </div>
 
         <div className="p-4 border-t space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
+          {/* Customer / Points */}
+          <div className="rounded-lg p-2 space-y-1.5" style={{ background: 'hsl(var(--pos-bg))' }}>
+            <div className="flex items-center gap-1.5">
+              <UserCircle className="h-3.5 w-3.5 text-primary shrink-0" />
+              <Input
+                value={customerPhone}
+                onChange={e => setCustomerPhone(e.target.value)}
+                placeholder="ফোন নাম্বার"
+                className="h-7 text-xs bg-transparent border-pos-border flex-1"
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleFindCustomer(); } }}
+              />
+              {customer ? (
+                <button onClick={clearCustomer} className="p-1 rounded hover:bg-destructive/20 text-destructive"><X className="h-3 w-3" /></button>
+              ) : (
+                <Button type="button" size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={handleFindCustomer} disabled={findCustomerMut.isPending}>
+                  {findCustomerMut.isPending ? '...' : 'খুঁজুন'}
+                </Button>
+              )}
+            </div>
+            {customer ? (
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-medium truncate">{customer.name || 'Customer'}</span>
+                <span className="text-primary font-bold flex items-center gap-1"><Sparkles className="h-3 w-3" />{customer.points}</span>
+              </div>
+            ) : customerPhone && (
+              <Input
+                value={customerName}
+                onChange={e => setCustomerName(e.target.value)}
+                placeholder="নতুন কাস্টমার নাম (optional)"
+                className="h-7 text-xs bg-transparent border-pos-border"
+              />
+            )}
+            {canRedeem && (
+              <div className="flex items-center gap-1.5 pt-1">
+                <Sparkles className="h-3 w-3 text-primary" />
+                <Input
+                  type="number"
+                  value={redeemPoints}
+                  onChange={e => setRedeemPoints(e.target.value)}
+                  placeholder={`রিডিম (max ${maxRedeem})`}
+                  className="h-7 text-[11px] bg-transparent border-pos-border flex-1"
+                />
+                <button type="button" onClick={() => setRedeemPoints(String(maxRedeem))} className="text-[10px] text-primary px-1.5">Max</button>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-between text-xs opacity-70"><span>{t('pos.subtotal')} ({t('pos.items', { n: itemCount })})</span><span>৳{subtotal.toFixed(0)}</span></div>
 
           <div className="flex items-center gap-1.5">
@@ -316,12 +363,21 @@ export default function POSSales() {
               <span>-৳{discountAmount.toFixed(0)}</span>
             </div>
           )}
+          {effectiveRedeem > 0 && (
+            <div className="flex justify-between text-xs font-medium text-primary">
+              <span>পয়েন্ট রিডিম ({effectiveRedeem})</span>
+              <span>-৳{effectiveRedeem.toFixed(0)}</span>
+            </div>
+          )}
 
           <div className="flex justify-between text-xs opacity-70"><span>{t('pos.costLabel')}</span><span>৳{totalCost.toFixed(0)}</span></div>
           <div className="flex justify-between text-xs font-medium text-success"><span>{t('pos.profitLabel')}</span><span>৳{profit.toFixed(0)}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
             <span>{t('pos.total')}</span><span className="text-primary">৳{total.toFixed(0)}</span>
           </div>
+          {willEarn > 0 && customerPhone && (
+            <p className="text-[10px] text-success flex items-center gap-1"><Sparkles className="h-2.5 w-2.5" /> এই অর্ডারে +{willEarn} পয়েন্ট যোগ হবে</p>
+          )}
 
           <div className="border-t pt-2 space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
             <div className="flex items-center justify-between">

@@ -117,6 +117,12 @@ export default function Checkout() {
         <CheckCircle2 className="h-16 w-16 text-success mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-1">{t('checkout.orderConfirmed')}</h2>
         <p className="text-muted-foreground text-sm mb-6">{t('checkout.orderSuccess')}</p>
+        {pointsEarnedSuccess > 0 && (
+          <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 flex items-center gap-2 justify-center">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <p className="text-sm font-medium">আপনি <span className="text-primary font-bold">{pointsEarnedSuccess}</span> পয়েন্ট অর্জন করেছেন!</p>
+          </div>
+        )}
         <div className="text-left space-y-3 mb-6">
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <Package className="h-4 w-4 text-primary shrink-0" />

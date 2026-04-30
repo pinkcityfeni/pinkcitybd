@@ -359,7 +359,6 @@ export function useDeleteReview() {
 // ─── Orders ───
 export function useOrders() {
   const queryKey = ['orders'];
-  useRealtimeSubscription('orders', queryKey);
   return useQuery({
     queryKey,
     queryFn: async () => {
@@ -367,6 +366,8 @@ export function useOrders() {
       if (error) throw error;
       return (data || []).map(dbToOrder);
     },
+    refetchInterval: 15000,
+    refetchOnWindowFocus: true,
   });
 }
 

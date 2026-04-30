@@ -74,13 +74,13 @@ function useRealtimeSubscription(tableName: string, queryKey: string[]) {
   const queryClient = useQueryClient();
   useEffect(() => {
     const channel = supabase
-      .channel(`${tableName}-realtime`)
+      .channel(`${tableName}-realtime-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
         queryClient.invalidateQueries({ queryKey });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [tableName, queryClient, queryKey]);
+  }, [tableName, queryClient]);
 }
 
 // ─── Products (admin/cashier — includes buyingPrice) ───

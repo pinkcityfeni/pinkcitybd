@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Product } from '@/data/store';
-import { useProducts, useCategories, useAddProduct, useUpdateProduct, useDeleteProduct, uploadImage } from '@/hooks/useSupabaseData';
+import { useProducts, useCategories, useAddProduct, useUpdateProduct, useDeleteProduct, uploadImage, useBrands, useDefaultBrand } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { BrandFilter } from '@/components/admin/BrandFilter';
 
-const EMPTY_FORM = { name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '', images: [] as string[] };
+const EMPTY_FORM = { name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '', images: [] as string[], brandId: '' };
 
 function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[]; onChange: (imgs: string[]) => void; uploadLabel: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -52,39 +53,49 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
 export default function Products() {
   const { data: products = [] } = useProducts();
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
+  const defaultBrand = useDefaultBrand();
   const addProductMut = useAddProduct();
   const updateProductMut = useUpdateProduct();
   const deleteProductMut = useDeleteProduct();
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
+  const [filterBrand, setFilterBrand] = useState('');
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
 
   const filtered = products.filter(p => {
+    if (filterBrand && p.brandId !== filterBrand) return false;
     if (filterCat && p.category !== filterCat) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.barcode.includes(search)) return false;
     return true;
   });
 
-  const selectedCat = categories.find(c => c.name === form.category);
+  // Categories filtered by selected brand
+  const formBrandCategories = form.brandId ? categories.filter(c => c.brandId === form.brandId) : categories;
+  const filterBrandCategories = filterBrand ? categories.filter(c => c.brandId === filterBrand) : categories;
+  const selectedCat = categories.find(c => c.name === form.category && (!form.brandId || c.brandId === form.brandId));
   const subcategories = selectedCat?.subcategories || [];
 
   const openNew = () => {
     setEditProduct(null);
-    setForm({ ...EMPTY_FORM, category: categories[0]?.name || '', subcategory: categories[0]?.subcategories[0] || '' });
+    const brandId = filterBrand || defaultBrand?.id || '';
+    const brandCats = brandId ? categories.filter(c => c.brandId === brandId) : categories;
+    setForm({ ...EMPTY_FORM, brandId, category: brandCats[0]?.name || '', subcategory: brandCats[0]?.subcategories[0] || '' });
     setDialogOpen(true);
   };
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
-    setForm({ name: p.name, description: p.description, price: String(p.price), compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '', buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [] });
+    setForm({ name: p.name, description: p.description, price: String(p.price), compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '', buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [], brandId: p.brandId || defaultBrand?.id || '' });
     setDialogOpen(true);
   };
 
   const handleSave = () => {
     if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
+    if (!form.brandId) { toast.error('Brand select করুন'); return; }
     const compareAt = Number(form.compareAtPrice) || 0;
     const sellPrice = Number(form.price);
     if (compareAt > 0 && compareAt <= sellPrice) {
@@ -93,15 +104,20 @@ export default function Products() {
     }
     const allImages = form.images;
     const mainImage = allImages[0] || form.image || '';
-    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual' };
+    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual', brandId: form.brandId };
     if (editProduct) { updateProductMut.mutate({ id: editProduct.id, updates: data }); toast.success(t('prod.updated')); }
     else { addProductMut.mutate(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
   };
 
   const handleCategoryChange = (catName: string) => {
-    const cat = categories.find(c => c.name === catName);
+    const cat = categories.find(c => c.name === catName && (!form.brandId || c.brandId === form.brandId));
     setForm(f => ({ ...f, category: catName, subcategory: cat?.subcategories[0] || '' }));
+  };
+
+  const handleBrandChange = (brandId: string) => {
+    const brandCats = categories.filter(c => c.brandId === brandId);
+    setForm(f => ({ ...f, brandId, category: brandCats[0]?.name || '', subcategory: brandCats[0]?.subcategories[0] || '' }));
   };
 
   return (
@@ -114,6 +130,10 @@ export default function Products() {
         <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> {t('prod.addProduct')}</Button>
       </div>
 
+      <div className="mb-3">
+        <BrandFilter value={filterBrand} onChange={(b) => { setFilterBrand(b); setFilterCat(''); }} allLabel="All Brands" />
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -121,7 +141,7 @@ export default function Products() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant={!filterCat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat('')}>{t('general.all')}</Button>
-          {categories.map(c => (
+          {filterBrandCategories.map(c => (
             <Button key={c.id} variant={filterCat === c.name ? 'default' : 'outline'} size="sm" onClick={() => setFilterCat(c.name)}>{c.icon} {c.name}</Button>
           ))}
         </div>
@@ -137,7 +157,10 @@ export default function Products() {
                   <img src={p.images?.[0] || p.image} alt={p.name} className="w-12 h-12 rounded-lg object-cover border" />
                 )}
                 <div>
-                  <h3 className="font-medium text-sm">{p.name}</h3>
+                  <h3 className="font-medium text-sm flex items-center gap-1.5 flex-wrap">
+                    {p.name}
+                    {(() => { const b = brands.find(x => x.id === p.brandId); return b ? <span className="text-[9px] font-semibold text-white px-1.5 py-0 rounded-full" style={{ backgroundColor: b.color }}>{b.name}</span> : null; })()}
+                  </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">{p.category} · {p.subcategory}</p>
                 </div>
               </div>
@@ -185,6 +208,7 @@ export default function Products() {
                   <div className="flex items-center gap-2">
                     {(p.images?.[0] || p.image) && <img src={p.images?.[0] || p.image} alt="" className="w-8 h-8 rounded-md object-cover border" />}
                     <span>{p.name}</span>
+                    {(() => { const b = brands.find(x => x.id === p.brandId); return b ? <span className="text-[9px] font-semibold text-white px-1.5 py-0 rounded-full" style={{ backgroundColor: b.color }}>{b.name}</span> : null; })()}
                     {p.source === 'fb' && <Badge className="text-[9px] h-4 px-1 bg-[#1877F2] text-white hover:bg-[#1877F2]">FB</Badge>}
                     {p.source === 'pos' && <Badge variant="secondary" className="text-[9px] h-4 px-1">POS</Badge>}
                   </div>
@@ -211,6 +235,13 @@ export default function Products() {
         <DialogContent>
           <DialogHeader><DialogTitle>{editProduct ? t('prod.editProduct') : t('prod.newProduct')}</DialogTitle></DialogHeader>
           <div className="grid gap-3 max-h-[70vh] overflow-auto pr-1">
+            <div>
+              <Label>Brand <span className="text-destructive">*</span></Label>
+              <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.brandId} onChange={e => handleBrandChange(e.target.value)}>
+                <option value="">-- Brand --</option>
+                {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
             <div><Label>{t('prod.name')}</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
             <div><Label>{t('prod.description')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
             <div>
@@ -235,7 +266,7 @@ export default function Products() {
                 <Label>{t('prod.category')}</Label>
                 <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.category} onChange={e => handleCategoryChange(e.target.value)}>
                   <option value="">{t('prod.selectCategory')}</option>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                  {formBrandCategories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <div>

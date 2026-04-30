@@ -146,6 +146,7 @@ export type Database = {
           payment_status: string | null
           points_earned: number
           points_redeemed: number
+          returned_items: Json
           split_payment: Json | null
           status: string
           total: number
@@ -170,6 +171,7 @@ export type Database = {
           payment_status?: string | null
           points_earned?: number
           points_redeemed?: number
+          returned_items?: Json
           split_payment?: Json | null
           status?: string
           total?: number
@@ -194,6 +196,7 @@ export type Database = {
           payment_status?: string | null
           points_earned?: number
           points_redeemed?: number
+          returned_items?: Json
           split_payment?: Json | null
           status?: string
           total?: number
@@ -240,6 +243,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pos_returns: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          order_id: string
+          points_reverted: number
+          processed_by: string | null
+          reason: string | null
+          refund_method: string
+          total_refund: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          order_id: string
+          points_reverted?: number
+          processed_by?: string | null
+          reason?: string | null
+          refund_method?: string
+          total_refund?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          order_id?: string
+          points_reverted?: number
+          processed_by?: string | null
+          reason?: string | null
+          refund_method?: string
+          total_refund?: number
+        }
+        Relationships: []
       }
       products: {
         Row: {

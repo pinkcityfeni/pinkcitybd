@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
-import { useProducts, useOrders, usePlaceOrder } from '@/hooks/useSupabaseData';
+import { useProducts, useOrders, usePlaceOrder, useFindCustomerByPhone, type CustomerPoints } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag } from 'lucide-react';
+import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag, Sparkles, UserCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
 import { dbToOrder } from '@/data/store';
@@ -18,10 +18,11 @@ export default function POSSales() {
   const updatePosCartQty = useStore(s => s.updatePosCartQty);
   const clearPosCart = useStore(s => s.clearPosCart);
   const placeOrderMut = usePlaceOrder();
+  const findCustomerMut = useFindCustomerByPhone();
   const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
-  const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number } | null>(null);
+  const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number; pointsEarned: number; pointsRedeemed: number; customer: CustomerPoints | null } | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
@@ -34,6 +35,12 @@ export default function POSSales() {
 
   const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
   const [discountValue, setDiscountValue] = useState('');
+
+  // Customer + points
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customer, setCustomer] = useState<CustomerPoints | null>(null);
+  const [redeemPoints, setRedeemPoints] = useState('');
 
   const PAYMENT_METHODS: { value: PaymentMethod; label: string; color: string }[] = [
     { value: 'cash', label: t('pos.cash'), color: 'bg-green-600' },
@@ -54,8 +61,16 @@ export default function POSSales() {
 
   const discountNum = parseFloat(discountValue) || 0;
   const discountAmount = discountType === 'percent' ? Math.round(subtotal * discountNum / 100) : discountNum;
-  const total = Math.max(0, subtotal - discountAmount);
+
+  const availablePoints = customer?.points || 0;
+  const canRedeem = !!customer && availablePoints >= 200;
+  const redeemNum = parseInt(redeemPoints) || 0;
+  const maxRedeem = Math.min(availablePoints, Math.max(0, subtotal - discountAmount));
+  const effectiveRedeem = canRedeem ? Math.max(0, Math.min(redeemNum, maxRedeem)) : 0;
+
+  const total = Math.max(0, subtotal - discountAmount - effectiveRedeem);
   const profit = total - totalCost;
+  const willEarn = Math.floor(total / 100);
 
   const splitAmt1 = parseFloat(splitAmount1) || 0;
   const splitAmt2 = Math.max(0, total - splitAmt1);
@@ -97,6 +112,9 @@ export default function POSSales() {
           splitPayment,
           discount: discountNum > 0 ? discountNum : undefined,
           discountType: discountNum > 0 ? discountType : undefined,
+          customerName: customerName || undefined,
+          customerPhone: customerPhone || undefined,
+          redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
         },
       });
 
@@ -107,6 +125,8 @@ export default function POSSales() {
         date: new Date().toISOString(),
         status: 'pending',
         type: 'pos',
+        customerName: customerName || undefined,
+        customerPhone: customerPhone || undefined,
         paymentMethod: isSplit ? splitMethod1 : paymentMethod,
         paymentStatus: 'paid',
         splitPayment,
@@ -114,15 +134,39 @@ export default function POSSales() {
         discountType: discountNum > 0 ? discountType : undefined,
       };
 
-      setSaleComplete({ order: completedOrder, profit: saleProfit });
+      setSaleComplete({
+        order: completedOrder,
+        profit: saleProfit,
+        pointsEarned: result.pointsEarned || 0,
+        pointsRedeemed: result.pointsRedeemed || 0,
+        customer,
+      });
       clearPosCart();
       setPaymentMethod('cash'); setIsSplit(false); setSplitAmount1(''); setDiscountValue(''); setDiscountType('fixed');
+      setCustomerPhone(''); setCustomerName(''); setCustomer(null); setRedeemPoints('');
     } catch (err: any) {
       toast.error(err.message || 'Order failed');
     }
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };
+
+  const handleFindCustomer = async () => {
+    if (!customerPhone.trim()) { toast.error('ফোন নাম্বার দিন'); return; }
+    const found = await findCustomerMut.mutateAsync(customerPhone);
+    if (found) {
+      setCustomer(found);
+      setCustomerName(found.name || '');
+      toast.success(`${found.name || 'Customer'} — ${found.points} পয়েন্ট`);
+    } else {
+      setCustomer(null);
+      toast.info('নতুন কাস্টমার — অর্ডার শেষে অ্যাকাউন্ট তৈরি হবে');
+    }
+  };
+
+  const clearCustomer = () => {
+    setCustomerPhone(''); setCustomerName(''); setCustomer(null); setRedeemPoints('');
+  };
 
   const handlePrintInvoice = () => {
     if (!invoiceRef.current) return;

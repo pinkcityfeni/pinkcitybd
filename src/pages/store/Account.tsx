@@ -1,10 +1,10 @@
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
-import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import { useOrders } from '@/hooks/useSupabaseData';
+import { useOrders, useMyPoints, useMyPointTransactions } from '@/hooks/useSupabaseData';
 
 export default function Account() {
   const { data: allOrders = [] } = useOrders();
@@ -13,6 +13,8 @@ export default function Account() {
   const navigate = useNavigate();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);
+  const { data: myPoints } = useMyPoints(user?.id);
+  const { data: pointTx = [] } = useMyPointTransactions(myPoints?.id);
   const ORDER_STEPS = [
     { status: 'pending', label: t('account.orderReceived'), icon: Clock },
     { status: 'processing', label: t('account.processing'), icon: Package },
@@ -35,6 +37,38 @@ export default function Account() {
         <div className="rounded-xl border bg-card p-4 text-center"><p className="text-2xl font-bold" style={{ fontFamily: 'DM Sans, sans-serif' }}>{orders.length}</p><p className="text-xs text-muted-foreground">{t('account.orders')}</p></div>
         <div className="rounded-xl border bg-card p-4 text-center"><p className="text-2xl font-bold" style={{ fontFamily: 'DM Sans, sans-serif' }}>{orders.filter(o => o.status === 'completed').length}</p><p className="text-xs text-muted-foreground">{t('account.delivered')}</p></div>
       </div>
+
+      {/* My Points */}
+      <div className="rounded-2xl border bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 p-5 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center"><Sparkles className="h-4 w-4 text-primary" /></div>
+            <div>
+              <p className="text-xs text-muted-foreground">আমার পয়েন্ট</p>
+              <p className="text-2xl font-bold text-primary" style={{ fontFamily: 'DM Sans, sans-serif' }}>{myPoints?.points || 0}</p>
+            </div>
+          </div>
+          <div className="text-right text-[10px] text-muted-foreground space-y-0.5">
+            <p>মোট অর্জিত: <span className="font-medium text-foreground">{myPoints?.total_earned || 0}</span></p>
+            <p>মোট রিডিম: <span className="font-medium text-foreground">{myPoints?.total_redeemed || 0}</span></p>
+          </div>
+        </div>
+        <p className="text-[11px] text-muted-foreground">প্রতি ১০০ টাকায় ১ পয়েন্ট। ২০০ পয়েন্ট হলে রিডিম করতে পারবেন। ১ পয়েন্ট = ১ টাকা।</p>
+        {pointTx.length > 0 && (
+          <details className="mt-3">
+            <summary className="text-xs text-primary cursor-pointer">সাম্প্রতিক লেনদেন ({pointTx.length})</summary>
+            <div className="mt-2 space-y-1 max-h-40 overflow-auto">
+              {pointTx.slice(0, 20).map((tx: any) => (
+                <div key={tx.id} className="flex justify-between text-[11px] py-1 border-b border-border/40">
+                  <span className="text-muted-foreground">{tx.note || tx.type} • {new Date(tx.created_at).toLocaleDateString(locale)}</span>
+                  <span className={tx.points >= 0 ? 'text-success font-medium' : 'text-destructive font-medium'}>{tx.points >= 0 ? '+' : ''}{tx.points}</span>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+      </div>
+
       <h2 className="font-semibold text-sm mb-3" style={{ fontFamily: 'DM Sans, sans-serif' }}>{t('account.recentOrders')}</h2>
       <div className="space-y-2">
         {orders.map(o => {

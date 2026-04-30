@@ -219,6 +219,7 @@ const translations = {
   'admin.sales': { bn: 'সেলস', en: 'Sales' },
   'admin.reviews': { bn: 'রিভিউ', en: 'Reviews' },
   'admin.users': { bn: 'ইউজার', en: 'Users' },
+ 'admin.customers': { bn: 'কাস্টমার পয়েন্ট', en: 'Customer Points' },
   'admin.pos': { bn: 'POS', en: 'POS' },
   'admin.storefront': { bn: 'স্টোরফ্রন্ট', en: 'Storefront' },
   'admin.logout': { bn: 'লগআউট', en: 'Logout' },

@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/data/store';
-import { useProducts, useOrders, usePlaceOrder } from '@/hooks/useSupabaseData';
+import { useProducts, useOrders, usePlaceOrder, useFindCustomerByPhone, type CustomerPoints } from '@/hooks/useSupabaseData';
 import { useLanguage } from '@/data/language';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag } from 'lucide-react';
+import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag, Sparkles, UserCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
 import { dbToOrder } from '@/data/store';
@@ -18,10 +18,11 @@ export default function POSSales() {
   const updatePosCartQty = useStore(s => s.updatePosCartQty);
   const clearPosCart = useStore(s => s.clearPosCart);
   const placeOrderMut = usePlaceOrder();
+  const findCustomerMut = useFindCustomerByPhone();
   const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
   const [search, setSearch] = useState('');
-  const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number } | null>(null);
+  const [saleComplete, setSaleComplete] = useState<{ order: Order; profit: number; pointsEarned: number; pointsRedeemed: number; customer: CustomerPoints | null } | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
@@ -34,6 +35,12 @@ export default function POSSales() {
 
   const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
   const [discountValue, setDiscountValue] = useState('');
+
+  // Customer + points
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customer, setCustomer] = useState<CustomerPoints | null>(null);
+  const [redeemPoints, setRedeemPoints] = useState('');
 
   const PAYMENT_METHODS: { value: PaymentMethod; label: string; color: string }[] = [
     { value: 'cash', label: t('pos.cash'), color: 'bg-green-600' },
@@ -54,8 +61,16 @@ export default function POSSales() {
 
   const discountNum = parseFloat(discountValue) || 0;
   const discountAmount = discountType === 'percent' ? Math.round(subtotal * discountNum / 100) : discountNum;
-  const total = Math.max(0, subtotal - discountAmount);
+
+  const availablePoints = customer?.points || 0;
+  const canRedeem = !!customer && availablePoints >= 200;
+  const redeemNum = parseInt(redeemPoints) || 0;
+  const maxRedeem = Math.min(availablePoints, Math.max(0, subtotal - discountAmount));
+  const effectiveRedeem = canRedeem ? Math.max(0, Math.min(redeemNum, maxRedeem)) : 0;
+
+  const total = Math.max(0, subtotal - discountAmount - effectiveRedeem);
   const profit = total - totalCost;
+  const willEarn = Math.floor(total / 100);
 
   const splitAmt1 = parseFloat(splitAmount1) || 0;
   const splitAmt2 = Math.max(0, total - splitAmt1);
@@ -97,6 +112,9 @@ export default function POSSales() {
           splitPayment,
           discount: discountNum > 0 ? discountNum : undefined,
           discountType: discountNum > 0 ? discountType : undefined,
+          customerName: customerName || undefined,
+          customerPhone: customerPhone || undefined,
+          redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
         },
       });
 
@@ -107,6 +125,8 @@ export default function POSSales() {
         date: new Date().toISOString(),
         status: 'pending',
         type: 'pos',
+        customerName: customerName || undefined,
+        customerPhone: customerPhone || undefined,
         paymentMethod: isSplit ? splitMethod1 : paymentMethod,
         paymentStatus: 'paid',
         splitPayment,
@@ -114,15 +134,39 @@ export default function POSSales() {
         discountType: discountNum > 0 ? discountType : undefined,
       };
 
-      setSaleComplete({ order: completedOrder, profit: saleProfit });
+      setSaleComplete({
+        order: completedOrder,
+        profit: saleProfit,
+        pointsEarned: result.pointsEarned || 0,
+        pointsRedeemed: result.pointsRedeemed || 0,
+        customer,
+      });
       clearPosCart();
       setPaymentMethod('cash'); setIsSplit(false); setSplitAmount1(''); setDiscountValue(''); setDiscountType('fixed');
+      setCustomerPhone(''); setCustomerName(''); setCustomer(null); setRedeemPoints('');
     } catch (err: any) {
       toast.error(err.message || 'Order failed');
     }
   };
 
   const handleNewSale = () => { setSaleComplete(null); focusBarcode(); };
+
+  const handleFindCustomer = async () => {
+    if (!customerPhone.trim()) { toast.error('ফোন নাম্বার দিন'); return; }
+    const found = await findCustomerMut.mutateAsync(customerPhone);
+    if (found) {
+      setCustomer(found);
+      setCustomerName(found.name || '');
+      toast.success(`${found.name || 'Customer'} — ${found.points} পয়েন্ট`);
+    } else {
+      setCustomer(null);
+      toast.info('নতুন কাস্টমার — অর্ডার শেষে অ্যাকাউন্ট তৈরি হবে');
+    }
+  };
+
+  const clearCustomer = () => {
+    setCustomerPhone(''); setCustomerName(''); setCustomer(null); setRedeemPoints('');
+  };
 
   const handlePrintInvoice = () => {
     if (!invoiceRef.current) return;
@@ -151,6 +195,12 @@ export default function POSSales() {
           <p className="text-sm opacity-70 mb-1">{t('pos.nItemsSold', { n: saleItemCount })}</p>
           <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
           <p className="text-sm text-success font-medium mb-2">{t('pos.profitLabel')}: ৳{saleComplete.profit.toFixed(0)}</p>
+          {(saleComplete.pointsEarned > 0 || saleComplete.pointsRedeemed > 0) && (
+            <div className="mb-3 p-2.5 rounded-lg bg-primary/10 border border-primary/20 inline-block text-xs space-y-0.5">
+              {saleComplete.pointsRedeemed > 0 && <p>রিডিম: <span className="font-bold">{saleComplete.pointsRedeemed} পয়েন্ট</span></p>}
+              {saleComplete.pointsEarned > 0 && <p>অর্জিত: <span className="font-bold text-primary">+{saleComplete.pointsEarned} পয়েন্ট</span></p>}
+            </div>
+          )}
           {saleComplete.order.splitPayment ? (
             <div className="text-xs opacity-70 mb-4 space-y-0.5">
               <p>{getMethodLabel(saleComplete.order.splitPayment.method1)}: ৳{saleComplete.order.splitPayment.amount1.toFixed(0)}</p>
@@ -250,6 +300,53 @@ export default function POSSales() {
         </div>
 
         <div className="p-4 border-t space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
+          {/* Customer / Points */}
+          <div className="rounded-lg p-2 space-y-1.5" style={{ background: 'hsl(var(--pos-bg))' }}>
+            <div className="flex items-center gap-1.5">
+              <UserCircle className="h-3.5 w-3.5 text-primary shrink-0" />
+              <Input
+                value={customerPhone}
+                onChange={e => setCustomerPhone(e.target.value)}
+                placeholder="ফোন নাম্বার"
+                className="h-7 text-xs bg-transparent border-pos-border flex-1"
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleFindCustomer(); } }}
+              />
+              {customer ? (
+                <button onClick={clearCustomer} className="p-1 rounded hover:bg-destructive/20 text-destructive"><X className="h-3 w-3" /></button>
+              ) : (
+                <Button type="button" size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={handleFindCustomer} disabled={findCustomerMut.isPending}>
+                  {findCustomerMut.isPending ? '...' : 'খুঁজুন'}
+                </Button>
+              )}
+            </div>
+            {customer ? (
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-medium truncate">{customer.name || 'Customer'}</span>
+                <span className="text-primary font-bold flex items-center gap-1"><Sparkles className="h-3 w-3" />{customer.points}</span>
+              </div>
+            ) : customerPhone && (
+              <Input
+                value={customerName}
+                onChange={e => setCustomerName(e.target.value)}
+                placeholder="নতুন কাস্টমার নাম (optional)"
+                className="h-7 text-xs bg-transparent border-pos-border"
+              />
+            )}
+            {canRedeem && (
+              <div className="flex items-center gap-1.5 pt-1">
+                <Sparkles className="h-3 w-3 text-primary" />
+                <Input
+                  type="number"
+                  value={redeemPoints}
+                  onChange={e => setRedeemPoints(e.target.value)}
+                  placeholder={`রিডিম (max ${maxRedeem})`}
+                  className="h-7 text-[11px] bg-transparent border-pos-border flex-1"
+                />
+                <button type="button" onClick={() => setRedeemPoints(String(maxRedeem))} className="text-[10px] text-primary px-1.5">Max</button>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-between text-xs opacity-70"><span>{t('pos.subtotal')} ({t('pos.items', { n: itemCount })})</span><span>৳{subtotal.toFixed(0)}</span></div>
 
           <div className="flex items-center gap-1.5">
@@ -266,12 +363,21 @@ export default function POSSales() {
               <span>-৳{discountAmount.toFixed(0)}</span>
             </div>
           )}
+          {effectiveRedeem > 0 && (
+            <div className="flex justify-between text-xs font-medium text-primary">
+              <span>পয়েন্ট রিডিম ({effectiveRedeem})</span>
+              <span>-৳{effectiveRedeem.toFixed(0)}</span>
+            </div>
+          )}
 
           <div className="flex justify-between text-xs opacity-70"><span>{t('pos.costLabel')}</span><span>৳{totalCost.toFixed(0)}</span></div>
           <div className="flex justify-between text-xs font-medium text-success"><span>{t('pos.profitLabel')}</span><span>৳{profit.toFixed(0)}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
             <span>{t('pos.total')}</span><span className="text-primary">৳{total.toFixed(0)}</span>
           </div>
+          {willEarn > 0 && customerPhone && (
+            <p className="text-[10px] text-success flex items-center gap-1"><Sparkles className="h-2.5 w-2.5" /> এই অর্ডারে +{willEarn} পয়েন্ট যোগ হবে</p>
+          )}
 
           <div className="border-t pt-2 space-y-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
             <div className="flex items-center justify-between">

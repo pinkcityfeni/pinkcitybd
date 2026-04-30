@@ -502,6 +502,52 @@ export function useAdjustPoints() {
   });
 }
 
+// Admin: create new customer + grant points (any phone)
+export function useCreateOrGrantCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ phone, name, points, note }: { phone: string; name?: string; points: number; note?: string }) => {
+      const norm = normalizePhone(phone);
+      if (!norm) throw new Error('সঠিক ফোন নাম্বার দিন');
+      if (!Number.isFinite(points) || points <= 0) throw new Error('পয়েন্ট ১ বা তার বেশি দিন');
+
+      const { data: existing } = await supabase
+        .from('customer_points' as any)
+        .select('*')
+        .eq('phone', norm)
+        .maybeSingle();
+
+      let cpId: string;
+      if (existing) {
+        const cur = existing as any;
+        const { error } = await supabase
+          .from('customer_points' as any)
+          .update({
+            points: (cur.points || 0) + points,
+            total_earned: (cur.total_earned || 0) + points,
+            name: cur.name || name || '',
+          })
+          .eq('id', cur.id);
+        if (error) throw error;
+        cpId = cur.id;
+      } else {
+        const { data: created, error } = await supabase
+          .from('customer_points' as any)
+          .insert({ phone: norm, name: name || '', points, total_earned: points } as any)
+          .select('id')
+          .single();
+        if (error) throw error;
+        cpId = (created as any).id;
+      }
+
+      await supabase.from('point_transactions' as any).insert({
+        customer_id: cpId, type: 'adjust', points, note: note || 'Admin granted',
+      } as any);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['customer_points'] }),
+  });
+}
+
 // User's transactions
 export function useMyPointTransactions(customerId?: string | null) {
   return useQuery({

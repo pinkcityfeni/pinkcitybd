@@ -397,6 +397,7 @@ export type Database = {
         Row: {
           barcode: string | null
           category: string | null
+          compare_at_price: number | null
           created_at: string | null
           description: string | null
           id: string | null
@@ -412,6 +413,7 @@ export type Database = {
         Insert: {
           barcode?: string | null
           category?: string | null
+          compare_at_price?: number | null
           created_at?: string | null
           description?: string | null
           id?: string | null
@@ -427,6 +429,7 @@ export type Database = {
         Update: {
           barcode?: string | null
           category?: string | null
+          compare_at_price?: number | null
           created_at?: string | null
           description?: string | null
           id?: string | null

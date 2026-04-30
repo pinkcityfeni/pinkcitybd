@@ -80,10 +80,22 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
             <span>৳{order.deliveryCharge.toFixed(0)}</span>
           </div>
         ) : null}
+        {order.pointsRedeemed && order.pointsRedeemed > 0 ? (
+          <div className="flex justify-between text-[10px]">
+            <span className="text-gray-500">Points Redeemed ({order.pointsRedeemed})</span>
+            <span className="text-red-500">-৳{order.pointsRedeemed.toFixed(0)}</span>
+          </div>
+        ) : null}
         <div className="flex justify-between font-bold text-sm border-t border-dashed border-gray-400 pt-2 mt-1">
           <span>{t('invoice.grandTotal')}</span>
           <span>৳{order.total.toFixed(0)}</span>
         </div>
+        {order.pointsEarned && order.pointsEarned > 0 ? (
+          <div className="flex justify-between text-[10px] pt-1">
+            <span className="text-gray-500">Points Earned</span>
+            <span className="font-semibold">+{order.pointsEarned} pts ⭐</span>
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-3 pt-2 border-t border-dashed border-gray-400 text-center text-[10px] text-gray-500">

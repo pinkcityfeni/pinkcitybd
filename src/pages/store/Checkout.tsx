@@ -54,6 +54,14 @@ export default function Checkout() {
   const canRedeem = isAuthenticated && availablePoints >= 200;
   const maxRedeem = Math.min(availablePoints, total);
   const effectiveRedeem = Math.max(0, Math.min(redeemPoints, maxRedeem));
+  const redeemError =
+    redeemPoints > 0 && !canRedeem
+      ? `রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন (বর্তমানে ${availablePoints})`
+      : redeemPoints > availablePoints
+      ? `আপনার কাছে মাত্র ${availablePoints} পয়েন্ট আছে`
+      : redeemPoints > total
+      ? `সর্বোচ্চ ${total} পয়েন্ট রিডিম করা যাবে (অর্ডার মূল্যের সমান)`
+      : '';
   const grandTotal = Math.max(0, total - effectiveRedeem) + deliveryCharge;
   const willEarn = Math.floor(Math.max(0, total - effectiveRedeem) / 100);
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
@@ -77,11 +85,13 @@ export default function Checkout() {
     if (!phone.trim()) { toast.error(t('checkout.enterPhone')); return; }
     if (!address.trim()) { toast.error(t('checkout.enterAddress')); return; }
     if (needsTrxId && !trxId.trim()) { toast.error(t('checkout.enterTrxId')); return; }
+    if (redeemError) { toast.error(redeemError); return; }
     setStep('review');
     window.scrollTo(0, 0);
   };
 
   const handlePlaceOrder = async () => {
+    if (redeemError) { toast.error(redeemError); return; }
     try {
       const result = await placeOrderMut.mutateAsync({
         type: 'online',
@@ -195,7 +205,7 @@ export default function Checkout() {
         </div>
       </div>
 
-      <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending}>
+      <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending || !!redeemError}>
         {placeOrderMut.isPending ? 'Processing...' : `${t('checkout.confirmBtn')} — ৳${grandTotal.toFixed(0)}`}
       </Button>
     </div>
@@ -356,6 +366,7 @@ export default function Checkout() {
                   <Button type="button" size="sm" variant="outline" onClick={() => setRedeemPoints(maxRedeem)}>সর্বোচ্চ</Button>
                   {redeemPoints > 0 && <Button type="button" size="sm" variant="ghost" onClick={() => setRedeemPoints(0)}>বাতিল</Button>}
                 </div>
+                {redeemError && <p className="text-xs text-destructive font-medium">{redeemError}</p>}
               </>
             ) : (
               <p className="text-xs text-muted-foreground">রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন। (বর্তমানে {availablePoints})</p>

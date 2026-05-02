@@ -406,6 +406,7 @@ interface PlaceOrderData {
   discount?: number;
   discountType?: 'fixed' | 'percent';
   redeemPoints?: number;
+  voucherCode?: string;
 }
 
 export function usePlaceOrder() {

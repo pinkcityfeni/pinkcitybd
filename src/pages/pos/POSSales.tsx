@@ -417,6 +417,29 @@ export default function POSSales() {
               <span>-৳{discountAmount.toFixed(0)}</span>
             </div>
           )}
+
+          {/* Voucher */}
+          <div className="flex items-center gap-1.5">
+            <Ticket className="h-3.5 w-3.5 text-primary shrink-0" />
+            <div className="flex-1">
+              <VoucherInput
+                items={posCart}
+                customerPhone={customerPhone}
+                userId={customer?.user_id || undefined}
+                applied={appliedVoucher}
+                onApply={setAppliedVoucher}
+                onClear={() => setAppliedVoucher(null)}
+                compact
+              />
+            </div>
+          </div>
+          {voucherDiscount > 0 && appliedVoucher && (
+            <div className="flex justify-between text-xs font-medium text-primary">
+              <span>ভাউচার ({appliedVoucher.code})</span>
+              <span>-৳{voucherDiscount.toFixed(0)}</span>
+            </div>
+          )}
+
           {effectiveRedeem > 0 && (
             <div className="flex justify-between text-xs font-medium text-primary">
               <span>পয়েন্ট রিডিম ({effectiveRedeem})</span>

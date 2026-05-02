@@ -213,6 +213,7 @@ const translations = {
   'admin.products': { bn: 'প্রোডাক্ট', en: 'Products' },
   'admin.fbImport': { bn: 'FB থেকে Import', en: 'FB Import' },
   'admin.brands': { bn: 'ব্র্যান্ড', en: 'Brands' },
+  'admin.vouchers': { bn: 'ভাউচার', en: 'Vouchers' },
   'admin.categories': { bn: 'ক্যাটাগরি', en: 'Categories' },
   'admin.banners': { bn: 'ব্যানার', en: 'Banners' },
   'admin.orders': { bn: 'অর্ডার', en: 'Orders' },

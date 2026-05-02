@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles, Ticket } from 'lucide-react';
+import VoucherInput from '@/components/VoucherInput';
 import type { PaymentMethod, DeliveryZone, Order } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
@@ -42,6 +43,7 @@ export default function Checkout() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [pointsEarnedSuccess, setPointsEarnedSuccess] = useState(0);
   const [pointsRedeemedSuccess, setPointsRedeemedSuccess] = useState(0);
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number } | null>(null);
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -63,8 +65,9 @@ export default function Checkout() {
       : redeemPoints > total
       ? `সর্বোচ্চ ${total} পয়েন্ট রিডিম করা যাবে (অর্ডার মূল্যের সমান)`
       : '';
-  const grandTotal = Math.max(0, total - effectiveRedeem) + deliveryCharge;
-  const willEarn = Math.floor(Math.max(0, total - effectiveRedeem) / 100);
+  const voucherDiscount = appliedVoucher?.discountAmount || 0;
+  const grandTotal = Math.max(0, total - effectiveRedeem - voucherDiscount) + deliveryCharge;
+  const willEarn = Math.floor(Math.max(0, total - effectiveRedeem - voucherDiscount) / 100);
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   if (cart.length === 0 && step !== 'done') {
@@ -107,6 +110,7 @@ export default function Checkout() {
           paymentMethod,
           paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
           redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
+          voucherCode: appliedVoucher?.code,
         },
       });
       setOrderId(result.id);

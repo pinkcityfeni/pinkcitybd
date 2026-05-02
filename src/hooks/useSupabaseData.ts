@@ -707,3 +707,142 @@ export function useProcessReturn() {
     },
   });
 }
+
+// ─── Vouchers ───
+export interface Voucher {
+  id: string;
+  code: string;
+  discountAmount: number;
+  scopeType: 'product' | 'category';
+  scopeProductId?: string | null;
+  scopeCategory?: string | null;
+  startAt: string;
+  expireAt: string;
+  perCustomerLimit: number;
+  minOrderAmount: number;
+  active: boolean;
+}
+
+function dbToVoucher(v: any): Voucher {
+  return {
+    id: v.id,
+    code: v.code,
+    discountAmount: Number(v.discount_amount || 0),
+    scopeType: v.scope_type,
+    scopeProductId: v.scope_product_id,
+    scopeCategory: v.scope_category,
+    startAt: v.start_at,
+    expireAt: v.expire_at,
+    perCustomerLimit: Number(v.per_customer_limit || 1),
+    minOrderAmount: Number(v.min_order_amount || 0),
+    active: !!v.active,
+  };
+}
+
+export function useVouchers() {
+  const queryKey = ['vouchers'];
+  useRealtimeSubscription('vouchers', queryKey);
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('vouchers' as any).select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return ((data as any[]) || []).map(dbToVoucher);
+    },
+  });
+}
+
+export function useCreateVoucher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: Omit<Voucher, 'id'>) => {
+      const { error } = await supabase.from('vouchers' as any).insert({
+        code: v.code.toUpperCase(),
+        discount_amount: v.discountAmount,
+        scope_type: v.scopeType,
+        scope_product_id: v.scopeProductId || null,
+        scope_category: v.scopeCategory || null,
+        start_at: v.startAt,
+        expire_at: v.expireAt,
+        per_customer_limit: v.perCustomerLimit,
+        min_order_amount: v.minOrderAmount,
+        active: v.active,
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vouchers'] }),
+  });
+}
+
+export function useUpdateVoucher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Voucher> }) => {
+      const u: any = {};
+      if (updates.code !== undefined) u.code = updates.code.toUpperCase();
+      if (updates.discountAmount !== undefined) u.discount_amount = updates.discountAmount;
+      if (updates.scopeType !== undefined) u.scope_type = updates.scopeType;
+      if (updates.scopeProductId !== undefined) u.scope_product_id = updates.scopeProductId || null;
+      if (updates.scopeCategory !== undefined) u.scope_category = updates.scopeCategory || null;
+      if (updates.startAt !== undefined) u.start_at = updates.startAt;
+      if (updates.expireAt !== undefined) u.expire_at = updates.expireAt;
+      if (updates.perCustomerLimit !== undefined) u.per_customer_limit = updates.perCustomerLimit;
+      if (updates.minOrderAmount !== undefined) u.min_order_amount = updates.minOrderAmount;
+      if (updates.active !== undefined) u.active = updates.active;
+      const { error } = await supabase.from('vouchers' as any).update(u).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vouchers'] }),
+  });
+}
+
+export function useDeleteVoucher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('vouchers' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vouchers'] }),
+  });
+}
+
+export interface VoucherValidation {
+  valid: boolean;
+  discountAmount?: number;
+  voucherId?: string;
+  code?: string;
+  error?: string;
+}
+
+export function useValidateVoucher() {
+  return useMutation({
+    mutationFn: async ({ code, items, customerPhone, userId }: {
+      code: string;
+      items: CartItem[];
+      customerPhone?: string;
+      userId?: string;
+    }): Promise<VoucherValidation> => {
+      const { data, error } = await supabase.functions.invoke('validate-voucher', {
+        body: {
+          code,
+          items: items.map(i => ({
+            product_id: i.product.id,
+            category: i.product.category,
+            price: i.product.price,
+            quantity: i.quantity,
+          })),
+          customerPhone,
+          userId,
+        },
+      });
+      if (error) {
+        const msg = (error as any)?.message || 'Validation failed';
+        return { valid: false, error: msg };
+      }
+      let parsed = data;
+      if (typeof data === 'string') { try { parsed = JSON.parse(data); } catch { return { valid: false, error: 'Invalid response' }; } }
+      return parsed as VoucherValidation;
+    },
+  });
+}

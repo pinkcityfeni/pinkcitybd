@@ -353,11 +353,29 @@ export default function Checkout() {
               <span>-৳{effectiveRedeem.toFixed(0)}</span>
             </div>
           )}
+          {voucherDiscount > 0 && appliedVoucher && (
+            <div className="flex justify-between text-primary font-medium">
+              <span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span>
+              <span>-৳{voucherDiscount.toFixed(0)}</span>
+            </div>
+          )}
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
           {willEarn > 0 && isAuthenticated && (
             <p className="text-xs text-success flex items-center gap-1 pt-1"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>
           )}
+        </div>
+
+        <div className="rounded-2xl border bg-card p-4 space-y-2">
+          <h3 className="font-semibold flex items-center gap-2 text-sm"><Ticket className="h-4 w-4 text-primary" /> ভাউচার কোড</h3>
+          <VoucherInput
+            items={cart}
+            customerPhone={phone}
+            userId={user?.id}
+            applied={appliedVoucher}
+            onApply={setAppliedVoucher}
+            onClear={() => setAppliedVoucher(null)}
+          />
         </div>
 
         {isAuthenticated && availablePoints > 0 && (

@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles, Tag } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles, Tag, Ticket } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -10,6 +10,7 @@ const NAV_KEYS = [
   { to: '/admin/products', key: 'admin.products' as const, icon: Package },
   { to: '/admin/fb-import', key: 'admin.fbImport' as const, icon: Facebook },
   { to: '/admin/brands', key: 'admin.brands' as const, icon: Tag },
+  { to: '/admin/vouchers', key: 'admin.vouchers' as const, icon: Ticket },
   { to: '/admin/categories', key: 'admin.categories' as const, icon: FolderTree },
   { to: '/admin/banners', key: 'admin.banners' as const, icon: Image },
   { to: '/admin/orders', key: 'admin.orders' as const, icon: ShoppingCart },

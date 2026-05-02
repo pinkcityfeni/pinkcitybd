@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles, Ticket } from 'lucide-react';
+import VoucherInput from '@/components/VoucherInput';
 import type { PaymentMethod, DeliveryZone, Order } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
@@ -42,6 +43,7 @@ export default function Checkout() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [pointsEarnedSuccess, setPointsEarnedSuccess] = useState(0);
   const [pointsRedeemedSuccess, setPointsRedeemedSuccess] = useState(0);
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number } | null>(null);
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -63,8 +65,9 @@ export default function Checkout() {
       : redeemPoints > total
       ? `সর্বোচ্চ ${total} পয়েন্ট রিডিম করা যাবে (অর্ডার মূল্যের সমান)`
       : '';
-  const grandTotal = Math.max(0, total - effectiveRedeem) + deliveryCharge;
-  const willEarn = Math.floor(Math.max(0, total - effectiveRedeem) / 100);
+  const voucherDiscount = appliedVoucher?.discountAmount || 0;
+  const grandTotal = Math.max(0, total - effectiveRedeem - voucherDiscount) + deliveryCharge;
+  const willEarn = Math.floor(Math.max(0, total - effectiveRedeem - voucherDiscount) / 100);
   const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   if (cart.length === 0 && step !== 'done') {
@@ -107,6 +110,7 @@ export default function Checkout() {
           paymentMethod,
           paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
           redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
+          voucherCode: appliedVoucher?.code,
         },
       });
       setOrderId(result.id);
@@ -208,6 +212,9 @@ export default function Checkout() {
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
           {effectiveRedeem > 0 && (
             <div className="flex justify-between text-primary"><span>পয়েন্ট রিডিম ({effectiveRedeem})</span><span>-৳{effectiveRedeem.toFixed(0)}</span></div>
+          )}
+          {voucherDiscount > 0 && appliedVoucher && (
+            <div className="flex justify-between text-primary"><span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span><span>-৳{voucherDiscount.toFixed(0)}</span></div>
           )}
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
         </div>
@@ -349,11 +356,29 @@ export default function Checkout() {
               <span>-৳{effectiveRedeem.toFixed(0)}</span>
             </div>
           )}
+          {voucherDiscount > 0 && appliedVoucher && (
+            <div className="flex justify-between text-primary font-medium">
+              <span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span>
+              <span>-৳{voucherDiscount.toFixed(0)}</span>
+            </div>
+          )}
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
           {willEarn > 0 && isAuthenticated && (
             <p className="text-xs text-success flex items-center gap-1 pt-1"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>
           )}
+        </div>
+
+        <div className="rounded-2xl border bg-card p-4 space-y-2">
+          <h3 className="font-semibold flex items-center gap-2 text-sm"><Ticket className="h-4 w-4 text-primary" /> ভাউচার কোড</h3>
+          <VoucherInput
+            items={cart}
+            customerPhone={phone}
+            userId={user?.id}
+            applied={appliedVoucher}
+            onApply={setAppliedVoucher}
+            onClear={() => setAppliedVoucher(null)}
+          />
         </div>
 
         {isAuthenticated && availablePoints > 0 && (

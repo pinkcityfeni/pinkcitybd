@@ -60,6 +60,68 @@ Deno.serve(async (req) => {
     const phoneRaw: string = (data?.customerPhone || "").toString().trim();
     const phoneNorm = phoneRaw.replace(/\D/g, "");
 
+    // ─── Voucher validation (server-side, never trust client) ───
+    const voucherCodeRaw: string = (data?.voucherCode || "").toString().trim().toUpperCase();
+    let voucher: any = null;
+    let voucherDiscount = 0;
+    if (voucherCodeRaw) {
+      const { data: v } = await adminClient
+        .from("vouchers")
+        .select("*")
+        .eq("code", voucherCodeRaw)
+        .maybeSingle();
+      if (!v || !v.active) {
+        return new Response(JSON.stringify({ error: "ভাউচার কোড সঠিক নয় বা নিষ্ক্রিয়" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const now = new Date();
+      if (now < new Date(v.start_at) || now > new Date(v.expire_at)) {
+        return new Response(JSON.stringify({ error: "ভাউচারের মেয়াদ নেই" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Scope check
+      let eligibleSubtotal = 0;
+      if (v.scope_type === "product") {
+        const m = items.filter((it: any) => it.product?.id === v.scope_product_id);
+        if (m.length === 0) {
+          return new Response(JSON.stringify({ error: "ভাউচার এই প্রোডাক্টের জন্য প্রযোজ্য নয়" }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        eligibleSubtotal = m.reduce((s: number, it: any) => s + Number(it.product?.price || 0) * Number(it.quantity || 0), 0);
+      } else {
+        const cat = String(v.scope_category || "").toLowerCase();
+        const m = items.filter((it: any) => String(it.product?.category || "").toLowerCase() === cat);
+        if (m.length === 0) {
+          return new Response(JSON.stringify({ error: "ভাউচার এই ক্যাটাগরির জন্য প্রযোজ্য নয়" }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        eligibleSubtotal = m.reduce((s: number, it: any) => s + Number(it.product?.price || 0) * Number(it.quantity || 0), 0);
+      }
+      if (Number(v.min_order_amount) > 0 && subtotal < Number(v.min_order_amount)) {
+        return new Response(JSON.stringify({ error: `সর্বনিম্ন অর্ডার ৳${Number(v.min_order_amount)}` }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Per-customer limit
+      if (phoneNorm || userId) {
+        let q = adminClient.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id);
+        if (phoneNorm) q = q.eq("customer_phone_normalized", phoneNorm);
+        else q = q.eq("user_id", userId!);
+        const { count } = await q;
+        if ((count || 0) >= Number(v.per_customer_limit)) {
+          return new Response(JSON.stringify({ error: "এই ভাউচার আপনি ইতিমধ্যে ব্যবহার করেছেন" }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+      voucher = v;
+      voucherDiscount = Math.min(Number(v.discount_amount), eligibleSubtotal);
+    }
+
     // Find/load customer if we have a phone OR a logged-in user
     let customer: any = null;
     if (phoneNorm) {
@@ -92,10 +154,10 @@ Deno.serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      redeemPoints = Math.min(requestedRedeem, customer.points, Math.max(0, subtotal - discountAmount));
+      redeemPoints = Math.min(requestedRedeem, customer.points, Math.max(0, subtotal - discountAmount - voucherDiscount));
     }
 
-    const totalAfterDiscount = Math.max(0, subtotal - discountAmount - redeemPoints);
+    const totalAfterDiscount = Math.max(0, subtotal - discountAmount - voucherDiscount - redeemPoints);
     const total = totalAfterDiscount + deliveryCharge;
 
     // Earn points: 1 point per 100 taka spent (on goods value AFTER discount & redeem, excluding delivery)
@@ -135,6 +197,8 @@ Deno.serve(async (req) => {
       customer_phone_normalized: phoneNorm || null,
       points_earned: pointsEarned,
       points_redeemed: redeemPoints,
+      voucher_code: voucher ? voucher.code : null,
+      voucher_discount: voucherDiscount,
     };
 
     const { data: orderRow, error: orderError } = await adminClient
@@ -149,6 +213,17 @@ Deno.serve(async (req) => {
     }
 
     console.log("Order created:", orderRow.id);
+
+    // Record voucher redemption
+    if (voucher) {
+      await adminClient.from("voucher_redemptions").insert({
+        voucher_id: voucher.id,
+        order_id: orderRow.id,
+        user_id: userId,
+        customer_phone_normalized: phoneNorm || null,
+        discount_applied: voucherDiscount,
+      });
+    }
 
     // Upsert customer_points row + log transactions
     if (phoneNorm || userId) {

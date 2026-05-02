@@ -5,10 +5,11 @@ import { useLanguage } from '@/data/language';
 import type { Order, PaymentMethod, SplitPayment } from '@/data/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag, Sparkles, UserCircle, X } from 'lucide-react';
+import { Trash2, Search, CheckCircle2, ScanBarcode, Minus, Plus, ShoppingCart, Printer, RotateCcw, Split, Percent, Tag, Sparkles, UserCircle, X, Ticket } from 'lucide-react';
 import { toast } from 'sonner';
 import POSInvoice from '@/components/pos/POSInvoice';
 import { dbToOrder } from '@/data/store';
+import VoucherInput from '@/components/VoucherInput';
 
 export default function POSSales() {
   const { data: products = [] } = useProducts();
@@ -43,6 +44,7 @@ export default function POSSales() {
   const [customerName, setCustomerName] = useState('');
   const [customer, setCustomer] = useState<CustomerPoints | null>(null);
   const [redeemPoints, setRedeemPoints] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number } | null>(null);
 
   const PAYMENT_METHODS: { value: PaymentMethod; label: string; color: string }[] = [
     { value: 'cash', label: t('pos.cash'), color: 'bg-green-600' },
@@ -67,7 +69,8 @@ export default function POSSales() {
   const availablePoints = customer?.points || 0;
   const canRedeem = !!customer && availablePoints >= 200;
   const redeemNum = parseInt(redeemPoints) || 0;
-  const maxRedeem = Math.min(availablePoints, Math.max(0, subtotal - discountAmount));
+  const voucherDiscount = appliedVoucher?.discountAmount || 0;
+  const maxRedeem = Math.min(availablePoints, Math.max(0, subtotal - discountAmount - voucherDiscount));
   const effectiveRedeem = canRedeem ? Math.max(0, Math.min(redeemNum, maxRedeem)) : 0;
 
   const redeemError =
@@ -81,7 +84,7 @@ export default function POSSales() {
       ? `সর্বোচ্চ ${Math.max(0, subtotal - discountAmount)} পয়েন্ট রিডিম করা যাবে`
       : '';
 
-  const total = Math.max(0, subtotal - discountAmount - effectiveRedeem);
+  const total = Math.max(0, subtotal - discountAmount - voucherDiscount - effectiveRedeem);
   const profit = total - totalCost;
   const willEarn = Math.floor(total / 100);
 
@@ -129,6 +132,7 @@ export default function POSSales() {
           customerName: customerName || undefined,
           customerPhone: customerPhone || undefined,
           redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
+          voucherCode: appliedVoucher?.code,
         },
       });
 
@@ -160,6 +164,7 @@ export default function POSSales() {
       clearPosCart();
       setPaymentMethod('cash'); setIsSplit(false); setSplitAmount1(''); setDiscountValue(''); setDiscountType('fixed');
       setCustomerPhone(''); setCustomerName(''); setCustomer(null); setRedeemPoints('');
+      setAppliedVoucher(null);
     } catch (err: any) {
       toast.error(err.message || 'Order failed');
     }
@@ -412,6 +417,29 @@ export default function POSSales() {
               <span>-৳{discountAmount.toFixed(0)}</span>
             </div>
           )}
+
+          {/* Voucher */}
+          <div className="flex items-center gap-1.5">
+            <Ticket className="h-3.5 w-3.5 text-primary shrink-0" />
+            <div className="flex-1">
+              <VoucherInput
+                items={posCart}
+                customerPhone={customerPhone}
+                userId={customer?.user_id || undefined}
+                applied={appliedVoucher}
+                onApply={setAppliedVoucher}
+                onClear={() => setAppliedVoucher(null)}
+                compact
+              />
+            </div>
+          </div>
+          {voucherDiscount > 0 && appliedVoucher && (
+            <div className="flex justify-between text-xs font-medium text-primary">
+              <span>ভাউচার ({appliedVoucher.code})</span>
+              <span>-৳{voucherDiscount.toFixed(0)}</span>
+            </div>
+          )}
+
           {effectiveRedeem > 0 && (
             <div className="flex justify-between text-xs font-medium text-primary">
               <span>পয়েন্ট রিডিম ({effectiveRedeem})</span>

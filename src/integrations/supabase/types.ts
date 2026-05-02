@@ -189,6 +189,8 @@ export type Database = {
           type: string
           updated_at: string
           user_id: string | null
+          voucher_code: string | null
+          voucher_discount: number
         }
         Insert: {
           created_at?: string
@@ -214,6 +216,8 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string | null
+          voucher_code?: string | null
+          voucher_discount?: number
         }
         Update: {
           created_at?: string
@@ -239,6 +243,8 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string | null
+          voucher_code?: string | null
+          voucher_discount?: number
         }
         Relationships: []
       }
@@ -466,6 +472,84 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      voucher_redemptions: {
+        Row: {
+          created_at: string
+          customer_phone_normalized: string | null
+          discount_applied: number
+          id: string
+          order_id: string | null
+          user_id: string | null
+          voucher_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_phone_normalized?: string | null
+          discount_applied?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string | null
+          voucher_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_phone_normalized?: string | null
+          discount_applied?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string | null
+          voucher_id?: string
+        }
+        Relationships: []
+      }
+      vouchers: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          discount_amount: number
+          expire_at: string
+          id: string
+          min_order_amount: number
+          per_customer_limit: number
+          scope_category: string | null
+          scope_product_id: string | null
+          scope_type: string
+          start_at: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          discount_amount?: number
+          expire_at: string
+          id?: string
+          min_order_amount?: number
+          per_customer_limit?: number
+          scope_category?: string | null
+          scope_product_id?: string | null
+          scope_type: string
+          start_at?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          discount_amount?: number
+          expire_at?: string
+          id?: string
+          min_order_amount?: number
+          per_customer_limit?: number
+          scope_category?: string | null
+          scope_product_id?: string | null
+          scope_type?: string
+          start_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

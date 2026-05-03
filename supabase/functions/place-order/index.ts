@@ -188,6 +188,8 @@ Deno.serve(async (req) => {
       customer_phone: data?.customerPhone || null,
       delivery_address: data?.deliveryAddress || null,
       delivery_zone: data?.deliveryZone || null,
+      delivery_district: data?.deliveryDistrict || null,
+      delivery_area: data?.deliveryArea || null,
       delivery_charge: deliveryCharge,
       payment_method: data?.paymentMethod || null,
       payment_status: data?.paymentStatus || (data?.paymentMethod === "cod" ? "pending" : "paid"),

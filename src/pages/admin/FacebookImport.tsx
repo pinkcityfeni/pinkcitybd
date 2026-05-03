@@ -196,7 +196,7 @@ export default function FacebookImport() {
   const [showBulkGuide, setShowBulkGuide] = useState(false);
 
   const validRows = useMemo(
-    () => rows.filter(r => r.name && Number(r.price) > 0 && r.imageUrls.length > 0 && r.category),
+    () => rows.filter(r => r.name && Number(r.price) > 0 && r.imageUrls.length > 0 && r.category && r.brandId),
     [rows]
   );
   const selectedValidRows = validRows.filter(r => r.selected && r.status !== 'success');
@@ -228,6 +228,12 @@ export default function FacebookImport() {
   const applyStockToSelected = () => {
     setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, stock: defaultStock } : r));
     toast.success('Stock apply হয়েছে');
+  };
+
+  const applyBrandToSelected = () => {
+    if (!defaultBrandId) { toast.error('আগে Brand select করুন'); return; }
+    setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, brandId: defaultBrandId } : r));
+    toast.success('Brand apply হয়েছে');
   };
 
   const [defaultCompareAt, setDefaultCompareAt] = useState('');
@@ -274,7 +280,7 @@ export default function FacebookImport() {
           category: row.category, subcategory: '',
           stock: Number(row.stock) || 0,
           image: finalImages[0], images: finalImages, trending: false,
-          source: 'fb',
+          source: 'fb', brandId: row.brandId,
         };
         await addProductMut.mutateAsync(data);
         updateRow(row.id, { status: 'success' });

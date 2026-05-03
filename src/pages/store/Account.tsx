@@ -1,10 +1,16 @@
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
-import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User, Sparkles, LayoutDashboard, ScanBarcode } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User, Sparkles, LayoutDashboard, ScanBarcode, MapPin, Pencil, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate, Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
-import { useOrders, useMyPoints, useMyPointTransactions } from '@/hooks/useSupabaseData';
+import { useMemo, useState, useEffect } from 'react';
+import { useOrders, useMyPoints, useMyPointTransactions, useDeliveryAreas } from '@/hooks/useSupabaseData';
+import { supabase } from '@/integrations/supabase/client';
+import { BD_DISTRICTS_EN, BD_DISTRICTS_BN } from '@/data/bdDistricts';
+import { toast } from 'sonner';
 
 export default function Account() {
   const { data: allOrders = [] } = useOrders();
@@ -15,6 +21,46 @@ export default function Account() {
   const orders = useMemo(() => allOrders.filter(o => o.type === 'online'), [allOrders]);
   const { data: myPoints } = useMyPoints(user?.id);
   const { data: pointTx = [] } = useMyPointTransactions(myPoints?.id);
+  const { data: deliveryAreas = [] } = useDeliveryAreas();
+  const activeAreas = deliveryAreas.filter(a => a.active);
+  const [editAddr, setEditAddr] = useState(false);
+  const [savingAddr, setSavingAddr] = useState(false);
+  const [addrPhone, setAddrPhone] = useState('');
+  const [addrAddress, setAddrAddress] = useState('');
+  const [addrDistrict, setAddrDistrict] = useState('');
+  const [addrArea, setAddrArea] = useState('');
+
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('phone, address, district, area')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) {
+        setAddrPhone(data.phone || '');
+        setAddrAddress(data.address || '');
+        setAddrDistrict(data.district || '');
+        setAddrArea(data.area || '');
+      }
+    })();
+  }, [user?.id]);
+
+  const saveAddress = async () => {
+    if (!user?.id) return;
+    setSavingAddr(true);
+    const { error } = await supabase.from('profiles').update({
+      phone: addrPhone,
+      address: addrAddress,
+      district: addrDistrict,
+      area: addrDistrict === 'Feni' ? addrArea : '',
+    }).eq('user_id', user.id);
+    setSavingAddr(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Saved');
+    setEditAddr(false);
+  };
   const ORDER_STEPS = [
     { status: 'pending', label: t('account.orderReceived'), icon: Clock },
     { status: 'processing', label: t('account.processing'), icon: Package },
@@ -80,6 +126,60 @@ export default function Account() {
               ))}
             </div>
           </details>
+        )}
+      </div>
+
+      {/* Saved delivery address */}
+      <div className="rounded-2xl border bg-card p-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> {t('checkout.deliveryAddress')}</h3>
+          {!editAddr ? (
+            <Button size="sm" variant="ghost" onClick={() => setEditAddr(true)}><Pencil className="h-3.5 w-3.5 mr-1" />Edit</Button>
+          ) : (
+            <Button size="sm" variant="ghost" onClick={() => setEditAddr(false)}>Cancel</Button>
+          )}
+        </div>
+        {!editAddr ? (
+          <div className="text-sm text-muted-foreground space-y-1">
+            {addrPhone && <p>📞 {addrPhone}</p>}
+            {addrAddress ? (
+              <p>{addrAddress}{addrArea ? ', ' + addrArea : ''}{addrDistrict ? ', ' + (locale === 'bn-BD' ? BD_DISTRICTS_BN[addrDistrict] || addrDistrict : addrDistrict) : ''}</p>
+            ) : (
+              <p className="text-xs italic">No saved delivery address yet.</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div><Label className="text-xs">{t('checkout.phone')}</Label><Input value={addrPhone} onChange={e => setAddrPhone(e.target.value)} placeholder="01XXXXXXXXX" /></div>
+            <div><Label className="text-xs">{t('checkout.address')}</Label><Input value={addrAddress} onChange={e => setAddrAddress(e.target.value)} /></div>
+            <div>
+              <Label className="text-xs">{t('checkout.district')}</Label>
+              <Select value={addrDistrict} onValueChange={(v) => { setAddrDistrict(v); if (v !== 'Feni') setAddrArea(''); }}>
+                <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict')} /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {BD_DISTRICTS_EN.map(d => (
+                    <SelectItem key={d} value={d}>{locale === 'bn-BD' ? BD_DISTRICTS_BN[d] : d}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {addrDistrict === 'Feni' && (
+              <div>
+                <Label className="text-xs">{t('checkout.area')}</Label>
+                <Select value={addrArea} onValueChange={setAddrArea}>
+                  <SelectTrigger><SelectValue placeholder={t('checkout.selectArea')} /></SelectTrigger>
+                  <SelectContent>
+                    {activeAreas.map(a => (
+                      <SelectItem key={a.id} value={a.name}>{a.name} — ৳{a.charge}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <Button size="sm" className="w-full" onClick={saveAddress} disabled={savingAddr}>
+              <Save className="h-3.5 w-3.5 mr-1" />{savingAddr ? '...' : 'Save'}
+            </Button>
+          </div>
         )}
       </div>
 

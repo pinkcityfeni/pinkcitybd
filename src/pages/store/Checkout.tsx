@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
 import { usePlaceOrder, useMyPoints, useDeliveryAreas, useAppSettings } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
 import { BD_DISTRICTS_EN, BD_DISTRICTS_BN } from '@/data/bdDistricts';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +46,47 @@ export default function Checkout() {
   const [pointsEarnedSuccess, setPointsEarnedSuccess] = useState(0);
   const [pointsRedeemedSuccess, setPointsRedeemedSuccess] = useState(0);
   const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number } | null>(null);
+
+  // Load saved delivery details from profile
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('name, phone, address, district, area')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      if (data.name && !name) setName(data.name);
+      if (data.phone && !phone) setPhone(data.phone);
+      if (data.address && !address) setAddress(data.address);
+      if (data.district && !district) setDistrict(data.district);
+      if (data.district === 'Feni' && data.area && !areaId) {
+        // area saved as area name; resolve to id when areas loaded
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Resolve saved area name → id once activeAreas load
+  useEffect(() => {
+    if (!user?.id || areaId || district !== 'Feni' || activeAreas.length === 0) return;
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('area')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      const savedArea = data?.area;
+      if (savedArea) {
+        const match = activeAreas.find(a => a.name === savedArea);
+        if (match) setAreaId(match.id);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAreas.length, district, user?.id]);
 
   const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'cod', label: t('checkout.cod'), icon: <Banknote className="h-5 w-5" />, description: t('checkout.codDesc') },
@@ -121,6 +163,8 @@ export default function Checkout() {
           customerEmail: email || undefined,
           customerPhone: phone,
           deliveryAddress: fullAddress,
+          deliveryDistrict: district,
+          deliveryArea: isFeni ? (selectedArea?.name || '') : '',
           deliveryZone,
           deliveryCharge,
           paymentMethod,
@@ -129,6 +173,16 @@ export default function Checkout() {
           voucherCode: appliedVoucher?.code,
         },
       });
+      // Save delivery details to profile for next time
+      if (user?.id) {
+        await supabase.from('profiles').update({
+          name: name || undefined,
+          phone,
+          address,
+          district,
+          area: isFeni ? (selectedArea?.name || '') : '',
+        }).eq('user_id', user.id);
+      }
       setOrderId(result.id);
       setOrderTotal(result.total);
       setPointsEarnedSuccess(result.pointsEarned || 0);

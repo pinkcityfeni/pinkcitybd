@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { usePlaceOrder, useMyPoints } from '@/hooks/useSupabaseData';
+import { usePlaceOrder, useMyPoints, useDeliveryAreas, useAppSettings } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
+import { BD_DISTRICTS_EN, BD_DISTRICTS_BN } from '@/data/bdDistricts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles, Ticket } from 'lucide-react';
 import VoucherInput from '@/components/VoucherInput';
@@ -14,27 +16,26 @@ import type { PaymentMethod, DeliveryZone, Order } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
 
-const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
-  feni: 30,
-  feni_upozila: 70,
-  outside: 150,
-};
-
 export default function Checkout() {
   const cart = useStore(s => s.cart);
   const clearCart = useStore(s => s.clearCart);
   const placeOrderMut = usePlaceOrder();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { data: myPoints } = useMyPoints(user?.id);
+  const { data: deliveryAreas = [] } = useDeliveryAreas();
+  const { data: settings } = useAppSettings();
+  const outsideCharge = Number(settings?.['delivery.outside_charge'] || 120);
+  const activeAreas = deliveryAreas.filter(a => a.active);
 
   const [step, setStep] = useState<Step>('details');
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>('feni');
+  const [district, setDistrict] = useState<string>('');
+  const [areaId, setAreaId] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
   const [copied, setCopied] = useState(false);
@@ -52,7 +53,19 @@ export default function Checkout() {
   ];
 
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const deliveryCharge = DELIVERY_CHARGES[deliveryZone];
+  const isFeni = district === 'Feni';
+  const selectedArea = activeAreas.find(a => a.id === areaId);
+  const deliveryCharge = !district
+    ? 0
+    : isFeni
+      ? (selectedArea ? Number(selectedArea.charge) : 0)
+      : outsideCharge;
+  const deliveryZone: DeliveryZone = isFeni ? 'feni' : 'outside';
+  const deliveryLabel = !district
+    ? ''
+    : isFeni
+      ? `${lang === 'bn' ? BD_DISTRICTS_BN[district] : district}${selectedArea ? ' — ' + selectedArea.name : ''}`
+      : (lang === 'bn' ? BD_DISTRICTS_BN[district] : district);
   const availablePoints = myPoints?.points || 0;
   const canRedeem = isAuthenticated && availablePoints >= 200;
   const maxRedeem = Math.min(availablePoints, total);
@@ -88,6 +101,8 @@ export default function Checkout() {
     e.preventDefault();
     if (!phone.trim()) { toast.error(t('checkout.enterPhone')); return; }
     if (!address.trim()) { toast.error(t('checkout.enterAddress')); return; }
+    if (!district) { toast.error(t('checkout.selectDistrict')); return; }
+    if (isFeni && !areaId) { toast.error(t('checkout.selectArea')); return; }
     if (needsTrxId && !trxId.trim()) { toast.error(t('checkout.enterTrxId')); return; }
     if (redeemError) { toast.error(redeemError); return; }
     setStep('review');
@@ -97,6 +112,7 @@ export default function Checkout() {
   const handlePlaceOrder = async () => {
     if (redeemError) { toast.error(redeemError); return; }
     try {
+      const fullAddress = `${address}, ${isFeni && selectedArea ? selectedArea.name + ', ' : ''}${lang === 'bn' ? BD_DISTRICTS_BN[district] : district}`;
       const result = await placeOrderMut.mutateAsync({
         type: 'online',
         items: cart,
@@ -104,7 +120,7 @@ export default function Checkout() {
           customerName: name || 'Guest',
           customerEmail: email || undefined,
           customerPhone: phone,
-          deliveryAddress: address,
+          deliveryAddress: fullAddress,
           deliveryZone,
           deliveryCharge,
           paymentMethod,

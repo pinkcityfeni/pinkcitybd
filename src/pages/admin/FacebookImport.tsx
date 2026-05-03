@@ -401,11 +401,19 @@ export default function FacebookImport() {
               <div><Label>Barcode</Label>
                 <Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>
             </div>
+            <div>
+              <Label>Brand *</Label>
+              <select className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+                value={form.brandId} onChange={e => handleBrandChange(e.target.value)}>
+                <option value="">-- select brand --</option>
+                {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Category *</Label>
                 <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.category} onChange={e => handleCategoryChange(e.target.value)}>
                   <option value="">-- select --</option>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                  {formBrandCategories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <div><Label>Subcategory</Label>

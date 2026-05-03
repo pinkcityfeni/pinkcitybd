@@ -3,6 +3,7 @@ import { useReviews, useProducts, useApproveReview, useDeleteReview } from '@/ho
 import { useLanguage } from '@/data/language';
 import { Star, Check, X, Clock, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 type Filter = 'pending' | 'approved' | 'all';
@@ -14,6 +15,7 @@ export default function Reviews() {
   const approveMut = useApproveReview();
   const deleteMut = useDeleteReview();
   const [filter, setFilter] = useState<Filter>('pending');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const pendingCount = reviews.filter(r => !r.approved).length;
   const approvedCount = reviews.filter(r => r.approved).length;
@@ -30,13 +32,15 @@ export default function Reviews() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('এই review টি delete করবেন?')) return;
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     try {
-      await deleteMut.mutateAsync(id);
+      await deleteMut.mutateAsync(deleteId);
       toast.success('Review delete হয়েছে');
     } catch {
       toast.error('Delete করা যায়নি');
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -135,7 +139,7 @@ export default function Reviews() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleDelete(r.id)}
+                    onClick={() => setDeleteId(r.id)}
                     disabled={deleteMut.isPending}
                     className="h-8 text-xs gap-1 text-destructive hover:text-destructive"
                   >
@@ -147,6 +151,19 @@ export default function Reviews() {
           })}
         </div>
       )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Review ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>এই review টি ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

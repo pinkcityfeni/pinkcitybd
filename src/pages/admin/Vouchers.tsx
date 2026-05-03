@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Pencil, Trash2, Ticket, Power, PowerOff } from 'lucide-react';
 import { toast } from 'sonner';
@@ -43,6 +44,7 @@ export default function Vouchers() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editVoucher, setEditVoucher] = useState<Voucher | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Voucher | null>(null);
 
   // form state
   const [code, setCode] = useState('');
@@ -127,13 +129,18 @@ export default function Vouchers() {
     }
   };
 
-  const handleDelete = async (v: Voucher) => {
-    if (!confirm(`Delete voucher "${v.code}"?`)) return;
+  const handleDelete = (v: Voucher) => {
+    setDeleteTarget(v);
+  };
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteMut.mutateAsync(v.id);
+      await deleteMut.mutateAsync(deleteTarget.id);
       toast.success('Voucher delete হয়েছে');
     } catch (e: any) {
       toast.error(e?.message || 'Delete failed');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -323,6 +330,21 @@ export default function Vouchers() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Voucher ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && <>Voucher <strong>{deleteTarget.code}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, X, FolderPlus, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,8 @@ export default function Categories() {
   const [filterBrand, setFilterBrand] = useState<string>('');
   const [subInput, setSubInput] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [removeSubTarget, setRemoveSubTarget] = useState<{ catId: string; sc: string } | null>(null);
 
   const openNew = () => {
     setEditCat(null); setCatName(''); setCatIcon('📦'); setCatImage('');
@@ -85,11 +88,16 @@ export default function Categories() {
     }
   };
 
-  const handleDeleteCat = (c: Category) => {
+  const requestDeleteCat = (c: Category) => {
     const productCount = products.filter(p => p.category === c.name).length;
     if (productCount > 0) { toast.error(t('cat.cantDelete', { n: productCount })); return; }
-    deleteCategoryMut.mutate(c.id);
+    setDeleteTarget(c);
+  };
+  const confirmDeleteCat = () => {
+    if (!deleteTarget) return;
+    deleteCategoryMut.mutate(deleteTarget.id);
     toast.success(t('cat.catDeleted'));
+    setDeleteTarget(null);
   };
 
   const CategoryIcon = ({ cat }: { cat: Category }) => {
@@ -136,7 +144,7 @@ export default function Categories() {
                 </div>
                 <div className="flex items-center gap-1">
                   <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => handleDeleteCat(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => requestDeleteCat(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
 
@@ -153,8 +161,7 @@ export default function Categories() {
                           onClick={() => {
                             const scProducts = catProducts.filter(p => p.subcategory === sc).length;
                             if (scProducts > 0) { toast.error(t('cat.cantDeleteSub', { n: scProducts })); return; }
-                            handleRemoveSub(c.id, sc);
-                            toast.success(t('cat.subRemoved'));
+                            setRemoveSubTarget({ catId: c.id, sc });
                           }}
                           className="ml-0.5 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive"
                         >
@@ -235,6 +242,45 @@ export default function Categories() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Category ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && <><strong>{deleteTarget.name}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDeleteCat}>ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!removeSubTarget} onOpenChange={(o) => { if (!o) setRemoveSubTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Subcategory ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removeSubTarget && <><strong>{removeSubTarget.sc}</strong> ডিলিট করা হবে।</>}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeSubTarget) {
+                  handleRemoveSub(removeSubTarget.catId, removeSubTarget.sc);
+                  toast.success(t('cat.subRemoved'));
+                }
+                setRemoveSubTarget(null);
+              }}
+            >ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

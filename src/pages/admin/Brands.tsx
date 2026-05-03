@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export default function Brands() {
   const [editBrand, setEditBrand] = useState<Brand | null>(null);
   const [name, setName] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[0]);
+  const [deleteTarget, setDeleteTarget] = useState<Brand | null>(null);
 
   const openNew = () => { setEditBrand(null); setName(''); setColor(PRESET_COLORS[0]); setDialogOpen(true); };
   const openEdit = (b: Brand) => { setEditBrand(b); setName(b.name); setColor(b.color); setDialogOpen(true); };
@@ -44,7 +46,7 @@ export default function Brands() {
     setDialogOpen(false);
   };
 
-  const handleDelete = (b: Brand) => {
+  const requestDelete = (b: Brand) => {
     if (b.isDefault) { toast.error('Default brand delete করা যাবে না'); return; }
     const productCount = products.filter(p => p.brandId === b.id).length;
     const catCount = categories.filter(c => c.brandId === b.id).length;
@@ -52,9 +54,13 @@ export default function Brands() {
       toast.error(`এই brand এ ${productCount}টি product ও ${catCount}টি category আছে। আগে move/delete করুন।`);
       return;
     }
-    if (!confirm(`Delete "${b.name}"?`)) return;
-    deleteBrandMut.mutate(b.id);
+    setDeleteTarget(b);
+  };
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteBrandMut.mutate(deleteTarget.id);
     toast.success('Brand delete হয়েছে');
+    setDeleteTarget(null);
   };
 
   return (
@@ -93,7 +99,7 @@ export default function Brands() {
                 <div className="flex gap-1">
                   <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
                   {!b.isDefault && (
-                    <button onClick={() => handleDelete(b)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => requestDelete(b)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                   )}
                 </div>
               </div>
@@ -142,6 +148,21 @@ export default function Brands() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Brand ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && <><strong>{deleteTarget.name}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

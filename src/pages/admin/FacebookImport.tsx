@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useCategories, useAddProduct, uploadImage } from '@/hooks/useSupabaseData';
+import { useState, useMemo, useEffect } from 'react';
+import { useCategories, useAddProduct, uploadImage, useBrands, useDefaultBrand } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import type { Product } from '@/data/store';
 
 const EMPTY = {
-  name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', stock: '10',
+  name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', stock: '10', brandId: '',
   barcode: '', category: '', subcategory: '', imageUrls: [] as string[],
 };
 
@@ -50,13 +50,14 @@ interface DraftRow {
   price: string;
   compareAtPrice: string;
   stock: string;
+  brandId: string;
   category: string;
   imageUrls: string[];
   status: RowStatus;
   error?: string;
 }
 
-function parseBulkText(text: string, defaultStock: string, defaultCategory: string): DraftRow[] {
+function parseBulkText(text: string, defaultStock: string, defaultCategory: string, defaultBrandId: string): DraftRow[] {
   const blocks = text.split(/\n\s*---\s*\n/).map(b => b.trim()).filter(Boolean);
   return blocks.map((block, idx) => {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
@@ -81,7 +82,7 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
       id: `${Date.now()}-${idx}`,
       selected: true,
       name, description, price, compareAtPrice,
-      stock: defaultStock, category: defaultCategory,
+      stock: defaultStock, category: defaultCategory, brandId: defaultBrandId,
       imageUrls, status: 'pending' as RowStatus,
     };
   });
@@ -89,6 +90,8 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
 
 export default function FacebookImport() {
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
+  const defaultBrand = useDefaultBrand();
   const addProductMut = useAddProduct();
 
   // ===== Single import state =====
@@ -97,7 +100,14 @@ export default function FacebookImport() {
   const [importing, setImporting] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
-  const selectedCat = categories.find(c => c.name === form.category);
+  useEffect(() => {
+    if (!form.brandId && defaultBrand) {
+      setForm(f => ({ ...f, brandId: defaultBrand.id }));
+    }
+  }, [defaultBrand, form.brandId]);
+
+  const formBrandCategories = form.brandId ? categories.filter(c => c.brandId === form.brandId) : categories;
+  const selectedCat = formBrandCategories.find(c => c.name === form.category);
   const subcategories = selectedCat?.subcategories || [];
 
   const handleParseText = () => {
@@ -134,6 +144,7 @@ export default function FacebookImport() {
   const handleImport = async () => {
     if (!form.name.trim()) { toast.error('Product name দিন'); return; }
     if (!form.price || Number(form.price) <= 0) { toast.error('Selling price দিন'); return; }
+    if (!form.brandId) { toast.error('Brand select করুন'); return; }
     if (!form.category) { toast.error('Category select করুন'); return; }
     if (form.imageUrls.length === 0) { toast.error('কমপক্ষে ১টা ছবি দিন'); return; }
     const sellPrice = Number(form.price);
@@ -151,7 +162,7 @@ export default function FacebookImport() {
         barcode: form.barcode.trim(), category: form.category, subcategory: form.subcategory,
         stock: Number(form.stock) || 0,
         image: finalImages[0], images: finalImages, trending: false,
-        source: 'fb',
+        source: 'fb', brandId: form.brandId,
       };
       await addProductMut.mutateAsync(data);
       toast.success(`✅ "${form.name}" add হয়েছে!`);
@@ -162,28 +173,37 @@ export default function FacebookImport() {
   };
 
   const handleCategoryChange = (catName: string) => {
-    const cat = categories.find(c => c.name === catName);
+    const cat = formBrandCategories.find(c => c.name === catName);
     setForm(f => ({ ...f, category: catName, subcategory: cat?.subcategories[0] || '' }));
+  };
+
+  const handleBrandChange = (brandId: string) => {
+    const brandCats = categories.filter(c => c.brandId === brandId);
+    setForm(f => ({ ...f, brandId, category: brandCats[0]?.name || '', subcategory: brandCats[0]?.subcategories[0] || '' }));
   };
 
   // ===== Bulk import state =====
   const [bulkText, setBulkText] = useState('');
   const [defaultStock, setDefaultStock] = useState('10');
   const [defaultCategory, setDefaultCategory] = useState('');
+  const [defaultBrandId, setDefaultBrandId] = useState('');
+  useEffect(() => {
+    if (!defaultBrandId && defaultBrand) setDefaultBrandId(defaultBrand.id);
+  }, [defaultBrand, defaultBrandId]);
   const [rows, setRows] = useState<DraftRow[]>([]);
   const [bulkImporting, setBulkImporting] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
   const [showBulkGuide, setShowBulkGuide] = useState(false);
 
   const validRows = useMemo(
-    () => rows.filter(r => r.name && Number(r.price) > 0 && r.imageUrls.length > 0 && r.category),
+    () => rows.filter(r => r.name && Number(r.price) > 0 && r.imageUrls.length > 0 && r.category && r.brandId),
     [rows]
   );
   const selectedValidRows = validRows.filter(r => r.selected && r.status !== 'success');
 
   const handleParseBulk = () => {
     if (!bulkText.trim()) { toast.error('আগে posts paste করুন'); return; }
-    const parsed = parseBulkText(bulkText, defaultStock, defaultCategory);
+    const parsed = parseBulkText(bulkText, defaultStock, defaultCategory, defaultBrandId || defaultBrand?.id || '');
     if (parsed.length === 0) { toast.error('কোনো post detect করতে পারিনি'); return; }
     setRows(parsed);
     toast.success(`${parsed.length}টি post parse হয়েছে — table-এ check করুন`);
@@ -208,6 +228,12 @@ export default function FacebookImport() {
   const applyStockToSelected = () => {
     setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, stock: defaultStock } : r));
     toast.success('Stock apply হয়েছে');
+  };
+
+  const applyBrandToSelected = () => {
+    if (!defaultBrandId) { toast.error('আগে Brand select করুন'); return; }
+    setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, brandId: defaultBrandId } : r));
+    toast.success('Brand apply হয়েছে');
   };
 
   const [defaultCompareAt, setDefaultCompareAt] = useState('');
@@ -254,7 +280,7 @@ export default function FacebookImport() {
           category: row.category, subcategory: '',
           stock: Number(row.stock) || 0,
           image: finalImages[0], images: finalImages, trending: false,
-          source: 'fb',
+          source: 'fb', brandId: row.brandId,
         };
         await addProductMut.mutateAsync(data);
         updateRow(row.id, { status: 'success' });
@@ -375,11 +401,19 @@ export default function FacebookImport() {
               <div><Label>Barcode</Label>
                 <Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>
             </div>
+            <div>
+              <Label>Brand *</Label>
+              <select className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+                value={form.brandId} onChange={e => handleBrandChange(e.target.value)}>
+                <option value="">-- select brand --</option>
+                {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Category *</Label>
                 <select className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.category} onChange={e => handleCategoryChange(e.target.value)}>
                   <option value="">-- select --</option>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                  {formBrandCategories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <div><Label>Subcategory</Label>
@@ -430,11 +464,20 @@ Price: 350 tk`}</pre>
                 <Input type="number" className="w-24" value={defaultStock} onChange={e => setDefaultStock(e.target.value)} />
               </div>
               <div>
+                <Label className="text-xs">Default Brand</Label>
+                <select className="h-10 rounded-md border bg-background px-3 text-sm min-w-[160px]"
+                  value={defaultBrandId} onChange={e => { setDefaultBrandId(e.target.value); setDefaultCategory(''); }}>
+                  <option value="">-- select --</option>
+                  {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+              </div>
+              <div>
                 <Label className="text-xs">Default Category</Label>
                 <select className="h-10 rounded-md border bg-background px-3 text-sm min-w-[180px]"
                   value={defaultCategory} onChange={e => setDefaultCategory(e.target.value)}>
                   <option value="">-- select --</option>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                  {(defaultBrandId ? categories.filter(c => c.brandId === defaultBrandId) : categories)
+                    .map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <Button onClick={handleParseBulk} variant="secondary">
@@ -454,6 +497,7 @@ Price: 350 tk`}</pre>
                 <Button size="sm" variant="outline" onClick={() => toggleAll(true)}>Select All</Button>
                 <Button size="sm" variant="outline" onClick={() => toggleAll(false)}>Deselect All</Button>
                 <Button size="sm" variant="outline" onClick={applyCategoryToSelected}>Apply Category</Button>
+                <Button size="sm" variant="outline" onClick={applyBrandToSelected}>Apply Brand</Button>
                 <Button size="sm" variant="outline" onClick={applyStockToSelected}>Apply Stock</Button>
                 <div className="flex items-center gap-1">
                   <Input type="number" placeholder="Original ৳" className="h-8 w-24"
@@ -479,6 +523,7 @@ Price: 350 tk`}</pre>
                       <TableHead className="w-24">Price *</TableHead>
                       <TableHead className="w-24">Original ৳</TableHead>
                       <TableHead className="w-20">Stock</TableHead>
+                      <TableHead className="min-w-[120px]">Brand *</TableHead>
                       <TableHead className="min-w-[140px]">Category *</TableHead>
                       <TableHead className="w-20">Status</TableHead>
                       <TableHead className="w-12"></TableHead>
@@ -486,7 +531,7 @@ Price: 350 tk`}</pre>
                   </TableHeader>
                   <TableBody>
                     {rows.map(row => {
-                      const invalid = !row.name || !(Number(row.price) > 0) || row.imageUrls.length === 0 || !row.category;
+                      const invalid = !row.name || !(Number(row.price) > 0) || row.imageUrls.length === 0 || !row.category || !row.brandId;
                       return (
                         <TableRow key={row.id}
                           className={
@@ -540,9 +585,18 @@ Price: 350 tk`}</pre>
                           </TableCell>
                           <TableCell>
                             <select className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+                              value={row.brandId}
+                              onChange={e => updateRow(row.id, { brandId: e.target.value, category: '' })}>
+                              <option value="">-- select --</option>
+                              {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                            </select>
+                          </TableCell>
+                          <TableCell>
+                            <select className="h-8 w-full rounded-md border bg-background px-2 text-xs"
                               value={row.category} onChange={e => updateRow(row.id, { category: e.target.value })}>
                               <option value="">-- select --</option>
-                              {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                              {(row.brandId ? categories.filter(c => c.brandId === row.brandId) : categories)
+                                .map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                             </select>
                           </TableCell>
                           <TableCell>

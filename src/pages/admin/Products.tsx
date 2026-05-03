@@ -301,7 +301,22 @@ export default function Products() {
               </select>
             </div>
             <div><Label>{t('prod.name')}</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
-            <div><Label>{t('prod.description')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
+            <div>
+              <Label>{t('prod.description')}</Label>
+              <Textarea rows={4} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Product details, features, etc." />
+            </div>
+            {!editProduct && (
+              <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-3 space-y-2">
+                <Label className="text-xs flex items-center gap-1">
+                  ✨ Caption থেকে auto-fill <span className="text-muted-foreground font-normal">(FB post / caption paste করুন)</span>
+                </Label>
+                <Textarea rows={3} value={captionText} onChange={e => setCaptionText(e.target.value)}
+                  placeholder={`Gold Plated Necklace Set\nসুন্দর party design\nPrice: 1500 tk`} />
+                <Button type="button" size="sm" variant="secondary" onClick={handleParseCaption}>
+                  ✨ Auto-fill Form
+                </Button>
+              </div>
+            )}
             <div>
               <Label>{t('prod.image')} ({form.images.length})</Label>
               <MultiImageUpload images={form.images} onChange={(imgs) => setForm(f => ({ ...f, images: imgs, image: imgs[0] || '' }))} uploadLabel={t('prod.uploadPhoto')} />

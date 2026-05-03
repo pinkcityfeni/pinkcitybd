@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useStore } from '@/data/store';
@@ -53,13 +53,23 @@ export default function Shop() {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
+  useEffect(() => {
+    setSearch(searchParams.get('search') || '');
+  }, [searchParams]);
   const activeCategory = searchParams.get('category') || '';
   const activeSub = searchParams.get('sub') || '';
   const activeSubcategories = activeCategory ? categories.find(c => c.name === activeCategory)?.subcategories || [] : [];
   const filtered = products.filter(p => {
     if (activeCategory && p.category !== activeCategory) return false;
     if (activeSub && p.subcategory !== activeSub) return false;
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.toLowerCase().trim();
+      const haystack = [p.name, p.category, p.subcategory, (p as any).description, (p as any).barcode]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     return true;
   });
   const setCategory = (cat: string) => { if (cat) setSearchParams({ category: cat }); else setSearchParams({}); };

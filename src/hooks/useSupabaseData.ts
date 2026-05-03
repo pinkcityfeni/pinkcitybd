@@ -312,6 +312,7 @@ export function useReviews(productId?: string) {
         id: r.id, productId: r.product_id, customerName: r.customer_name,
         rating: r.rating, comment: r.comment, date: r.created_at,
         approved: r.approved ?? false,
+        imageUrls: r.image_urls ?? [],
       }));
     },
   });
@@ -320,10 +321,11 @@ export function useReviews(productId?: string) {
 export function useAddReview() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (review: { productId: string; customerName: string; rating: number; comment: string }) => {
+    mutationFn: async (review: { productId: string; customerName: string; rating: number; comment: string; imageUrls?: string[] }) => {
       const { error } = await supabase.from('reviews').insert({
         product_id: review.productId, customer_name: review.customerName,
         rating: review.rating, comment: review.comment,
+        image_urls: review.imageUrls ?? [],
       } as any);
       if (error) throw error;
     },

@@ -475,6 +475,67 @@ export function useUpdateAppSetting() {
   });
 }
 
+// ─── Delivery Areas (Feni sub-areas) ───
+export interface DeliveryArea {
+  id: string;
+  name: string;
+  charge: number;
+  sort_order: number;
+  active: boolean;
+}
+
+export function useDeliveryAreas() {
+  const queryKey = ['delivery_areas'];
+  useRealtimeSubscription('delivery_areas', queryKey);
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('delivery_areas' as any)
+        .select('*')
+        .order('sort_order');
+      if (error) throw error;
+      return ((data as any[]) || []) as DeliveryArea[];
+    },
+  });
+}
+
+export function useAddDeliveryArea() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (a: { name: string; charge: number; sort_order?: number; active?: boolean }) => {
+      const { error } = await supabase.from('delivery_areas' as any).insert({
+        name: a.name, charge: a.charge,
+        sort_order: a.sort_order ?? 0, active: a.active ?? true,
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['delivery_areas'] }),
+  });
+}
+
+export function useUpdateDeliveryArea() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<DeliveryArea> }) => {
+      const { error } = await supabase.from('delivery_areas' as any).update(updates as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['delivery_areas'] }),
+  });
+}
+
+export function useDeleteDeliveryArea() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('delivery_areas' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['delivery_areas'] }),
+  });
+}
+
 // ─── Product Rating Helper ───
 export function useProductRating(productId: string) {
   const { data: reviews } = useReviews(productId);

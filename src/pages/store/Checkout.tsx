@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '@/data/store';
-import { usePlaceOrder, useMyPoints } from '@/hooks/useSupabaseData';
+import { usePlaceOrder, useMyPoints, useDeliveryAreas, useAppSettings } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
+import { BD_DISTRICTS_EN, BD_DISTRICTS_BN } from '@/data/bdDistricts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { CheckCircle2, ShoppingBag, ArrowLeft, MapPin, Phone, Mail, User, Package, Gift, Wallet, Building2, Banknote, Smartphone, Copy, Check, Truck, Sparkles, Ticket } from 'lucide-react';
 import VoucherInput from '@/components/VoucherInput';
@@ -14,27 +16,26 @@ import type { PaymentMethod, DeliveryZone, Order } from '@/data/store';
 
 type Step = 'details' | 'review' | 'done';
 
-const DELIVERY_CHARGES: Record<DeliveryZone, number> = {
-  feni: 30,
-  feni_upozila: 70,
-  outside: 150,
-};
-
 export default function Checkout() {
   const cart = useStore(s => s.cart);
   const clearCart = useStore(s => s.clearCart);
   const placeOrderMut = usePlaceOrder();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { data: myPoints } = useMyPoints(user?.id);
+  const { data: deliveryAreas = [] } = useDeliveryAreas();
+  const { data: settings } = useAppSettings();
+  const outsideCharge = Number(settings?.['delivery.outside_charge'] || 120);
+  const activeAreas = deliveryAreas.filter(a => a.active);
 
   const [step, setStep] = useState<Step>('details');
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>('feni');
+  const [district, setDistrict] = useState<string>('');
+  const [areaId, setAreaId] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
   const [copied, setCopied] = useState(false);
@@ -52,7 +53,19 @@ export default function Checkout() {
   ];
 
   const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const deliveryCharge = DELIVERY_CHARGES[deliveryZone];
+  const isFeni = district === 'Feni';
+  const selectedArea = activeAreas.find(a => a.id === areaId);
+  const deliveryCharge = !district
+    ? 0
+    : isFeni
+      ? (selectedArea ? Number(selectedArea.charge) : 0)
+      : outsideCharge;
+  const deliveryZone: DeliveryZone = isFeni ? 'feni' : 'outside';
+  const deliveryLabel = !district
+    ? ''
+    : isFeni
+      ? `${lang === 'bn' ? BD_DISTRICTS_BN[district] : district}${selectedArea ? ' — ' + selectedArea.name : ''}`
+      : (lang === 'bn' ? BD_DISTRICTS_BN[district] : district);
   const availablePoints = myPoints?.points || 0;
   const canRedeem = isAuthenticated && availablePoints >= 200;
   const maxRedeem = Math.min(availablePoints, total);
@@ -88,6 +101,8 @@ export default function Checkout() {
     e.preventDefault();
     if (!phone.trim()) { toast.error(t('checkout.enterPhone')); return; }
     if (!address.trim()) { toast.error(t('checkout.enterAddress')); return; }
+    if (!district) { toast.error(t('checkout.selectDistrict')); return; }
+    if (isFeni && !areaId) { toast.error(t('checkout.selectArea')); return; }
     if (needsTrxId && !trxId.trim()) { toast.error(t('checkout.enterTrxId')); return; }
     if (redeemError) { toast.error(redeemError); return; }
     setStep('review');
@@ -97,6 +112,7 @@ export default function Checkout() {
   const handlePlaceOrder = async () => {
     if (redeemError) { toast.error(redeemError); return; }
     try {
+      const fullAddress = `${address}, ${isFeni && selectedArea ? selectedArea.name + ', ' : ''}${lang === 'bn' ? BD_DISTRICTS_BN[district] : district}`;
       const result = await placeOrderMut.mutateAsync({
         type: 'online',
         items: cart,
@@ -104,7 +120,7 @@ export default function Checkout() {
           customerName: name || 'Guest',
           customerEmail: email || undefined,
           customerPhone: phone,
-          deliveryAddress: address,
+          deliveryAddress: fullAddress,
           deliveryZone,
           deliveryCharge,
           paymentMethod,
@@ -188,7 +204,7 @@ export default function Checkout() {
         <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
         {email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-muted-foreground" /><span>{email}</span></div>}
         <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span>{address}</span></div>
-        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')} — ৳{deliveryCharge}</span></div>
+        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryLabel} — ৳{deliveryCharge}</span></div>
       </div>
 
       <div className="rounded-2xl border bg-card p-4 mb-4 text-sm">
@@ -216,7 +232,7 @@ export default function Checkout() {
           {voucherDiscount > 0 && appliedVoucher && (
             <div className="flex justify-between text-primary"><span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span><span>-৳{voucherDiscount.toFixed(0)}</span></div>
           )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryLabel})</span><span>৳{deliveryCharge}</span></div>
         </div>
         <div className="border-t pt-2 flex justify-between font-bold text-lg">
           <span>{t('checkout.total')}</span>
@@ -268,22 +284,38 @@ export default function Checkout() {
             <textarea id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder={t('checkout.addressPlaceholder')} required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none" />
           </div>
           <div>
-            <Label className="mb-2 block">{t('checkout.deliveryZone')} <span className="text-destructive">*</span></Label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['feni', 'feni_upozila', 'outside'] as DeliveryZone[]).map(zone => (
-                <button key={zone} type="button" onClick={() => setDeliveryZone(zone)}
-                  className={`p-3 rounded-xl border-2 text-left transition-all ${deliveryZone === zone ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
-                  <div className="flex items-center gap-2">
-                    <Truck className={`h-4 w-4 shrink-0 ${deliveryZone === zone ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <div>
-                      <p className="font-medium text-xs">{zone === 'feni' ? t('checkout.feni') : zone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')}</p>
-                      <p className="text-xs text-primary font-bold">৳{DELIVERY_CHARGES[zone]}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <Label className="mb-2 block">{t('checkout.district')} <span className="text-destructive">*</span></Label>
+            <Select value={district} onValueChange={(v) => { setDistrict(v); if (v !== 'Feni') setAreaId(''); }}>
+              <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict')} /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                {BD_DISTRICTS_EN.map(d => (
+                  <SelectItem key={d} value={d}>{lang === 'bn' ? BD_DISTRICTS_BN[d] : d}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {district && district !== 'Feni' && (
+              <p className="text-xs text-muted-foreground mt-2">{t('checkout.delivery')}: ৳{outsideCharge}</p>
+            )}
           </div>
+          {isFeni && (
+            <div>
+              <Label className="mb-2 block">{t('checkout.area')} <span className="text-destructive">*</span></Label>
+              <Select value={areaId} onValueChange={setAreaId}>
+                <SelectTrigger><SelectValue placeholder={t('checkout.selectArea')} /></SelectTrigger>
+                <SelectContent>
+                  {activeAreas.length === 0 && (
+                    <div className="px-3 py-2 text-xs text-muted-foreground">No areas configured</div>
+                  )}
+                  {activeAreas.map(a => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} — ৳{a.charge}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedArea && (
+                <p className="text-xs text-muted-foreground mt-2">{t('checkout.delivery')}: ৳{selectedArea.charge}</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border bg-card p-4 space-y-3">
@@ -362,7 +394,7 @@ export default function Checkout() {
               <span>-৳{voucherDiscount.toFixed(0)}</span>
             </div>
           )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}{deliveryLabel ? ` (${deliveryLabel})` : ''}</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
           {willEarn > 0 && isAuthenticated && (
             <p className="text-xs text-success flex items-center gap-1 pt-1"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>

@@ -54,7 +54,7 @@ function ProductImageGallery({ product, cat }: { product: { image: string; image
   return (
     <div className="space-y-2">
       <div className="aspect-square rounded-xl overflow-hidden bg-secondary/30 border relative select-none" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-        <img src={allImages[currentIndex]} alt={`${product.name} ${currentIndex + 1}`} className="h-full w-full object-cover transition-opacity duration-300" draggable={false} />
+        <img src={allImages[currentIndex]} alt={`${product.name} ${currentIndex + 1}`} className="h-full w-full object-contain transition-opacity duration-300" draggable={false} />
         {allImages.length > 1 && (
           <>
             {currentIndex > 0 && <button onClick={() => goTo(currentIndex - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-background transition-colors"><ChevronLeft className="h-4 w-4" /></button>}
@@ -92,6 +92,7 @@ export default function ProductDetail() {
   const [reviewName, setReviewName] = useState('');
   const [reviewComment, setReviewComment] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   if (!product) return (
     <div className="container mx-auto px-4 py-20 text-center">
@@ -154,7 +155,7 @@ export default function ProductDetail() {
               </button>
               {product.stock <= 5 && product.stock > 0 && (
                 <Badge className="absolute top-3 left-3 z-20 bg-destructive text-destructive-foreground rounded text-[10px]">
-                  {lang === 'bn' ? `মাত্র ${product.stock}টি বাকি` : `Only ${product.stock} left`}
+                  {t('product.onlyLeft', { n: product.stock })}
                 </Badge>
               )}
             </div>
@@ -172,12 +173,21 @@ export default function ProductDetail() {
                 <span className="min-w-0 text-sm text-muted-foreground break-words">{rating.avg.toFixed(1)} · {t('product.reviews', { n: rating.count })}</span>
               </div>
             )}
-            <p className="text-muted-foreground text-sm leading-relaxed mb-4 break-words line-clamp-4 sm:line-clamp-none">{product.description}</p>
+            {product.description && (
+              <div className="mb-4">
+                <p className={`text-muted-foreground text-sm leading-relaxed break-words whitespace-pre-wrap ${descExpanded ? '' : 'line-clamp-4'}`}>{product.description}</p>
+                {product.description.length > 180 && (
+                  <button onClick={() => setDescExpanded(e => !e)} className="mt-1 text-xs font-semibold text-primary hover:underline">
+                    {descExpanded ? t('product.readLess') : t('product.readMore')}
+                  </button>
+                )}
+              </div>
+            )}
             <div className="mb-4">
               <PriceTag price={product.price} compareAt={product.compareAtPrice} size="lg" />
               {product.compareAtPrice && product.compareAtPrice > product.price && (
                 <p className="text-xs text-success font-medium mt-1">
-                  আপনি বাঁচাচ্ছেন ৳{(product.compareAtPrice - product.price).toFixed(0)}
+                  {t('product.savings')} ৳{(product.compareAtPrice - product.price).toFixed(0)}
                 </p>
               )}
             </div>
@@ -198,8 +208,8 @@ export default function ProductDetail() {
               <Button onClick={handleBuyNow} disabled={product.stock === 0} className="flex-1 rounded-lg h-11 font-semibold"><Zap className="h-4 w-4 mr-2" /> {t('product.buyNow')}</Button>
             </div>
             <div className="grid grid-cols-1 gap-3 border rounded-lg p-3 sm:grid-cols-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Truck className="h-4 w-4 text-primary shrink-0" /><span>{lang === 'bn' ? 'দ্রুত ডেলিভারি' : 'Fast Delivery'}</span></div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 text-primary shrink-0" /><span>{lang === 'bn' ? 'অরিজিনাল' : 'Original'}</span></div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Truck className="h-4 w-4 text-primary shrink-0" /><span>{t('product.fastDelivery')}</span></div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 text-primary shrink-0" /><span>{t('product.original')}</span></div>
             </div>
             <p className="mt-4 break-all text-[10px] text-muted-foreground font-mono">{t('product.barcode')}: {product.barcode}</p>
           </div>

@@ -348,6 +348,17 @@ export default function FacebookImport() {
               <div><Label>Buying Price (৳)</Label>
                 <Input type="number" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
+            <div>
+              <Label>Original Price / Discount আগের দাম (৳)</Label>
+              <Input type="number" placeholder="যেমন 700" value={form.compareAtPrice}
+                onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
+              {Number(form.compareAtPrice) > Number(form.price) && Number(form.price) > 0 && (
+                <p className="text-xs text-primary mt-1 font-medium">
+                  ✨ {Math.round((1 - Number(form.price) / Number(form.compareAtPrice)) * 100)}% OFF দেখাবে
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Optional — selling price-এর চেয়ে বড় দিলে discount badge দেখাবে</p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Stock</Label>
                 <Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} /></div>

@@ -319,49 +319,42 @@ export default function Checkout() {
             <Label htmlFor="address">{t('checkout.address')} <span className="text-destructive">*</span></Label>
             <textarea id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder={t('checkout.addressPlaceholder')} required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none" />
           </div>
-          <div>
-            <Label className="mb-2 block">{t('checkout.district')} <span className="text-destructive">*</span></Label>
+          <div className={isFeni ? 'grid grid-cols-2 gap-2' : ''}>
             <Select value={district} onValueChange={(v) => { setDistrict(v); if (v !== 'Feni') setAreaId(''); }}>
-              <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict')} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict') + ' *'} /></SelectTrigger>
               <SelectContent className="max-h-72">
                 {BD_DISTRICTS_EN.map(d => (
                   <SelectItem key={d} value={d}>{lang === 'bn' ? BD_DISTRICTS_BN[d] : d}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {district && district !== 'Feni' && (
-              <p className="text-xs text-muted-foreground mt-2">{t('checkout.delivery')}: ৳{outsideCharge}</p>
-            )}
-          </div>
-          {isFeni && (
-            <div>
-              <Label className="mb-2 block">{t('checkout.area')} <span className="text-destructive">*</span></Label>
+            {isFeni && (
               <Select value={areaId} onValueChange={setAreaId}>
-                <SelectTrigger><SelectValue placeholder={t('checkout.selectArea')} /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('checkout.selectArea') + ' *'} /></SelectTrigger>
                 <SelectContent>
                   {activeAreas.length === 0 && (
-                    <div className="px-3 py-2 text-xs text-muted-foreground">No areas configured</div>
+                    <div className="px-3 py-2 text-xs text-muted-foreground">No areas</div>
                   )}
                   {activeAreas.map(a => (
                     <SelectItem key={a.id} value={a.id}>{a.name} — ৳{a.charge}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {selectedArea && (
-                <p className="text-xs text-muted-foreground mt-2">{t('checkout.delivery')}: ৳{selectedArea.charge}</p>
-              )}
-            </div>
+            )}
+          </div>
+          {district && (
+            <p className="text-xs text-muted-foreground">{t('checkout.delivery')}: ৳{deliveryCharge}</p>
           )}
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> {t('checkout.paymentMethod')}</h3>
-          <div className="grid grid-cols-1 gap-2">
+        <div className="rounded-xl border bg-card p-3 space-y-2">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><Wallet className="h-3.5 w-3.5 text-primary" /> {t('checkout.paymentMethod')}</h3>
+          <div className="grid grid-cols-1 gap-1.5">
             {paymentMethods.map(pm => (
               <button key={pm.id} type="button" onClick={() => { setPaymentMethod(pm.id); setTrxId(''); }}
-                className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
+                className={`flex items-center gap-2 p-2 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
                 <span className={paymentMethod === pm.id ? 'text-primary' : 'text-muted-foreground'}>{pm.icon}</span>
-                <div className="flex-1 min-w-0"><p className="font-medium text-sm">{pm.label}</p><p className="text-xs text-muted-foreground">{pm.description}</p></div>
+                <div className="flex-1 min-w-0"><p className="font-medium text-xs">{pm.label}</p></div>
                 <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === pm.id ? 'border-primary' : 'border-muted-foreground/30'}`}>
                   {paymentMethod === pm.id && <div className="h-2 w-2 rounded-full bg-primary" />}
                 </div>

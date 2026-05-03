@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useStore } from '@/data/store';
@@ -53,6 +53,9 @@ export default function Shop() {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
+  useEffect(() => {
+    setSearch(searchParams.get('search') || '');
+  }, [searchParams]);
   const activeCategory = searchParams.get('category') || '';
   const activeSub = searchParams.get('sub') || '';
   const activeSubcategories = activeCategory ? categories.find(c => c.name === activeCategory)?.subcategories || [] : [];

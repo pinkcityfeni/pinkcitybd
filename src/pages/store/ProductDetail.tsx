@@ -5,10 +5,13 @@ import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, ArrowLeft, Package, Zap, Star, Heart, Send, Truck, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ImagePlus, X as XIcon } from 'lucide-react';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { PriceTag } from '@/components/store/PriceTag';
+import { useAuth } from '@/data/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 function StarRating({ rating, size = 'sm', interactive = false, onChange }: { rating: number; size?: 'sm' | 'md' | 'lg'; interactive?: boolean; onChange?: (r: number) => void }) {
   const cls = size === 'lg' ? 'h-6 w-6' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5';
@@ -87,11 +90,13 @@ export default function ProductDetail() {
   const rating = useProductRating(id || '');
   const { t, lang, locale } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);
-  const [reviewName, setReviewName] = useState('');
   const [reviewComment, setReviewComment] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
+  const [uploadingImg, setUploadingImg] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
 
   if (!product) return (
@@ -120,11 +125,36 @@ export default function ProductDetail() {
   };
 
   const handleSubmitReview = () => {
-    if (!reviewName.trim()) { toast.error(t('product.enterName')); return; }
+    if (!user) { toast.error('Login required'); navigate('/login'); return; }
     if (!reviewComment.trim()) { toast.error(t('product.enterReview')); return; }
-    addReviewMut.mutate({ productId: product.id, customerName: reviewName, rating: reviewRating, comment: reviewComment });
+    addReviewMut.mutate({ productId: product.id, customerName: user.name || 'Customer', rating: reviewRating, comment: reviewComment, imageUrls: reviewImages });
     toast.success(t('product.reviewSubmitted'));
-    setReviewName(''); setReviewComment(''); setReviewRating(5);
+    setReviewComment(''); setReviewRating(5); setReviewImages([]);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    if (!user) { toast.error('Login required'); return; }
+    if (reviewImages.length + files.length > 4) { toast.error('Max 4 images'); return; }
+    setUploadingImg(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of files) {
+        const ext = file.name.split('.').pop();
+        const path = `reviews/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage.from('images').upload(path, file);
+        if (error) throw error;
+        const { data } = supabase.storage.from('images').getPublicUrl(path);
+        uploaded.push(data.publicUrl);
+      }
+      setReviewImages(prev => [...prev, ...uploaded]);
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setUploadingImg(false);
+      e.target.value = '';
+    }
   };
 
   const ratingDistribution = [5, 4, 3, 2, 1].map(star => ({
@@ -246,8 +276,22 @@ export default function ProductDetail() {
             <div className="rounded-xl border bg-background p-5 space-y-3">
               <h3 className="font-semibold text-sm">{t('product.writeReview')}</h3>
               <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">Rating:</span><StarRating rating={reviewRating} size="md" interactive onChange={setReviewRating} /></div>
-              <Input value={reviewName} onChange={e => setReviewName(e.target.value)} placeholder={t('product.yourName')} className="rounded-lg" />
               <textarea value={reviewComment} onChange={e => setReviewComment(e.target.value)} placeholder={t('product.yourReview')} className="flex w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[80px] resize-none" />
+              {reviewImages.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {reviewImages.map((url, i) => (
+                    <div key={i} className="relative h-16 w-16 rounded-lg overflow-hidden border">
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      <button type="button" onClick={() => setReviewImages(p => p.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-background/90 flex items-center justify-center"><XIcon className="h-3 w-3" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <label className="flex items-center justify-center gap-2 h-10 rounded-lg border border-dashed cursor-pointer hover:bg-muted/50 text-xs text-muted-foreground">
+                <ImagePlus className="h-4 w-4" />
+                {uploadingImg ? 'Uploading…' : (reviewImages.length ? `${reviewImages.length}/4 photos` : 'Add photos (optional)')}
+                <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploadingImg || reviewImages.length >= 4} />
+              </label>
               <Button onClick={handleSubmitReview} className="rounded-lg w-full h-10 font-semibold"><Send className="h-4 w-4 mr-2" /> {t('product.submit')}</Button>
             </div>
           </div>
@@ -264,6 +308,15 @@ export default function ProductDetail() {
                     <span className="text-[10px] text-muted-foreground">{new Date(r.date).toLocaleDateString(locale)}</span>
                   </div>
                   <p className="text-sm text-muted-foreground ml-[42px]">{r.comment}</p>
+                  {r.imageUrls && r.imageUrls.length > 0 && (
+                    <div className="flex flex-wrap gap-2 ml-[42px] mt-2">
+                      {r.imageUrls.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block h-16 w-16 rounded-lg overflow-hidden border">
+                          <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

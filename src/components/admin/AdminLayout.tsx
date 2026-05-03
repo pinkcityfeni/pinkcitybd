@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles, Tag, Ticket, Truck } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles, Tag, Ticket, Truck, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -41,6 +41,14 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
         <LayoutDashboard className="h-5 w-5 text-sidebar-primary shrink-0" />
         {!collapsed && <span className="font-bold text-sm text-sidebar-primary-foreground">{t('admin.panel')}</span>}
       </div>
+      <Link
+        to="/"
+        onClick={handleLink}
+        className="mx-2 mt-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-sidebar-primary/10 hover:bg-sidebar-primary/20 text-sidebar-primary-foreground font-medium transition-colors"
+      >
+        <Home className="h-4 w-4 shrink-0" />
+        {!collapsed && <span>{t('nav.home')}</span>}
+      </Link>
       <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
         {NAV_KEYS.map(n => {
           const active = location.pathname.startsWith(n.to);
@@ -102,7 +110,10 @@ export default function AdminLayout() {
               <Menu className="h-5 w-5" />
             </button>
             <LayoutDashboard className="h-4 w-4 text-sidebar-primary" />
-            <span className="font-bold text-sm text-sidebar-primary-foreground">{t('admin.panel')}</span>
+            <span className="font-bold text-sm text-sidebar-primary-foreground flex-1">{t('admin.panel')}</span>
+            <Link to="/" className="p-1.5 rounded-lg hover:bg-sidebar-accent/50" aria-label="Home">
+              <Home className="h-5 w-5" />
+            </Link>
           </header>
 
           {mobileOpen && (

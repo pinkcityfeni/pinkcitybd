@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Trash2, Image as ImageIcon, GripVertical, Megaphone, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,6 +24,7 @@ export default function AdminBanners() {
   const [newLink, setNewLink] = useState('/shop');
   const [newImage, setNewImage] = useState('');
   const [editAnnouncement, setEditAnnouncement] = useState(announcementText);
+  const [deleteTarget, setDeleteTarget] = useState<Banner | null>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, bannerId?: string) => {
     const file = e.target.files?.[0];
@@ -142,7 +144,7 @@ export default function AdminBanners() {
                   <Switch checked={b.active} onCheckedChange={v => updateBannerMut.mutate({ id: b.id, updates: { active: v } })} />
                   <span className="text-xs text-muted-foreground">{b.active ? t('banner.active') : t('banner.inactive')}</span>
                 </div>
-                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full h-8 w-8 p-0" onClick={() => { deleteBannerMut.mutate(b.id); toast.success(t('banner.deleted')); }}>
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full h-8 w-8 p-0" onClick={() => setDeleteTarget(b)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -150,6 +152,27 @@ export default function AdminBanners() {
           </Card>
         ))}
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Banner ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && <><strong>{deleteTarget.title || 'এই banner'}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) { deleteBannerMut.mutate(deleteTarget.id); toast.success(t('banner.deleted')); }
+                setDeleteTarget(null);
+              }}
+            >ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

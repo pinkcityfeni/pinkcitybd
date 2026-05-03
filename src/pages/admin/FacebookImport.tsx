@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useCategories, useAddProduct, uploadImage } from '@/hooks/useSupabaseData';
+import { useCategories, useAddProduct, uploadImage, useBrands, useDefaultBrand } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import type { Product } from '@/data/store';
 
 const EMPTY = {
-  name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', stock: '10',
+  name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', stock: '10', brandId: '',
   barcode: '', category: '', subcategory: '', imageUrls: [] as string[],
 };
 
@@ -50,13 +50,14 @@ interface DraftRow {
   price: string;
   compareAtPrice: string;
   stock: string;
+  brandId: string;
   category: string;
   imageUrls: string[];
   status: RowStatus;
   error?: string;
 }
 
-function parseBulkText(text: string, defaultStock: string, defaultCategory: string): DraftRow[] {
+function parseBulkText(text: string, defaultStock: string, defaultCategory: string, defaultBrandId: string): DraftRow[] {
   const blocks = text.split(/\n\s*---\s*\n/).map(b => b.trim()).filter(Boolean);
   return blocks.map((block, idx) => {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
@@ -81,7 +82,7 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
       id: `${Date.now()}-${idx}`,
       selected: true,
       name, description, price, compareAtPrice,
-      stock: defaultStock, category: defaultCategory,
+      stock: defaultStock, category: defaultCategory, brandId: defaultBrandId,
       imageUrls, status: 'pending' as RowStatus,
     };
   });
@@ -89,6 +90,8 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
 
 export default function FacebookImport() {
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
+  const defaultBrand = useDefaultBrand();
   const addProductMut = useAddProduct();
 
   // ===== Single import state =====
@@ -97,7 +100,12 @@ export default function FacebookImport() {
   const [importing, setImporting] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
-  const selectedCat = categories.find(c => c.name === form.category);
+  // Default the brand once brands load
+  if (!form.brandId && defaultBrand) {
+    // schedule once
+  }
+  const formBrandCategories = form.brandId ? categories.filter(c => c.brandId === form.brandId) : categories;
+  const selectedCat = formBrandCategories.find(c => c.name === form.category);
   const subcategories = selectedCat?.subcategories || [];
 
   const handleParseText = () => {

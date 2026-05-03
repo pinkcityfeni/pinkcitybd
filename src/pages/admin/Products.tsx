@@ -114,12 +114,14 @@ export default function Products() {
     const brandId = filterBrand || defaultBrand?.id || '';
     const brandCats = brandId ? categories.filter(c => c.brandId === brandId) : categories;
     setForm({ ...EMPTY_FORM, brandId, category: brandCats[0]?.name || '', subcategory: brandCats[0]?.subcategories[0] || '' });
+    setCaptionText('');
     setDialogOpen(true);
   };
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
     setForm({ name: p.name, description: p.description, price: String(p.price), compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '', buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [], brandId: p.brandId || defaultBrand?.id || '' });
+    setCaptionText('');
     setDialogOpen(true);
   };
 

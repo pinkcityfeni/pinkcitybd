@@ -103,6 +103,15 @@
     font-family: 'Playfair Display', 'Georgia', serif;
     letter-spacing: -0.01em;
   }
+  /* Ensure product captions, titles, and descriptions are selectable
+     (long-press to copy on mobile, click-drag on desktop) */
+  p, span, h1, h2, h3, h4, h5, h6, li, a, label, td, th, blockquote {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
 }
 
 @layer components {

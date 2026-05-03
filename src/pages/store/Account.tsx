@@ -1,6 +1,6 @@
 import { useAuth } from '@/data/auth';
 import { useLanguage } from '@/data/language';
-import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User, Sparkles } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, CheckCircle2, Clock, XCircle, User, Sparkles, LayoutDashboard, ScanBarcode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
@@ -33,6 +33,20 @@ export default function Account() {
         </div>
         <Button variant="outline" size="sm" className="rounded-lg" onClick={handleLogout}>{t('account.logout')}</Button>
       </div>
+      {(user?.role === 'admin' || user?.role === 'cashier') && (
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {user?.role === 'admin' && (
+            <Link to="/admin" className="rounded-xl border bg-primary text-primary-foreground p-4 flex items-center gap-3 hover:opacity-90 transition-opacity">
+              <LayoutDashboard className="h-5 w-5" />
+              <span className="font-semibold text-sm">{t('account.adminDashboard')}</span>
+            </Link>
+          )}
+          <Link to="/pos" className={`rounded-xl border p-4 flex items-center gap-3 hover:opacity-90 transition-opacity ${user?.role === 'admin' ? 'bg-secondary text-secondary-foreground' : 'bg-primary text-primary-foreground col-span-2'}`}>
+            <ScanBarcode className="h-5 w-5" />
+            <span className="font-semibold text-sm">{t('account.adminPos')}</span>
+          </Link>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <div className="rounded-xl border bg-card p-4 text-center"><p className="text-2xl font-bold" style={{ fontFamily: 'DM Sans, sans-serif' }}>{orders.length}</p><p className="text-xs text-muted-foreground">{t('account.orders')}</p></div>
         <div className="rounded-xl border bg-card p-4 text-center"><p className="text-2xl font-bold" style={{ fontFamily: 'DM Sans, sans-serif' }}>{orders.filter(o => o.status === 'completed').length}</p><p className="text-xs text-muted-foreground">{t('account.delivered')}</p></div>
@@ -44,19 +58,19 @@ export default function Account() {
           <div className="flex items-center gap-2">
             <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center"><Sparkles className="h-4 w-4 text-primary" /></div>
             <div>
-              <p className="text-xs text-muted-foreground">আমার পয়েন্ট</p>
+              <p className="text-xs text-muted-foreground">{t('account.myPoints')}</p>
               <p className="text-2xl font-bold text-primary" style={{ fontFamily: 'DM Sans, sans-serif' }}>{myPoints?.points || 0}</p>
             </div>
           </div>
           <div className="text-right text-[10px] text-muted-foreground space-y-0.5">
-            <p>মোট অর্জিত: <span className="font-medium text-foreground">{myPoints?.total_earned || 0}</span></p>
-            <p>মোট রিডিম: <span className="font-medium text-foreground">{myPoints?.total_redeemed || 0}</span></p>
+            <p>{t('account.totalEarned')}: <span className="font-medium text-foreground">{myPoints?.total_earned || 0}</span></p>
+            <p>{t('account.totalRedeemed')}: <span className="font-medium text-foreground">{myPoints?.total_redeemed || 0}</span></p>
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground">প্রতি ১০০ টাকায় ১ পয়েন্ট। ২০০ পয়েন্ট হলে রিডিম করতে পারবেন। ১ পয়েন্ট = ১ টাকা।</p>
+        <p className="text-[11px] text-muted-foreground">{t('account.pointsRule')}</p>
         {pointTx.length > 0 && (
           <details className="mt-3">
-            <summary className="text-xs text-primary cursor-pointer">সাম্প্রতিক লেনদেন ({pointTx.length})</summary>
+            <summary className="text-xs text-primary cursor-pointer">{t('account.recentTx')} ({pointTx.length})</summary>
             <div className="mt-2 space-y-1 max-h-40 overflow-auto">
               {pointTx.slice(0, 20).map((tx: any) => (
                 <div key={tx.id} className="flex justify-between text-[11px] py-1 border-b border-border/40">

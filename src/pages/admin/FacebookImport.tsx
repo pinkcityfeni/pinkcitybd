@@ -210,6 +210,13 @@ export default function FacebookImport() {
     toast.success('Stock apply হয়েছে');
   };
 
+  const [defaultCompareAt, setDefaultCompareAt] = useState('');
+  const applyCompareToSelected = () => {
+    if (!defaultCompareAt) { toast.error('আগে Original price দিন'); return; }
+    setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, compareAtPrice: defaultCompareAt } : r));
+    toast.success('Original price apply হয়েছে');
+  };
+
   const uploadRowImages = async (id: string, files: FileList | null) => {
     if (!files) return;
     for (const file of Array.from(files)) {
@@ -238,9 +245,12 @@ export default function FacebookImport() {
       updateRow(row.id, { status: 'importing', error: undefined });
       try {
         const finalImages = await persistFbImages(row.imageUrls);
+        const sell = Number(row.price);
+        let cmp = Number(row.compareAtPrice) || 0;
+        if (cmp > 0 && cmp <= sell) cmp = 0;
         const data: Omit<Product, 'id'> = {
           name: row.name.trim(), description: row.description.trim(),
-          price: Number(row.price), buyingPrice: 0, barcode: '',
+          price: sell, compareAtPrice: cmp, buyingPrice: 0, barcode: '',
           category: row.category, subcategory: '',
           stock: Number(row.stock) || 0,
           image: finalImages[0], images: finalImages, trending: false,

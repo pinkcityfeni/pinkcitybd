@@ -77,6 +77,12 @@ const translations = {
   'product.reviewSubmitted': { bn: 'রিভিউ সংযুক্ত হয়েছে!', en: 'Review submitted!' },
   'product.enterName': { bn: 'আপনার নাম দিন', en: 'Please enter your name' },
   'product.enterReview': { bn: 'রিভিউ লিখুন', en: 'Please write a review' },
+  'product.readMore': { bn: 'আরো পড়ুন', en: 'Read more' },
+  'product.readLess': { bn: 'কম দেখুন', en: 'Read less' },
+  'product.savings': { bn: 'YOUR SAVINGS', en: 'YOUR SAVINGS' },
+  'product.onlyLeft': { bn: 'মাত্র {n}টি বাকি', en: 'Only {n} left' },
+  'product.fastDelivery': { bn: 'দ্রুত ডেলিভারি', en: 'Fast Delivery' },
+  'product.original': { bn: 'অরিজিনাল', en: 'Original' },
 
   // Checkout
   'checkout.title': { bn: 'চেকআউট', en: 'Checkout' },
@@ -164,6 +170,13 @@ const translations = {
   'account.orderReceived': { bn: 'অর্ডার রিসিভ', en: 'Order Received' },
   'account.processing': { bn: 'প্রসেসিং', en: 'Processing' },
   'account.delivered': { bn: 'ডেলিভারি সম্পন্ন', en: 'Delivered' },
+  'account.myPoints': { bn: 'আমার পয়েন্ট', en: 'My Points' },
+  'account.totalEarned': { bn: 'মোট অর্জিত', en: 'Total Earned' },
+  'account.totalRedeemed': { bn: 'মোট রিডিম', en: 'Total Redeemed' },
+  'account.pointsRule': { bn: 'প্রতি ১০০ টাকায় ১ পয়েন্ট। ২০০ পয়েন্ট হলে রিডিম করতে পারবেন। ১ পয়েন্ট = ১ টাকা।', en: '1 point per ৳100 spent. Redeem after 200 points. 1 point = ৳1.' },
+  'account.recentTx': { bn: 'সাম্প্রতিক লেনদেন', en: 'Recent Transactions' },
+  'account.adminDashboard': { bn: 'ড্যাশবোর্ড', en: 'Dashboard' },
+  'account.adminPos': { bn: 'POS', en: 'POS' },
 
   // Auth
   'auth.welcomeBack': { bn: 'স্বাগতম', en: 'Welcome back' },

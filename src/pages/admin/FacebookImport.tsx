@@ -455,6 +455,11 @@ Price: 350 tk`}</pre>
                 <Button size="sm" variant="outline" onClick={() => toggleAll(false)}>Deselect All</Button>
                 <Button size="sm" variant="outline" onClick={applyCategoryToSelected}>Apply Category</Button>
                 <Button size="sm" variant="outline" onClick={applyStockToSelected}>Apply Stock</Button>
+                <div className="flex items-center gap-1">
+                  <Input type="number" placeholder="Original ৳" className="h-8 w-24"
+                    value={defaultCompareAt} onChange={e => setDefaultCompareAt(e.target.value)} />
+                  <Button size="sm" variant="outline" onClick={applyCompareToSelected}>Apply</Button>
+                </div>
                 <div className="ml-auto">
                   <Button size="sm" onClick={handleBulkImport} disabled={bulkImporting || selectedValidRows.length === 0}>
                     {bulkImporting
@@ -472,6 +477,7 @@ Price: 350 tk`}</pre>
                       <TableHead className="w-24">Images</TableHead>
                       <TableHead className="min-w-[180px]">Name *</TableHead>
                       <TableHead className="w-24">Price *</TableHead>
+                      <TableHead className="w-24">Original ৳</TableHead>
                       <TableHead className="w-20">Stock</TableHead>
                       <TableHead className="min-w-[140px]">Category *</TableHead>
                       <TableHead className="w-20">Status</TableHead>
@@ -519,6 +525,15 @@ Price: 350 tk`}</pre>
                           </TableCell>
                           <TableCell>
                             <Input type="number" value={row.price} onChange={e => updateRow(row.id, { price: e.target.value })} className="h-8" />
+                          </TableCell>
+                          <TableCell>
+                            <Input type="number" placeholder="—" value={row.compareAtPrice}
+                              onChange={e => updateRow(row.id, { compareAtPrice: e.target.value })} className="h-8" />
+                            {Number(row.compareAtPrice) > Number(row.price) && Number(row.price) > 0 && (
+                              <span className="text-[10px] text-primary font-semibold">
+                                {Math.round((1 - Number(row.price) / Number(row.compareAtPrice)) * 100)}% off
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Input type="number" value={row.stock} onChange={e => updateRow(row.id, { stock: e.target.value })} className="h-8" />

@@ -59,7 +59,14 @@ export default function Shop() {
   const filtered = products.filter(p => {
     if (activeCategory && p.category !== activeCategory) return false;
     if (activeSub && p.subcategory !== activeSub) return false;
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.toLowerCase().trim();
+      const haystack = [p.name, p.category, p.subcategory, (p as any).description, (p as any).barcode]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     return true;
   });
   const setCategory = (cat: string) => { if (cat) setSearchParams({ category: cat }); else setSearchParams({}); };

@@ -144,6 +144,7 @@ export default function FacebookImport() {
   const handleImport = async () => {
     if (!form.name.trim()) { toast.error('Product name দিন'); return; }
     if (!form.price || Number(form.price) <= 0) { toast.error('Selling price দিন'); return; }
+    if (!form.brandId) { toast.error('Brand select করুন'); return; }
     if (!form.category) { toast.error('Category select করুন'); return; }
     if (form.imageUrls.length === 0) { toast.error('কমপক্ষে ১টা ছবি দিন'); return; }
     const sellPrice = Number(form.price);
@@ -161,7 +162,7 @@ export default function FacebookImport() {
         barcode: form.barcode.trim(), category: form.category, subcategory: form.subcategory,
         stock: Number(form.stock) || 0,
         image: finalImages[0], images: finalImages, trending: false,
-        source: 'fb',
+        source: 'fb', brandId: form.brandId,
       };
       await addProductMut.mutateAsync(data);
       toast.success(`✅ "${form.name}" add হয়েছে!`);
@@ -172,8 +173,13 @@ export default function FacebookImport() {
   };
 
   const handleCategoryChange = (catName: string) => {
-    const cat = categories.find(c => c.name === catName);
+    const cat = formBrandCategories.find(c => c.name === catName);
     setForm(f => ({ ...f, category: catName, subcategory: cat?.subcategories[0] || '' }));
+  };
+
+  const handleBrandChange = (brandId: string) => {
+    const brandCats = categories.filter(c => c.brandId === brandId);
+    setForm(f => ({ ...f, brandId, category: brandCats[0]?.name || '', subcategory: brandCats[0]?.subcategories[0] || '' }));
   };
 
   // ===== Bulk import state =====

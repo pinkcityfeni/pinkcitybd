@@ -461,6 +461,7 @@ export type Database = {
           created_at: string
           customer_name: string
           id: string
+          image_urls: string[]
           product_id: string
           rating: number
           user_id: string | null
@@ -471,6 +472,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           id?: string
+          image_urls?: string[]
           product_id: string
           rating: number
           user_id?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           id?: string
+          image_urls?: string[]
           product_id?: string
           rating?: number
           user_id?: string | null

@@ -297,38 +297,24 @@ export default function Checkout() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-lg animate-fade-in">
-      <button onClick={() => navigate('/cart')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" /> {t('checkout.backToCart')}
+    <div className="container mx-auto px-3 py-4 max-w-lg animate-fade-in">
+      <button onClick={() => navigate('/cart')} className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-2">
+        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> {t('checkout.backToCart')}
       </button>
-      <h1 className="text-xl font-bold mb-4">{t('checkout.title')}</h1>
+      <h1 className="text-lg font-bold mb-3">{t('checkout.title')}</h1>
 
       {!isAuthenticated && (
-        <div className="rounded-2xl border bg-card p-4 mb-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><User className="h-5 w-5 text-primary" /></div>
-            <div><p className="font-medium text-sm">{t('checkout.guestOrder')}</p><p className="text-xs text-muted-foreground">{t('checkout.guestDesc')}</p></div>
+        <Link to="/login" state={{ from: '/checkout' }} className="block w-full text-center py-2 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-xs font-medium hover:bg-primary/10 transition-colors mb-3">{t('checkout.loginPrompt')}</Link>
+      )}
+
+      <form onSubmit={handleContinueToReview} className="space-y-3">
+        <div className="rounded-xl border bg-card p-3 space-y-2">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> {t('checkout.deliveryInfo')}</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <Input value={name} onChange={e => setName(e.target.value)} placeholder={t('checkout.fullName')} />
+            <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder={t('checkout.phone') + ' *'} required />
           </div>
-          <Link to="/login" state={{ from: '/checkout' }} className="block w-full text-center py-2.5 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 transition-colors">{t('checkout.loginPrompt')}</Link>
-        </div>
-      )}
-      {isAuthenticated && (
-        <div className="rounded-2xl border bg-card p-3 mb-4 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center"><Gift className="h-4 w-4 text-accent" /></div>
-          <div><p className="font-medium text-sm">{t('checkout.loggedInAs', { name: user?.name || '' })}</p><p className="text-xs text-muted-foreground">{t('checkout.loggedInAs', { name: user?.name || '' })}</p></div>
-        </div>
-      )}
-
-      <form onSubmit={handleContinueToReview} className="space-y-4">
-        <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> {t('checkout.contact')}</h3>
-          <div><Label htmlFor="name">{t('checkout.name')}</Label><Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder={t('checkout.fullName')} /></div>
-          <div><Label htmlFor="email">{t('checkout.email')}</Label><Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" /></div>
-        </div>
-
-        <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> {t('checkout.deliveryInfo')}</h3>
-          <div><Label htmlFor="phone">{t('checkout.phone')} <span className="text-destructive">*</span></Label><Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" required /></div>
+          <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com (optional)" />
           <div>
             <Label htmlFor="address">{t('checkout.address')} <span className="text-destructive">*</span></Label>
             <textarea id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder={t('checkout.addressPlaceholder')} required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none" />

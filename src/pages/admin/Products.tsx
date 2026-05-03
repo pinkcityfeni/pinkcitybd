@@ -11,6 +11,7 @@ import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { BrandFilter } from '@/components/admin/BrandFilter';
+import BarcodeScannerDialog from '@/components/admin/BarcodeScannerDialog';
 
 const EMPTY_FORM = { name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', barcode: '', category: '', subcategory: '', stock: '', image: '', images: [] as string[], brandId: '' };
 
@@ -67,6 +68,9 @@ export default function Products() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [duplicateWarning, setDuplicateWarning] = useState<Product | null>(null);
+  const [duplicateBarcode, setDuplicateBarcode] = useState<Product | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   const filtered = products.filter(p => {
     if (filterBrand && p.brandId !== filterBrand) return false;
@@ -105,6 +109,7 @@ export default function Products() {
     else { addProductMut.mutate(data); toast.success(t('prod.added')); }
     setDialogOpen(false);
     setDuplicateWarning(null);
+    setDuplicateBarcode(null);
   };
 
   const handleSave = () => {
@@ -120,7 +125,21 @@ export default function Products() {
       const dup = products.find(p => p.name.trim().toLowerCase() === form.name.trim().toLowerCase());
       if (dup) { setDuplicateWarning(dup); return; }
     }
+    if (form.barcode.trim()) {
+      const dupBc = products.find(p => p.barcode.trim() === form.barcode.trim() && p.id !== editProduct?.id);
+      if (dupBc) { setDuplicateBarcode(dupBc); return; }
+    }
     performSave();
+  };
+
+  const handleBarcodeDetected = (code: string) => {
+    setForm(f => ({ ...f, barcode: code }));
+    const existing = products.find(p => p.barcode.trim() === code.trim() && p.id !== editProduct?.id);
+    if (existing) {
+      toast.warning(`এই barcode আগে থেকেই আছে: ${existing.name}`);
+    } else {
+      toast.success('Barcode scan হয়েছে');
+    }
   };
 
   const handleCategoryChange = (catName: string) => {
@@ -180,7 +199,7 @@ export default function Products() {
               <div className="flex gap-1">
                 <button onClick={() => updateProductMut.mutate({ id: p.id, updates: { trending: !p.trending } })} className={`p-1.5 rounded-lg ${p.trending ? 'text-orange-500 bg-orange-500/10' : 'hover:text-orange-500 hover:bg-orange-500/10'}`} title="Trending"><Flame className="h-4 w-4" /></button>
                 <button onClick={() => openEdit(p)} className="p-1.5 hover:text-primary rounded-lg hover:bg-primary/10"><Pencil className="h-4 w-4" /></button>
-                <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => setDeleteTarget(p)} className="p-1.5 hover:text-destructive rounded-lg hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs flex-wrap">
@@ -235,7 +254,7 @@ export default function Products() {
                 <td className="py-3 text-right">
                   <button onClick={() => updateProductMut.mutate({ id: p.id, updates: { trending: !p.trending } })} className={`p-1 ${p.trending ? 'text-orange-500' : 'hover:text-orange-500'}`} title="Trending"><Flame className="h-4 w-4" /></button>
                   <button onClick={() => openEdit(p)} className="p-1 hover:text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => { deleteProductMut.mutate(p.id); toast.success(t('prod.deleted')); }} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => setDeleteTarget(p)} className="p-1 hover:text-destructive ml-1"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
             ))}
@@ -271,7 +290,15 @@ export default function Products() {
               <p className="text-[11px] text-muted-foreground mt-1">সেলিং দামের চেয়ে বেশি দিলে কাস্টমার কাটা দাগ ও ডিসকাউন্ট % দেখবে। খালি রাখলে কিছু দেখাবে না।</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{t('prod.barcode')}</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} /></div>
+              <div>
+                <Label>{t('prod.barcode')}</Label>
+                <div className="flex gap-1.5">
+                  <Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} />
+                  <Button type="button" variant="outline" size="icon" onClick={() => setScannerOpen(true)} title="Scan barcode">
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
               <div><Label>{t('prod.stock')}</Label><Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -317,6 +344,65 @@ export default function Products() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!duplicateBarcode} onOpenChange={(o) => { if (!o) setDuplicateBarcode(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>⚠️ একই Barcode-এর প্রোডাক্ট আছে</AlertDialogTitle>
+            <AlertDialogDescription>
+              {duplicateBarcode && (
+                <>
+                  এই barcode <strong>#{duplicateBarcode.barcode}</strong> আগে থেকেই use হয়েছে —{' '}
+                  <strong>{duplicateBarcode.name}</strong>
+                  {' '}({(brands.find(b => b.id === duplicateBarcode.brandId)?.name) || '—'} · {duplicateBarcode.category} · Stock: {duplicateBarcode.stock} · ৳{duplicateBarcode.price.toFixed(0)}).
+                  <br /><br />
+                  Barcode unique রাখাই ভাল। তবুও কি save করতে চান?
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না, ঠিক করি</AlertDialogCancel>
+            <AlertDialogAction onClick={performSave}>হ্যাঁ, save করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>প্রোডাক্ট ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && (
+                <>
+                  <strong>{deleteTarget.name}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  deleteProductMut.mutate(deleteTarget.id);
+                  toast.success(t('prod.deleted'));
+                }
+                setDeleteTarget(null);
+              }}
+            >
+              ডিলিট করুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <BarcodeScannerDialog
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onDetected={handleBarcodeDetected}
+      />
     </div>
   );
 }

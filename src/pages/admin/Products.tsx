@@ -5,6 +5,7 @@ import { useLanguage } from '@/data/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-react';
@@ -71,6 +72,29 @@ export default function Products() {
   const [duplicateBarcode, setDuplicateBarcode] = useState<Product | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [captionText, setCaptionText] = useState('');
+
+  const handleParseCaption = () => {
+    const text = captionText.trim();
+    if (!text) { toast.error('আগে caption paste করুন'); return; }
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const name = lines[0]?.slice(0, 80) || '';
+    const description = lines.slice(1).join('\n').trim() || lines[0] || '';
+    const priceMatch = text.match(/(?:৳|tk|টাকা|price[\s:]+)\s*(\d{2,6})/i)
+      || text.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
+    const price = priceMatch ? priceMatch[1] : '';
+    const compareMatch = text.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+      || text.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareAt = compareMatch ? compareMatch[1] : '';
+    setForm(f => ({
+      ...f,
+      name: name || f.name,
+      description: description || f.description,
+      price: price || f.price,
+      compareAtPrice: compareAt || f.compareAtPrice,
+    }));
+    toast.success('Caption parse হয়েছে');
+  };
 
   const filtered = products.filter(p => {
     if (filterBrand && p.brandId !== filterBrand) return false;
@@ -90,12 +114,14 @@ export default function Products() {
     const brandId = filterBrand || defaultBrand?.id || '';
     const brandCats = brandId ? categories.filter(c => c.brandId === brandId) : categories;
     setForm({ ...EMPTY_FORM, brandId, category: brandCats[0]?.name || '', subcategory: brandCats[0]?.subcategories[0] || '' });
+    setCaptionText('');
     setDialogOpen(true);
   };
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
     setForm({ name: p.name, description: p.description, price: String(p.price), compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '', buyingPrice: String(p.buyingPrice), barcode: p.barcode, category: p.category, subcategory: p.subcategory, stock: String(p.stock), image: p.image, images: p.images || [], brandId: p.brandId || defaultBrand?.id || '' });
+    setCaptionText('');
     setDialogOpen(true);
   };
 
@@ -275,7 +301,22 @@ export default function Products() {
               </select>
             </div>
             <div><Label>{t('prod.name')}</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
-            <div><Label>{t('prod.description')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
+            <div>
+              <Label>{t('prod.description')}</Label>
+              <Textarea rows={4} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Product details, features, etc." />
+            </div>
+            {!editProduct && (
+              <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-3 space-y-2">
+                <Label className="text-xs flex items-center gap-1">
+                  ✨ Caption থেকে auto-fill <span className="text-muted-foreground font-normal">(FB post / caption paste করুন)</span>
+                </Label>
+                <Textarea rows={3} value={captionText} onChange={e => setCaptionText(e.target.value)}
+                  placeholder={`Gold Plated Necklace Set\nসুন্দর party design\nPrice: 1500 tk`} />
+                <Button type="button" size="sm" variant="secondary" onClick={handleParseCaption}>
+                  ✨ Auto-fill Form
+                </Button>
+              </div>
+            )}
             <div>
               <Label>{t('prod.image')} ({form.images.length})</Label>
               <MultiImageUpload images={form.images} onChange={(imgs) => setForm(f => ({ ...f, images: imgs, image: imgs[0] || '' }))} uploadLabel={t('prod.uploadPhoto')} />

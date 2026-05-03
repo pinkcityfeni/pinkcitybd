@@ -246,49 +246,45 @@ export default function Checkout() {
   );
 
   if (step === 'review') return (
-    <div className="container mx-auto px-4 py-8 max-w-lg animate-fade-in">
-      <button onClick={() => setStep('details')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" /> {t('checkout.goBack')}
+    <div className="container mx-auto px-3 py-4 max-w-lg animate-fade-in">
+      <button onClick={() => setStep('details')} className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-2">
+        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> {t('checkout.goBack')}
       </button>
-      <h1 className="text-xl font-bold mb-6">{t('checkout.orderReview')}</h1>
+      <h1 className="text-lg font-bold mb-3">{t('checkout.orderReview')}</h1>
 
-      <div className="rounded-2xl border bg-card p-4 mb-4 space-y-2 text-sm">
-        <h3 className="font-semibold text-base mb-2">{t('checkout.deliveryDetails')}</h3>
-        {name && <div className="flex items-center gap-2"><User className="h-3.5 w-3.5 text-muted-foreground" /><span>{name}</span></div>}
-        <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
-        {email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-muted-foreground" /><span>{email}</span></div>}
-        <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span>{address}</span></div>
-        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryLabel} — ৳{deliveryCharge}</span></div>
+      {/* Products */}
+      <div className="rounded-xl border bg-card p-3 mb-2.5">
+        <h3 className="font-semibold text-sm mb-1.5 flex items-center gap-1.5"><Package className="h-3.5 w-3.5 text-primary" /> {t('checkout.products')} ({itemCount})</h3>
+        <div className="space-y-0.5 text-xs max-h-32 overflow-y-auto">
+          {cart.map(i => (
+            <div key={i.product.id} className="flex justify-between">
+              <span className="text-muted-foreground truncate pr-2">{i.product.name} × {i.quantity}</span>
+              <span className="font-medium shrink-0">৳{(i.product.price * i.quantity).toFixed(0)}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="rounded-2xl border bg-card p-4 mb-4 text-sm">
-        <h3 className="font-semibold text-base mb-2">{t('checkout.paymentMethod')}</h3>
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
-          <span className="text-primary">{selectedPayment.icon}</span>
-          <div><p className="font-medium">{selectedPayment.label}</p><p className="text-xs text-muted-foreground">{selectedPayment.description}</p></div>
-        </div>
-        {trxId && <p className="mt-2 text-xs text-muted-foreground">TrxID: <span className="font-mono font-medium text-foreground">{trxId}</span></p>}
+      {/* Delivery */}
+      <div className="rounded-xl border bg-card p-3 mb-2.5 space-y-1 text-xs">
+        <h3 className="font-semibold text-sm mb-1 flex items-center gap-1.5"><Truck className="h-3.5 w-3.5 text-primary" /> {t('checkout.deliveryDetails')}</h3>
+        {name && <div className="flex items-center gap-2"><User className="h-3 w-3 text-muted-foreground shrink-0" /><span className="truncate">{name}</span></div>}
+        <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-muted-foreground shrink-0" /><span>{phone}</span></div>
+        <div className="flex items-start gap-2"><MapPin className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" /><span>{address}</span></div>
+        <div className="flex items-center gap-2"><Truck className="h-3 w-3 text-muted-foreground shrink-0" /><span>{deliveryLabel} — ৳{deliveryCharge}</span></div>
       </div>
 
-      <div className="rounded-2xl border bg-card p-4 mb-4 space-y-3">
-        <h3 className="font-semibold text-base">{t('checkout.products')} ({itemCount})</h3>
-        {cart.map(i => (
-          <div key={i.product.id} className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{i.product.name} × {i.quantity}</span>
-            <span className="font-medium">৳{(i.product.price * i.quantity).toFixed(0)}</span>
-          </div>
-        ))}
-        <div className="border-t pt-2 space-y-1 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
-          {effectiveRedeem > 0 && (
-            <div className="flex justify-between text-primary"><span>পয়েন্ট রিডিম ({effectiveRedeem})</span><span>-৳{effectiveRedeem.toFixed(0)}</span></div>
-          )}
-          {voucherDiscount > 0 && appliedVoucher && (
-            <div className="flex justify-between text-primary"><span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span><span>-৳{voucherDiscount.toFixed(0)}</span></div>
-          )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryLabel})</span><span>৳{deliveryCharge}</span></div>
-        </div>
-        <div className="border-t pt-2 flex justify-between font-bold text-lg">
+      {/* Totals */}
+      <div className="rounded-xl border bg-card p-3 mb-3 space-y-1 text-xs">
+        <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
+        {effectiveRedeem > 0 && (
+          <div className="flex justify-between text-primary"><span>পয়েন্ট রিডিম ({effectiveRedeem})</span><span>-৳{effectiveRedeem.toFixed(0)}</span></div>
+        )}
+        {voucherDiscount > 0 && appliedVoucher && (
+          <div className="flex justify-between text-primary"><span className="flex items-center gap-1"><Ticket className="h-3 w-3" /> {appliedVoucher.code}</span><span>-৳{voucherDiscount.toFixed(0)}</span></div>
+        )}
+        <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}</span><span>৳{deliveryCharge}</span></div>
+        <div className="border-t pt-1.5 mt-1 flex justify-between font-bold text-base">
           <span>{t('checkout.total')}</span>
           <span className="text-primary">৳{grandTotal.toFixed(0)}</span>
         </div>
@@ -301,85 +297,64 @@ export default function Checkout() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-lg animate-fade-in">
-      <button onClick={() => navigate('/cart')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" /> {t('checkout.backToCart')}
+    <div className="container mx-auto px-3 py-4 max-w-lg animate-fade-in">
+      <button onClick={() => navigate('/cart')} className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-2">
+        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> {t('checkout.backToCart')}
       </button>
-      <h1 className="text-xl font-bold mb-4">{t('checkout.title')}</h1>
+      <h1 className="text-lg font-bold mb-3">{t('checkout.title')}</h1>
 
       {!isAuthenticated && (
-        <div className="rounded-2xl border bg-card p-4 mb-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><User className="h-5 w-5 text-primary" /></div>
-            <div><p className="font-medium text-sm">{t('checkout.guestOrder')}</p><p className="text-xs text-muted-foreground">{t('checkout.guestDesc')}</p></div>
+        <Link to="/login" state={{ from: '/checkout' }} className="block w-full text-center py-2 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-xs font-medium hover:bg-primary/10 transition-colors mb-3">{t('checkout.loginPrompt')}</Link>
+      )}
+
+      <form onSubmit={handleContinueToReview} className="space-y-3">
+        <div className="rounded-xl border bg-card p-3 space-y-2">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> {t('checkout.deliveryInfo')}</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <Input value={name} onChange={e => setName(e.target.value)} placeholder={t('checkout.fullName')} />
+            <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder={t('checkout.phone') + ' *'} required />
           </div>
-          <Link to="/login" state={{ from: '/checkout' }} className="block w-full text-center py-2.5 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 transition-colors">{t('checkout.loginPrompt')}</Link>
-        </div>
-      )}
-      {isAuthenticated && (
-        <div className="rounded-2xl border bg-card p-3 mb-4 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center"><Gift className="h-4 w-4 text-accent" /></div>
-          <div><p className="font-medium text-sm">{t('checkout.loggedInAs', { name: user?.name || '' })}</p><p className="text-xs text-muted-foreground">{t('checkout.loggedInAs', { name: user?.name || '' })}</p></div>
-        </div>
-      )}
-
-      <form onSubmit={handleContinueToReview} className="space-y-4">
-        <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> {t('checkout.contact')}</h3>
-          <div><Label htmlFor="name">{t('checkout.name')}</Label><Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder={t('checkout.fullName')} /></div>
-          <div><Label htmlFor="email">{t('checkout.email')}</Label><Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" /></div>
-        </div>
-
-        <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> {t('checkout.deliveryInfo')}</h3>
-          <div><Label htmlFor="phone">{t('checkout.phone')} <span className="text-destructive">*</span></Label><Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" required /></div>
+          <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com (optional)" />
           <div>
             <Label htmlFor="address">{t('checkout.address')} <span className="text-destructive">*</span></Label>
             <textarea id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder={t('checkout.addressPlaceholder')} required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none" />
           </div>
-          <div>
-            <Label className="mb-2 block">{t('checkout.district')} <span className="text-destructive">*</span></Label>
+          <div className={isFeni ? 'grid grid-cols-2 gap-2' : ''}>
             <Select value={district} onValueChange={(v) => { setDistrict(v); if (v !== 'Feni') setAreaId(''); }}>
-              <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict')} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict') + ' *'} /></SelectTrigger>
               <SelectContent className="max-h-72">
                 {BD_DISTRICTS_EN.map(d => (
                   <SelectItem key={d} value={d}>{lang === 'bn' ? BD_DISTRICTS_BN[d] : d}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {district && district !== 'Feni' && (
-              <p className="text-xs text-muted-foreground mt-2">{t('checkout.delivery')}: ৳{outsideCharge}</p>
-            )}
-          </div>
-          {isFeni && (
-            <div>
-              <Label className="mb-2 block">{t('checkout.area')} <span className="text-destructive">*</span></Label>
+            {isFeni && (
               <Select value={areaId} onValueChange={setAreaId}>
-                <SelectTrigger><SelectValue placeholder={t('checkout.selectArea')} /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('checkout.selectArea') + ' *'} /></SelectTrigger>
                 <SelectContent>
                   {activeAreas.length === 0 && (
-                    <div className="px-3 py-2 text-xs text-muted-foreground">No areas configured</div>
+                    <div className="px-3 py-2 text-xs text-muted-foreground">No areas</div>
                   )}
                   {activeAreas.map(a => (
                     <SelectItem key={a.id} value={a.id}>{a.name} — ৳{a.charge}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {selectedArea && (
-                <p className="text-xs text-muted-foreground mt-2">{t('checkout.delivery')}: ৳{selectedArea.charge}</p>
-              )}
-            </div>
+            )}
+          </div>
+          {district && (
+            <p className="text-xs text-muted-foreground">{t('checkout.delivery')}: ৳{deliveryCharge}</p>
           )}
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> {t('checkout.paymentMethod')}</h3>
-          <div className="grid grid-cols-1 gap-2">
+        <div className="rounded-xl border bg-card p-3 space-y-2">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><Wallet className="h-3.5 w-3.5 text-primary" /> {t('checkout.paymentMethod')}</h3>
+          <div className="grid grid-cols-1 gap-1.5">
             {paymentMethods.map(pm => (
               <button key={pm.id} type="button" onClick={() => { setPaymentMethod(pm.id); setTrxId(''); }}
-                className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
+                className={`flex items-center gap-2 p-2 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}>
                 <span className={paymentMethod === pm.id ? 'text-primary' : 'text-muted-foreground'}>{pm.icon}</span>
-                <div className="flex-1 min-w-0"><p className="font-medium text-sm">{pm.label}</p><p className="text-xs text-muted-foreground">{pm.description}</p></div>
+                <div className="flex-1 min-w-0"><p className="font-medium text-xs">{pm.label}</p></div>
                 <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === pm.id ? 'border-primary' : 'border-muted-foreground/30'}`}>
                   {paymentMethod === pm.id && <div className="h-2 w-2 rounded-full bg-primary" />}
                 </div>
@@ -434,7 +409,7 @@ export default function Checkout() {
           )}
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
+        <div className="rounded-xl border bg-card p-3 space-y-1 text-xs">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.nItems', { n: itemCount })}</span><span>৳{total.toFixed(0)}</span></div>
           {effectiveRedeem > 0 && (
             <div className="flex justify-between text-primary font-medium">
@@ -444,19 +419,19 @@ export default function Checkout() {
           )}
           {voucherDiscount > 0 && appliedVoucher && (
             <div className="flex justify-between text-primary font-medium">
-              <span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span>
+              <span className="flex items-center gap-1"><Ticket className="h-3 w-3" /> ভাউচার ({appliedVoucher.code})</span>
               <span>-৳{voucherDiscount.toFixed(0)}</span>
             </div>
           )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}{deliveryLabel ? ` (${deliveryLabel})` : ''}</span><span>৳{deliveryCharge}</span></div>
-          <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}</span><span>৳{deliveryCharge}</span></div>
+          <div className="border-t pt-1.5 mt-1 flex justify-between font-bold text-sm"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
           {willEarn > 0 && isAuthenticated && (
-            <p className="text-xs text-success flex items-center gap-1 pt-1"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>
+            <p className="text-[11px] text-success flex items-center gap-1 pt-0.5"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>
           )}
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 space-y-2">
-          <h3 className="font-semibold flex items-center gap-2 text-sm"><Ticket className="h-4 w-4 text-primary" /> ভাউচার কোড</h3>
+        <div className="rounded-xl border bg-card p-3 space-y-2">
+          <h3 className="font-semibold flex items-center gap-2 text-sm"><Ticket className="h-3.5 w-3.5 text-primary" /> ভাউচার কোড</h3>
           <VoucherInput
             items={cart}
             customerPhone={phone}
@@ -468,14 +443,13 @@ export default function Checkout() {
         </div>
 
         {isAuthenticated && availablePoints > 0 && (
-          <div className="rounded-2xl border bg-card p-4 space-y-3">
+          <div className="rounded-xl border bg-card p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> রিওয়ার্ড পয়েন্ট</h3>
-              <span className="text-sm font-bold text-primary">{availablePoints} পয়েন্ট</span>
+              <h3 className="font-semibold flex items-center gap-2 text-sm"><Sparkles className="h-3.5 w-3.5 text-primary" /> রিওয়ার্ড পয়েন্ট</h3>
+              <span className="text-xs font-bold text-primary">{availablePoints} পয়েন্ট</span>
             </div>
             {canRedeem ? (
               <>
-                <p className="text-xs text-muted-foreground">১ পয়েন্ট = ১ টাকা। সর্বনিম্ন ২০০ পয়েন্ট থেকে রিডিম করতে পারবেন।</p>
                 <div className="flex gap-2 items-center">
                   <Input
                     type="number"
@@ -483,7 +457,7 @@ export default function Checkout() {
                     max={maxRedeem}
                     value={redeemPoints || ''}
                     onChange={e => setRedeemPoints(Math.max(0, Math.min(maxRedeem, parseInt(e.target.value) || 0)))}
-                    placeholder="কত পয়েন্ট রিডিম?"
+                    placeholder="কত পয়েন্ট রিডিম? (১পয়েন্ট = ১৳)"
                     className="flex-1"
                   />
                   <Button type="button" size="sm" variant="outline" onClick={() => setRedeemPoints(maxRedeem)}>সর্বোচ্চ</Button>
@@ -492,7 +466,7 @@ export default function Checkout() {
                 {redeemError && <p className="text-xs text-destructive font-medium">{redeemError}</p>}
               </>
             ) : (
-              <p className="text-xs text-muted-foreground">রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন। (বর্তমানে {availablePoints})</p>
+              <p className="text-xs text-muted-foreground">রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন।</p>
             )}
           </div>
         )}

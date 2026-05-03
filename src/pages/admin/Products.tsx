@@ -72,6 +72,29 @@ export default function Products() {
   const [duplicateBarcode, setDuplicateBarcode] = useState<Product | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [captionText, setCaptionText] = useState('');
+
+  const handleParseCaption = () => {
+    const text = captionText.trim();
+    if (!text) { toast.error('আগে caption paste করুন'); return; }
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const name = lines[0]?.slice(0, 80) || '';
+    const description = lines.slice(1).join('\n').trim() || lines[0] || '';
+    const priceMatch = text.match(/(?:৳|tk|টাকা|price[\s:]+)\s*(\d{2,6})/i)
+      || text.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
+    const price = priceMatch ? priceMatch[1] : '';
+    const compareMatch = text.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+      || text.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareAt = compareMatch ? compareMatch[1] : '';
+    setForm(f => ({
+      ...f,
+      name: name || f.name,
+      description: description || f.description,
+      price: price || f.price,
+      compareAtPrice: compareAt || f.compareAtPrice,
+    }));
+    toast.success('Caption parse হয়েছে');
+  };
 
   const filtered = products.filter(p => {
     if (filterBrand && p.brandId !== filterBrand) return false;

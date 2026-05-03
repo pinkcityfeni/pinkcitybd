@@ -497,6 +497,7 @@ Price: 350 tk`}</pre>
                 <Button size="sm" variant="outline" onClick={() => toggleAll(true)}>Select All</Button>
                 <Button size="sm" variant="outline" onClick={() => toggleAll(false)}>Deselect All</Button>
                 <Button size="sm" variant="outline" onClick={applyCategoryToSelected}>Apply Category</Button>
+                <Button size="sm" variant="outline" onClick={applyBrandToSelected}>Apply Brand</Button>
                 <Button size="sm" variant="outline" onClick={applyStockToSelected}>Apply Stock</Button>
                 <div className="flex items-center gap-1">
                   <Input type="number" placeholder="Original ৳" className="h-8 w-24"
@@ -522,6 +523,7 @@ Price: 350 tk`}</pre>
                       <TableHead className="w-24">Price *</TableHead>
                       <TableHead className="w-24">Original ৳</TableHead>
                       <TableHead className="w-20">Stock</TableHead>
+                      <TableHead className="min-w-[120px]">Brand *</TableHead>
                       <TableHead className="min-w-[140px]">Category *</TableHead>
                       <TableHead className="w-20">Status</TableHead>
                       <TableHead className="w-12"></TableHead>
@@ -529,7 +531,7 @@ Price: 350 tk`}</pre>
                   </TableHeader>
                   <TableBody>
                     {rows.map(row => {
-                      const invalid = !row.name || !(Number(row.price) > 0) || row.imageUrls.length === 0 || !row.category;
+                      const invalid = !row.name || !(Number(row.price) > 0) || row.imageUrls.length === 0 || !row.category || !row.brandId;
                       return (
                         <TableRow key={row.id}
                           className={
@@ -583,9 +585,18 @@ Price: 350 tk`}</pre>
                           </TableCell>
                           <TableCell>
                             <select className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+                              value={row.brandId}
+                              onChange={e => updateRow(row.id, { brandId: e.target.value, category: '' })}>
+                              <option value="">-- select --</option>
+                              {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                            </select>
+                          </TableCell>
+                          <TableCell>
+                            <select className="h-8 w-full rounded-md border bg-background px-2 text-xs"
                               value={row.category} onChange={e => updateRow(row.id, { category: e.target.value })}>
                               <option value="">-- select --</option>
-                              {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                              {(row.brandId ? categories.filter(c => c.brandId === row.brandId) : categories)
+                                .map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                             </select>
                           </TableCell>
                           <TableCell>

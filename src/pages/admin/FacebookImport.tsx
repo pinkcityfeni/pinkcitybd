@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import type { Product } from '@/data/store';
 
 const EMPTY = {
-  name: '', description: '', price: '', buyingPrice: '', stock: '10',
+  name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', stock: '10',
   barcode: '', category: '', subcategory: '', imageUrls: [] as string[],
 };
 
@@ -48,6 +48,7 @@ interface DraftRow {
   name: string;
   description: string;
   price: string;
+  compareAtPrice: string;
   stock: string;
   category: string;
   imageUrls: string[];
@@ -72,11 +73,14 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
       || rest.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i)
       || block.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
+    const compareMatch = block.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+      || block.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareAtPrice = compareMatch ? compareMatch[1] : '';
     const description = rest.replace(/(?:price[\s:]+)\s*\d{2,6}/gi, '').trim();
     return {
       id: `${Date.now()}-${idx}`,
       selected: true,
-      name, description, price,
+      name, description, price, compareAtPrice,
       stock: defaultStock, category: defaultCategory,
       imageUrls, status: 'pending' as RowStatus,
     };
@@ -103,7 +107,10 @@ export default function FacebookImport() {
     const description = lines.slice(1).join('\n').trim() || lines[0] || '';
     const priceMatch = pastedText.match(/(?:৳|tk|টাকা|price[\s]+)\s*(\d{2,6})/i) || pastedText.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
-    setForm(f => ({ ...f, name, description, price: price || f.price }));
+    const compareMatch = pastedText.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+      || pastedText.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareAt = compareMatch ? compareMatch[1] : '';
+    setForm(f => ({ ...f, name, description, price: price || f.price, compareAtPrice: compareAt || f.compareAtPrice }));
     toast.success('Text parse হয়েছে');
   };
 
@@ -129,12 +136,18 @@ export default function FacebookImport() {
     if (!form.price || Number(form.price) <= 0) { toast.error('Selling price দিন'); return; }
     if (!form.category) { toast.error('Category select করুন'); return; }
     if (form.imageUrls.length === 0) { toast.error('কমপক্ষে ১টা ছবি দিন'); return; }
+    const sellPrice = Number(form.price);
+    let compareAt = Number(form.compareAtPrice) || 0;
+    if (compareAt > 0 && compareAt <= sellPrice) {
+      toast.warning('Original price selling price-এর চেয়ে বড় হওয়া উচিত — discount দেখানো হবে না');
+      compareAt = 0;
+    }
     setImporting(true);
     try {
       const finalImages = await persistFbImages(form.imageUrls);
       const data: Omit<Product, 'id'> = {
         name: form.name.trim(), description: form.description.trim(),
-        price: Number(form.price), buyingPrice: Number(form.buyingPrice) || 0,
+        price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice) || 0,
         barcode: form.barcode.trim(), category: form.category, subcategory: form.subcategory,
         stock: Number(form.stock) || 0,
         image: finalImages[0], images: finalImages, trending: false,
@@ -197,6 +210,13 @@ export default function FacebookImport() {
     toast.success('Stock apply হয়েছে');
   };
 
+  const [defaultCompareAt, setDefaultCompareAt] = useState('');
+  const applyCompareToSelected = () => {
+    if (!defaultCompareAt) { toast.error('আগে Original price দিন'); return; }
+    setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, compareAtPrice: defaultCompareAt } : r));
+    toast.success('Original price apply হয়েছে');
+  };
+
   const uploadRowImages = async (id: string, files: FileList | null) => {
     if (!files) return;
     for (const file of Array.from(files)) {
@@ -225,9 +245,12 @@ export default function FacebookImport() {
       updateRow(row.id, { status: 'importing', error: undefined });
       try {
         const finalImages = await persistFbImages(row.imageUrls);
+        const sell = Number(row.price);
+        let cmp = Number(row.compareAtPrice) || 0;
+        if (cmp > 0 && cmp <= sell) cmp = 0;
         const data: Omit<Product, 'id'> = {
           name: row.name.trim(), description: row.description.trim(),
-          price: Number(row.price), buyingPrice: 0, barcode: '',
+          price: sell, compareAtPrice: cmp, buyingPrice: 0, barcode: '',
           category: row.category, subcategory: '',
           stock: Number(row.stock) || 0,
           image: finalImages[0], images: finalImages, trending: false,
@@ -335,6 +358,17 @@ export default function FacebookImport() {
               <div><Label>Buying Price (৳)</Label>
                 <Input type="number" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
+            <div>
+              <Label>Original Price / Discount আগের দাম (৳)</Label>
+              <Input type="number" placeholder="যেমন 700" value={form.compareAtPrice}
+                onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
+              {Number(form.compareAtPrice) > Number(form.price) && Number(form.price) > 0 && (
+                <p className="text-xs text-primary mt-1 font-medium">
+                  ✨ {Math.round((1 - Number(form.price) / Number(form.compareAtPrice)) * 100)}% OFF দেখাবে
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Optional — selling price-এর চেয়ে বড় দিলে discount badge দেখাবে</p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Stock</Label>
                 <Input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} /></div>
@@ -421,6 +455,11 @@ Price: 350 tk`}</pre>
                 <Button size="sm" variant="outline" onClick={() => toggleAll(false)}>Deselect All</Button>
                 <Button size="sm" variant="outline" onClick={applyCategoryToSelected}>Apply Category</Button>
                 <Button size="sm" variant="outline" onClick={applyStockToSelected}>Apply Stock</Button>
+                <div className="flex items-center gap-1">
+                  <Input type="number" placeholder="Original ৳" className="h-8 w-24"
+                    value={defaultCompareAt} onChange={e => setDefaultCompareAt(e.target.value)} />
+                  <Button size="sm" variant="outline" onClick={applyCompareToSelected}>Apply</Button>
+                </div>
                 <div className="ml-auto">
                   <Button size="sm" onClick={handleBulkImport} disabled={bulkImporting || selectedValidRows.length === 0}>
                     {bulkImporting
@@ -438,6 +477,7 @@ Price: 350 tk`}</pre>
                       <TableHead className="w-24">Images</TableHead>
                       <TableHead className="min-w-[180px]">Name *</TableHead>
                       <TableHead className="w-24">Price *</TableHead>
+                      <TableHead className="w-24">Original ৳</TableHead>
                       <TableHead className="w-20">Stock</TableHead>
                       <TableHead className="min-w-[140px]">Category *</TableHead>
                       <TableHead className="w-20">Status</TableHead>
@@ -485,6 +525,15 @@ Price: 350 tk`}</pre>
                           </TableCell>
                           <TableCell>
                             <Input type="number" value={row.price} onChange={e => updateRow(row.id, { price: e.target.value })} className="h-8" />
+                          </TableCell>
+                          <TableCell>
+                            <Input type="number" placeholder="—" value={row.compareAtPrice}
+                              onChange={e => updateRow(row.id, { compareAtPrice: e.target.value })} className="h-8" />
+                            {Number(row.compareAtPrice) > Number(row.price) && Number(row.price) > 0 && (
+                              <span className="text-[10px] text-primary font-semibold">
+                                {Math.round((1 - Number(row.price) / Number(row.compareAtPrice)) * 100)}% off
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Input type="number" value={row.stock} onChange={e => updateRow(row.id, { stock: e.target.value })} className="h-8" />

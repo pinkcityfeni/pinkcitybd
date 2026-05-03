@@ -394,7 +394,7 @@ export default function Checkout() {
               <span>-৳{voucherDiscount.toFixed(0)}</span>
             </div>
           )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryZone === 'feni' ? t('checkout.feni') : deliveryZone === 'feni_upozila' ? t('checkout.feniUpozila') : t('checkout.outsideFeni')})</span><span>৳{deliveryCharge}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}{deliveryLabel ? ` (${deliveryLabel})` : ''}</span><span>৳{deliveryCharge}</span></div>
           <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
           {willEarn > 0 && isAuthenticated && (
             <p className="text-xs text-success flex items-center gap-1 pt-1"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>

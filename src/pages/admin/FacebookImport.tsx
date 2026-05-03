@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCategories, useAddProduct, uploadImage, useBrands, useDefaultBrand } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,10 +100,12 @@ export default function FacebookImport() {
   const [importing, setImporting] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
-  // Default the brand once brands load
-  if (!form.brandId && defaultBrand) {
-    // schedule once
-  }
+  useEffect(() => {
+    if (!form.brandId && defaultBrand) {
+      setForm(f => ({ ...f, brandId: defaultBrand.id }));
+    }
+  }, [defaultBrand, form.brandId]);
+
   const formBrandCategories = form.brandId ? categories.filter(c => c.brandId === form.brandId) : categories;
   const selectedCat = formBrandCategories.find(c => c.name === form.category);
   const subcategories = selectedCat?.subcategories || [];

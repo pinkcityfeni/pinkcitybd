@@ -398,6 +398,8 @@ interface PlaceOrderData {
   customerEmail?: string;
   customerPhone?: string;
   deliveryAddress?: string;
+  deliveryDistrict?: string;
+  deliveryArea?: string;
   deliveryZone?: DeliveryZone;
   deliveryCharge?: number;
   paymentMethod?: PaymentMethod;

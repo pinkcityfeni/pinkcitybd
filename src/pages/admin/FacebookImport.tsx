@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import type { Product } from '@/data/store';
 
 const EMPTY = {
-  name: '', description: '', price: '', buyingPrice: '', stock: '10',
+  name: '', description: '', price: '', compareAtPrice: '', buyingPrice: '', stock: '10',
   barcode: '', category: '', subcategory: '', imageUrls: [] as string[],
 };
 
@@ -48,6 +48,7 @@ interface DraftRow {
   name: string;
   description: string;
   price: string;
+  compareAtPrice: string;
   stock: string;
   category: string;
   imageUrls: string[];
@@ -72,11 +73,14 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
       || rest.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i)
       || block.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
+    const compareMatch = block.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+      || block.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareAtPrice = compareMatch ? compareMatch[1] : '';
     const description = rest.replace(/(?:price[\s:]+)\s*\d{2,6}/gi, '').trim();
     return {
       id: `${Date.now()}-${idx}`,
       selected: true,
-      name, description, price,
+      name, description, price, compareAtPrice,
       stock: defaultStock, category: defaultCategory,
       imageUrls, status: 'pending' as RowStatus,
     };
@@ -103,7 +107,10 @@ export default function FacebookImport() {
     const description = lines.slice(1).join('\n').trim() || lines[0] || '';
     const priceMatch = pastedText.match(/(?:৳|tk|টাকা|price[\s]+)\s*(\d{2,6})/i) || pastedText.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
-    setForm(f => ({ ...f, name, description, price: price || f.price }));
+    const compareMatch = pastedText.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+      || pastedText.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareAt = compareMatch ? compareMatch[1] : '';
+    setForm(f => ({ ...f, name, description, price: price || f.price, compareAtPrice: compareAt || f.compareAtPrice }));
     toast.success('Text parse হয়েছে');
   };
 
@@ -129,12 +136,18 @@ export default function FacebookImport() {
     if (!form.price || Number(form.price) <= 0) { toast.error('Selling price দিন'); return; }
     if (!form.category) { toast.error('Category select করুন'); return; }
     if (form.imageUrls.length === 0) { toast.error('কমপক্ষে ১টা ছবি দিন'); return; }
+    const sellPrice = Number(form.price);
+    let compareAt = Number(form.compareAtPrice) || 0;
+    if (compareAt > 0 && compareAt <= sellPrice) {
+      toast.warning('Original price selling price-এর চেয়ে বড় হওয়া উচিত — discount দেখানো হবে না');
+      compareAt = 0;
+    }
     setImporting(true);
     try {
       const finalImages = await persistFbImages(form.imageUrls);
       const data: Omit<Product, 'id'> = {
         name: form.name.trim(), description: form.description.trim(),
-        price: Number(form.price), buyingPrice: Number(form.buyingPrice) || 0,
+        price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice) || 0,
         barcode: form.barcode.trim(), category: form.category, subcategory: form.subcategory,
         stock: Number(form.stock) || 0,
         image: finalImages[0], images: finalImages, trending: false,

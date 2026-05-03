@@ -246,49 +246,45 @@ export default function Checkout() {
   );
 
   if (step === 'review') return (
-    <div className="container mx-auto px-4 py-8 max-w-lg animate-fade-in">
-      <button onClick={() => setStep('details')} className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" /> {t('checkout.goBack')}
+    <div className="container mx-auto px-3 py-4 max-w-lg animate-fade-in">
+      <button onClick={() => setStep('details')} className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-2">
+        <ArrowLeft className="h-3.5 w-3.5 mr-1" /> {t('checkout.goBack')}
       </button>
-      <h1 className="text-xl font-bold mb-6">{t('checkout.orderReview')}</h1>
+      <h1 className="text-lg font-bold mb-3">{t('checkout.orderReview')}</h1>
 
-      <div className="rounded-2xl border bg-card p-4 mb-4 space-y-2 text-sm">
-        <h3 className="font-semibold text-base mb-2">{t('checkout.deliveryDetails')}</h3>
-        {name && <div className="flex items-center gap-2"><User className="h-3.5 w-3.5 text-muted-foreground" /><span>{name}</span></div>}
-        <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /><span>{phone}</span></div>
-        {email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-muted-foreground" /><span>{email}</span></div>}
-        <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /><span>{address}</span></div>
-        <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-muted-foreground" /><span>{deliveryLabel} — ৳{deliveryCharge}</span></div>
+      {/* Products */}
+      <div className="rounded-xl border bg-card p-3 mb-2.5">
+        <h3 className="font-semibold text-sm mb-1.5 flex items-center gap-1.5"><Package className="h-3.5 w-3.5 text-primary" /> {t('checkout.products')} ({itemCount})</h3>
+        <div className="space-y-0.5 text-xs max-h-32 overflow-y-auto">
+          {cart.map(i => (
+            <div key={i.product.id} className="flex justify-between">
+              <span className="text-muted-foreground truncate pr-2">{i.product.name} × {i.quantity}</span>
+              <span className="font-medium shrink-0">৳{(i.product.price * i.quantity).toFixed(0)}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="rounded-2xl border bg-card p-4 mb-4 text-sm">
-        <h3 className="font-semibold text-base mb-2">{t('checkout.paymentMethod')}</h3>
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
-          <span className="text-primary">{selectedPayment.icon}</span>
-          <div><p className="font-medium">{selectedPayment.label}</p><p className="text-xs text-muted-foreground">{selectedPayment.description}</p></div>
-        </div>
-        {trxId && <p className="mt-2 text-xs text-muted-foreground">TrxID: <span className="font-mono font-medium text-foreground">{trxId}</span></p>}
+      {/* Delivery */}
+      <div className="rounded-xl border bg-card p-3 mb-2.5 space-y-1 text-xs">
+        <h3 className="font-semibold text-sm mb-1 flex items-center gap-1.5"><Truck className="h-3.5 w-3.5 text-primary" /> {t('checkout.deliveryDetails')}</h3>
+        {name && <div className="flex items-center gap-2"><User className="h-3 w-3 text-muted-foreground shrink-0" /><span className="truncate">{name}</span></div>}
+        <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-muted-foreground shrink-0" /><span>{phone}</span></div>
+        <div className="flex items-start gap-2"><MapPin className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" /><span>{address}</span></div>
+        <div className="flex items-center gap-2"><Truck className="h-3 w-3 text-muted-foreground shrink-0" /><span>{deliveryLabel} — ৳{deliveryCharge}</span></div>
       </div>
 
-      <div className="rounded-2xl border bg-card p-4 mb-4 space-y-3">
-        <h3 className="font-semibold text-base">{t('checkout.products')} ({itemCount})</h3>
-        {cart.map(i => (
-          <div key={i.product.id} className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{i.product.name} × {i.quantity}</span>
-            <span className="font-medium">৳{(i.product.price * i.quantity).toFixed(0)}</span>
-          </div>
-        ))}
-        <div className="border-t pt-2 space-y-1 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
-          {effectiveRedeem > 0 && (
-            <div className="flex justify-between text-primary"><span>পয়েন্ট রিডিম ({effectiveRedeem})</span><span>-৳{effectiveRedeem.toFixed(0)}</span></div>
-          )}
-          {voucherDiscount > 0 && appliedVoucher && (
-            <div className="flex justify-between text-primary"><span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span><span>-৳{voucherDiscount.toFixed(0)}</span></div>
-          )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')} ({deliveryLabel})</span><span>৳{deliveryCharge}</span></div>
-        </div>
-        <div className="border-t pt-2 flex justify-between font-bold text-lg">
+      {/* Totals */}
+      <div className="rounded-xl border bg-card p-3 mb-3 space-y-1 text-xs">
+        <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.subtotal')}</span><span>৳{total.toFixed(0)}</span></div>
+        {effectiveRedeem > 0 && (
+          <div className="flex justify-between text-primary"><span>পয়েন্ট রিডিম ({effectiveRedeem})</span><span>-৳{effectiveRedeem.toFixed(0)}</span></div>
+        )}
+        {voucherDiscount > 0 && appliedVoucher && (
+          <div className="flex justify-between text-primary"><span className="flex items-center gap-1"><Ticket className="h-3 w-3" /> {appliedVoucher.code}</span><span>-৳{voucherDiscount.toFixed(0)}</span></div>
+        )}
+        <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}</span><span>৳{deliveryCharge}</span></div>
+        <div className="border-t pt-1.5 mt-1 flex justify-between font-bold text-base">
           <span>{t('checkout.total')}</span>
           <span className="text-primary">৳{grandTotal.toFixed(0)}</span>
         </div>

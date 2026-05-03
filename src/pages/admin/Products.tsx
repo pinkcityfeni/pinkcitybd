@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +66,7 @@ export default function Products() {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [duplicateWarning, setDuplicateWarning] = useState<Product | null>(null);
 
   const filtered = products.filter(p => {
     if (filterBrand && p.brandId !== filterBrand) return false;
@@ -93,6 +95,18 @@ export default function Products() {
     setDialogOpen(true);
   };
 
+  const performSave = () => {
+    const compareAt = Number(form.compareAtPrice) || 0;
+    const sellPrice = Number(form.price);
+    const allImages = form.images;
+    const mainImage = allImages[0] || form.image || '';
+    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual', brandId: form.brandId };
+    if (editProduct) { updateProductMut.mutate({ id: editProduct.id, updates: data }); toast.success(t('prod.updated')); }
+    else { addProductMut.mutate(data); toast.success(t('prod.added')); }
+    setDialogOpen(false);
+    setDuplicateWarning(null);
+  };
+
   const handleSave = () => {
     if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
     if (!form.brandId) { toast.error('Brand select করুন'); return; }
@@ -102,12 +116,11 @@ export default function Products() {
       toast.error('পুরাতন দাম বর্তমান দামের চেয়ে বেশি হতে হবে');
       return;
     }
-    const allImages = form.images;
-    const mainImage = allImages[0] || form.image || '';
-    const data: Omit<Product, 'id'> = { name: form.name, description: form.description, price: sellPrice, compareAtPrice: compareAt, buyingPrice: Number(form.buyingPrice), barcode: form.barcode, category: form.category, subcategory: form.subcategory, stock: Number(form.stock), image: mainImage, images: allImages, source: editProduct?.source || 'manual', brandId: form.brandId };
-    if (editProduct) { updateProductMut.mutate({ id: editProduct.id, updates: data }); toast.success(t('prod.updated')); }
-    else { addProductMut.mutate(data); toast.success(t('prod.added')); }
-    setDialogOpen(false);
+    if (!editProduct) {
+      const dup = products.find(p => p.name.trim().toLowerCase() === form.name.trim().toLowerCase());
+      if (dup) { setDuplicateWarning(dup); return; }
+    }
+    performSave();
   };
 
   const handleCategoryChange = (catName: string) => {
@@ -281,6 +294,29 @@ export default function Products() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!duplicateWarning} onOpenChange={(o) => { if (!o) setDuplicateWarning(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>⚠️ একই নামের প্রোডাক্ট আছে</AlertDialogTitle>
+            <AlertDialogDescription>
+              {duplicateWarning && (
+                <>
+                  এই নামে একটি প্রোডাক্ট আগে থেকেই আছে —{' '}
+                  <strong>{duplicateWarning.name}</strong>
+                  {' '}({(brands.find(b => b.id === duplicateWarning.brandId)?.name) || '—'} · {duplicateWarning.category} · Stock: {duplicateWarning.stock} · ৳{duplicateWarning.price.toFixed(0)}).
+                  <br /><br />
+                  আপনি কি তবুও নতুন প্রোডাক্ট হিসেবে add করতে চান?
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না, বাতিল করুন</AlertDialogCancel>
+            <AlertDialogAction onClick={performSave}>হ্যাঁ, add করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

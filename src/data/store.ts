@@ -57,6 +57,7 @@ export interface Review {
   comment: string;
   date: string;
   approved: boolean;
+  imageUrls?: string[];
 }
 
 export interface Order {

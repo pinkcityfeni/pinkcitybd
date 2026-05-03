@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { BrandFilter } from '@/components/admin/BrandFilter';
@@ -18,22 +18,50 @@ const EMPTY_FORM = { name: '', description: '', price: '', compareAtPrice: '', b
 
 function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[]; onChange: (imgs: string[]) => void; uploadLabel: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    for (const file of Array.from(files)) {
-      if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); continue; }
-      try {
-        const url = await uploadImage(file);
-        onChange([...images, url]);
-      } catch { toast.error('Upload failed'); }
+  const [uploading, setUploading] = useState(0);
+  const [dragOver, setDragOver] = useState(false);
+
+  const uploadFiles = async (fileList: FileList | File[]) => {
+    const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+    const valid = files.filter(f => {
+      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name}: 5MB-এর বেশি — skip`); return false; }
+      return true;
+    });
+    if (valid.length === 0) return;
+    setUploading(valid.length);
+    try {
+      const results = await Promise.allSettled(valid.map(f => uploadImage(f)));
+      const urls: string[] = [];
+      let failed = 0;
+      results.forEach(r => { if (r.status === 'fulfilled') urls.push(r.value); else failed++; });
+      if (urls.length > 0) onChange([...images, ...urls]);
+      if (failed > 0) toast.error(`${failed}টি ছবি upload হয়নি`);
+      if (urls.length > 0) toast.success(`${urls.length}টি ছবি upload হয়েছে`);
+    } finally {
+      setUploading(0);
     }
+  };
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    await uploadFiles(e.target.files);
     e.target.value = '';
+  };
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer.files) await uploadFiles(e.dataTransfer.files);
   };
   const removeImage = (index: number) => onChange(images.filter((_, i) => i !== index));
 
   return (
-    <div className="space-y-2">
+    <div
+      className={`space-y-2 rounded-xl transition-colors ${dragOver ? 'ring-2 ring-primary bg-primary/5 p-2' : ''}`}
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+    >
       <div className="flex flex-wrap gap-2">
         {images.map((img, i) => (
           <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border">
@@ -43,11 +71,20 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
             </button>
           </div>
         ))}
-        <button type="button" onClick={() => fileRef.current?.click()} className="flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground">
+        {uploading > 0 && Array.from({ length: uploading }).map((_, i) => (
+          <div key={`up-${i}`} className="w-20 h-20 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 text-primary animate-spin" />
+          </div>
+        ))}
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading > 0}
+          className="flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground disabled:opacity-50">
           <Camera className="h-4 w-4" />
-          <span className="text-[10px] mt-1">{uploadLabel}</span>
+          <span className="text-[10px] mt-1 text-center px-1">{uploadLabel}</span>
         </button>
       </div>
+      <p className="text-[10px] text-muted-foreground">
+        একসাথে অনেকগুলো select করতে Ctrl/Cmd চেপে click করুন, অথবা ছবিগুলো এখানে drag-drop করুন।
+      </p>
       <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
     </div>
   );

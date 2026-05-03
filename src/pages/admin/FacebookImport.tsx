@@ -464,11 +464,20 @@ Price: 350 tk`}</pre>
                 <Input type="number" className="w-24" value={defaultStock} onChange={e => setDefaultStock(e.target.value)} />
               </div>
               <div>
+                <Label className="text-xs">Default Brand</Label>
+                <select className="h-10 rounded-md border bg-background px-3 text-sm min-w-[160px]"
+                  value={defaultBrandId} onChange={e => { setDefaultBrandId(e.target.value); setDefaultCategory(''); }}>
+                  <option value="">-- select --</option>
+                  {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+              </div>
+              <div>
                 <Label className="text-xs">Default Category</Label>
                 <select className="h-10 rounded-md border bg-background px-3 text-sm min-w-[180px]"
                   value={defaultCategory} onChange={e => setDefaultCategory(e.target.value)}>
                   <option value="">-- select --</option>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                  {(defaultBrandId ? categories.filter(c => c.brandId === defaultBrandId) : categories)
+                    .map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <Button onClick={handleParseBulk} variant="secondary">

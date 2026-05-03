@@ -284,7 +284,6 @@ export default function Checkout() {
             <textarea id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder={t('checkout.addressPlaceholder')} required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none" />
           </div>
           <div>
-          <div>
             <Label className="mb-2 block">{t('checkout.district')} <span className="text-destructive">*</span></Label>
             <Select value={district} onValueChange={(v) => { setDistrict(v); if (v !== 'Feni') setAreaId(''); }}>
               <SelectTrigger><SelectValue placeholder={t('checkout.selectDistrict')} /></SelectTrigger>

@@ -279,12 +279,6 @@ export default function StoreLayout() {
                 <Facebook className="h-4 w-4" />
                 <span>Facebook Page</span>
               </a>
-              {user?.role === 'admin' && (
-                <div className="space-y-2.5">
-                  <Link to="/admin" className="block text-xs text-background/50 hover:text-background transition-colors">{t('footer.dashboard')}</Link>
-                  <Link to="/pos" className="block text-xs text-background/50 hover:text-background transition-colors">POS</Link>
-                </div>
-              )}
             </div>
           </div>
 

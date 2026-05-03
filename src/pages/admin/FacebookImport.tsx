@@ -180,6 +180,10 @@ export default function FacebookImport() {
   const [bulkText, setBulkText] = useState('');
   const [defaultStock, setDefaultStock] = useState('10');
   const [defaultCategory, setDefaultCategory] = useState('');
+  const [defaultBrandId, setDefaultBrandId] = useState('');
+  useEffect(() => {
+    if (!defaultBrandId && defaultBrand) setDefaultBrandId(defaultBrand.id);
+  }, [defaultBrand, defaultBrandId]);
   const [rows, setRows] = useState<DraftRow[]>([]);
   const [bulkImporting, setBulkImporting] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
@@ -193,7 +197,7 @@ export default function FacebookImport() {
 
   const handleParseBulk = () => {
     if (!bulkText.trim()) { toast.error('আগে posts paste করুন'); return; }
-    const parsed = parseBulkText(bulkText, defaultStock, defaultCategory);
+    const parsed = parseBulkText(bulkText, defaultStock, defaultCategory, defaultBrandId || defaultBrand?.id || '');
     if (parsed.length === 0) { toast.error('কোনো post detect করতে পারিনি'); return; }
     setRows(parsed);
     toast.success(`${parsed.length}টি post parse হয়েছে — table-এ check করুন`);

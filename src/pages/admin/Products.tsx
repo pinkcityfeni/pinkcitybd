@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Camera, X as XIcon, Flame, Loader2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { BrandFilter } from '@/components/admin/BrandFilter';
@@ -62,6 +62,12 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
+      <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-dashed cursor-pointer hover:bg-muted/50 text-xs text-muted-foreground">
+        {uploading > 0
+          ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading {uploading}...</>
+          : <><ImageIcon className="h-4 w-4" /> Upload ছবি (একাধিক select করতে পারেন)</>}
+        <input type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} disabled={uploading > 0} />
+      </label>
       <div className="flex flex-wrap gap-2">
         {images.map((img, i) => (
           <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border">
@@ -77,13 +83,14 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
           </div>
         ))}
         <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading > 0}
-          className="flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground disabled:opacity-50">
+          className="flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground disabled:opacity-50"
+          title={uploadLabel}>
           <Camera className="h-4 w-4" />
-          <span className="text-[10px] mt-1 text-center px-1">{uploadLabel}</span>
+          <span className="text-[10px] mt-1 text-center px-1">+ আরো</span>
         </button>
       </div>
       <p className="text-[10px] text-muted-foreground">
-        একসাথে অনেকগুলো select করতে Ctrl/Cmd চেপে click করুন, অথবা ছবিগুলো এখানে drag-drop করুন।
+        File picker-এ Ctrl/Cmd চেপে click করে অনেকগুলো select করুন, অথবা ছবি drag-drop করুন।
       </p>
       <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
     </div>

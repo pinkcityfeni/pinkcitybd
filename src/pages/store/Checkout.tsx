@@ -409,7 +409,7 @@ export default function Checkout() {
           )}
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 space-y-2 text-sm">
+        <div className="rounded-xl border bg-card p-3 space-y-1 text-xs">
           <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.nItems', { n: itemCount })}</span><span>৳{total.toFixed(0)}</span></div>
           {effectiveRedeem > 0 && (
             <div className="flex justify-between text-primary font-medium">
@@ -419,19 +419,19 @@ export default function Checkout() {
           )}
           {voucherDiscount > 0 && appliedVoucher && (
             <div className="flex justify-between text-primary font-medium">
-              <span className="flex items-center gap-1"><Ticket className="h-3.5 w-3.5" /> ভাউচার ({appliedVoucher.code})</span>
+              <span className="flex items-center gap-1"><Ticket className="h-3 w-3" /> ভাউচার ({appliedVoucher.code})</span>
               <span>-৳{voucherDiscount.toFixed(0)}</span>
             </div>
           )}
-          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}{deliveryLabel ? ` (${deliveryLabel})` : ''}</span><span>৳{deliveryCharge}</span></div>
-          <div className="border-t pt-2 flex justify-between font-bold text-base"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{t('checkout.delivery')}</span><span>৳{deliveryCharge}</span></div>
+          <div className="border-t pt-1.5 mt-1 flex justify-between font-bold text-sm"><span>{t('checkout.total')}</span><span className="text-primary">৳{grandTotal.toFixed(0)}</span></div>
           {willEarn > 0 && isAuthenticated && (
-            <p className="text-xs text-success flex items-center gap-1 pt-1"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>
+            <p className="text-[11px] text-success flex items-center gap-1 pt-0.5"><Sparkles className="h-3 w-3" /> এই অর্ডারে {willEarn} পয়েন্ট পাবেন</p>
           )}
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 space-y-2">
-          <h3 className="font-semibold flex items-center gap-2 text-sm"><Ticket className="h-4 w-4 text-primary" /> ভাউচার কোড</h3>
+        <div className="rounded-xl border bg-card p-3 space-y-2">
+          <h3 className="font-semibold flex items-center gap-2 text-sm"><Ticket className="h-3.5 w-3.5 text-primary" /> ভাউচার কোড</h3>
           <VoucherInput
             items={cart}
             customerPhone={phone}
@@ -443,14 +443,13 @@ export default function Checkout() {
         </div>
 
         {isAuthenticated && availablePoints > 0 && (
-          <div className="rounded-2xl border bg-card p-4 space-y-3">
+          <div className="rounded-xl border bg-card p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> রিওয়ার্ড পয়েন্ট</h3>
-              <span className="text-sm font-bold text-primary">{availablePoints} পয়েন্ট</span>
+              <h3 className="font-semibold flex items-center gap-2 text-sm"><Sparkles className="h-3.5 w-3.5 text-primary" /> রিওয়ার্ড পয়েন্ট</h3>
+              <span className="text-xs font-bold text-primary">{availablePoints} পয়েন্ট</span>
             </div>
             {canRedeem ? (
               <>
-                <p className="text-xs text-muted-foreground">১ পয়েন্ট = ১ টাকা। সর্বনিম্ন ২০০ পয়েন্ট থেকে রিডিম করতে পারবেন।</p>
                 <div className="flex gap-2 items-center">
                   <Input
                     type="number"
@@ -458,7 +457,7 @@ export default function Checkout() {
                     max={maxRedeem}
                     value={redeemPoints || ''}
                     onChange={e => setRedeemPoints(Math.max(0, Math.min(maxRedeem, parseInt(e.target.value) || 0)))}
-                    placeholder="কত পয়েন্ট রিডিম?"
+                    placeholder="কত পয়েন্ট রিডিম? (১পয়েন্ট = ১৳)"
                     className="flex-1"
                   />
                   <Button type="button" size="sm" variant="outline" onClick={() => setRedeemPoints(maxRedeem)}>সর্বোচ্চ</Button>
@@ -467,7 +466,7 @@ export default function Checkout() {
                 {redeemError && <p className="text-xs text-destructive font-medium">{redeemError}</p>}
               </>
             ) : (
-              <p className="text-xs text-muted-foreground">রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন। (বর্তমানে {availablePoints})</p>
+              <p className="text-xs text-muted-foreground">রিডিম করতে কমপক্ষে ২০০ পয়েন্ট প্রয়োজন।</p>
             )}
           </div>
         )}

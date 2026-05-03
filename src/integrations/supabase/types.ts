@@ -202,7 +202,9 @@ export type Database = {
           customer_phone: string | null
           customer_phone_normalized: string | null
           delivery_address: string | null
+          delivery_area: string | null
           delivery_charge: number | null
+          delivery_district: string | null
           delivery_zone: string | null
           discount: number | null
           discount_type: string | null
@@ -229,7 +231,9 @@ export type Database = {
           customer_phone?: string | null
           customer_phone_normalized?: string | null
           delivery_address?: string | null
+          delivery_area?: string | null
           delivery_charge?: number | null
+          delivery_district?: string | null
           delivery_zone?: string | null
           discount?: number | null
           discount_type?: string | null
@@ -256,7 +260,9 @@ export type Database = {
           customer_phone?: string | null
           customer_phone_normalized?: string | null
           delivery_address?: string | null
+          delivery_area?: string | null
           delivery_charge?: number | null
+          delivery_district?: string | null
           delivery_zone?: string | null
           discount?: number | null
           discount_type?: string | null
@@ -414,7 +420,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          area: string | null
           created_at: string
+          district: string | null
           id: string
           name: string
           phone: string | null
@@ -422,7 +431,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
+          area?: string | null
           created_at?: string
+          district?: string | null
           id?: string
           name?: string
           phone?: string | null
@@ -430,7 +442,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
+          area?: string | null
           created_at?: string
+          district?: string | null
           id?: string
           name?: string
           phone?: string | null

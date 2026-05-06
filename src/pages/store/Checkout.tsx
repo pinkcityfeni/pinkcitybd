@@ -130,7 +130,10 @@ export default function Checkout() {
     return null;
   }
 
-  const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'bank';
+  const needsAdvanceForCOD = paymentMethod === 'cod' && !!district && !isFeni;
+  const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'bank' || needsAdvanceForCOD;
+  const advanceAmount = needsAdvanceForCOD ? deliveryCharge : 0;
+  const remainingCOD = needsAdvanceForCOD ? Math.max(0, grandTotal - advanceAmount) : 0;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -168,7 +171,8 @@ export default function Checkout() {
           deliveryZone,
           deliveryCharge,
           paymentMethod,
-          paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+          paymentStatus: needsAdvanceForCOD ? 'partial' : (paymentMethod === 'cod' ? 'pending' : 'paid'),
+          advanceTrxId: needsTrxId ? trxId : undefined,
           redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
           voucherCode: appliedVoucher?.code,
         },

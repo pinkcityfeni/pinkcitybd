@@ -74,13 +74,16 @@ export interface Order {
   deliveryZone?: DeliveryZone;
   deliveryCharge?: number;
   paymentMethod?: PaymentMethod;
-  paymentStatus?: 'pending' | 'paid';
+  paymentStatus?: 'pending' | 'paid' | 'partial';
   splitPayment?: SplitPayment;
   discount?: number;
   discountType?: 'fixed' | 'percent';
   pointsEarned?: number;
   pointsRedeemed?: number;
   returnedItems?: { product_id: string; quantity: number }[];
+  advanceTrxId?: string;
+  deliveryDistrict?: string;
+  deliveryArea?: string;
 }
 
 export interface Banner {
@@ -176,13 +179,16 @@ export function dbToOrder(o: any): Order {
     deliveryZone: o.delivery_zone as DeliveryZone,
     deliveryCharge: Number(o.delivery_charge || 0),
     paymentMethod: o.payment_method as PaymentMethod,
-    paymentStatus: o.payment_status as 'pending' | 'paid',
+    paymentStatus: o.payment_status as 'pending' | 'paid' | 'partial',
     splitPayment: o.split_payment as SplitPayment | undefined,
     discount: Number(o.discount || 0),
     discountType: o.discount_type as 'fixed' | 'percent' | undefined,
     pointsEarned: o.points_earned || 0,
     pointsRedeemed: o.points_redeemed || 0,
     returnedItems: (o.returned_items as any[]) || [],
+    advanceTrxId: o.advance_trx_id || undefined,
+    deliveryDistrict: o.delivery_district || undefined,
+    deliveryArea: o.delivery_area || undefined,
   };
 }
 

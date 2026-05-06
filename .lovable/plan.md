@@ -1,62 +1,60 @@
-## Goals
+## Goal
 
-Fix five customer-facing issues based on user feedback.
+Feni-এর বাইরে যেকোনো জেলায় Cash On Delivery (COD) সিলেক্ট করলে customer-কে আগে delivery charge advance pay করতে হবে (bKash/Nagad-এ), এবং transaction ID দিতে হবে। তবেই অর্ডার confirm হবে। Feni-র ভেতরে COD আগের মতোই — কোনো advance লাগবে না।
 
-### 1. Product detail image — show full image, no crop
+## Behavior Rules
 
-**File:** `src/pages/store/ProductDetail.tsx` (`ProductImageGallery`)
+1. **Feni + COD** → আগের মতোই, কোনো advance নেই।
+2. **Outside Feni + COD** → নতুন rule:
+   - Customer-কে delivery charge (e.g. ৳120) bKash/Nagad-এ পাঠাতে হবে (০১৭১৫৩০৭২৭১ — same numbers as bKash flow)।
+   - Transaction ID input বাধ্যতামূলক।
+   - বাকি product price delivery-তে cash দিবে।
+3. **bKash / Bank (full payment)** → আগের মতোই, full amount + trxId।
 
-- Change main image from `object-cover` to `object-contain` so the uploaded image is shown exactly as-is (no cropping).
-- Keep the `aspect-square` container with a soft background (already `bg-secondary/30`) so portrait/landscape images sit centered with letterbox padding.
-- Thumbnails can stay `object-cover` (they're tiny previews).
+## UI Changes — `src/pages/store/Checkout.tsx`
 
-### 2. Product description — full text with "Read More" toggle
+- নতুন derived flag: `needsAdvanceForCOD = paymentMethod === 'cod' && district && !isFeni`
+- `needsTrxId` update → `bkash || bank || needsAdvanceForCOD`
+- COD সিলেক্ট থাকলে এবং outside Feni হলে, payment section-এ একটা নতুন info block দেখাবে:
+  - "আপনার জেলা Feni-এর বাইরে। অর্ডার confirm করতে delivery charge ৳{deliveryCharge} bKash/Nagad-এ advance পাঠান।"
+  - bKash + Nagad number (copy button সহ — bkash flow থেকে reuse)
+  - Transaction ID input (required)
+  - একটা note: "বাকি ৳{total - discounts} delivery-র সময় cash দিবেন।"
+- Review screen-এ "Advance Paid: ৳{deliveryCharge} (TrxID: xxx)" এবং "Cash on Delivery: ৳{remaining}" আলাদা দেখাবে।
+- Validation (`handleContinueToReview`): COD + outside Feni হলে trxId required।
 
-**File:** `src/pages/store/ProductDetail.tsx`
+## Backend / Data
 
-- Remove the `line-clamp-4` truncation on the description.
-- Replace with a controlled "Read more / Read less" toggle:
-  - If description is longer than ~180 chars (or >4 lines worth), show clamped text + a `Read more` button.
-  - Clicking expands to full text with a `Read less` button.
-- Render description with `whitespace-pre-wrap` so the seller's line breaks/formatting are preserved exactly as typed in the admin form (matches FB-import caption/description behavior).
-- Add translation keys: `product.readMore` (Read more / আরো পড়ুন), `product.readLess` (Read less / কম দেখুন).
+- নতুন column বা migration লাগবে না — existing fields যথেষ্ট:
+  - `payment_method = 'cod'` থাকবে।
+  - `payment_status` → outside Feni COD-এর জন্য `'partial'` set করব (advance paid for delivery)। Feni COD আগের মতোই `'pending'`।
+  - TrxID আপাতত order note হিসাবে save হয় না — `delivery_address`-এ append করা হবে কিনা, না কি একটা নতুন optional field রাখব সেটা decide করতে হবে। **Recommendation:** edge function payload-এ `advanceTrxId` পাঠাব, এবং `place-order`-এ যদি COD + outside Feni হয় তাহলে order note হিসাবে `customer_email`-এর পাশে একটা স্পষ্ট জায়গায় না রেখে বরং একটা ছোট migration দিয়ে `advance_trx_id text` column add করব orders table-এ। (cleaner, admin Orders page-এ দেখানো যাবে)
 
-### 3. Admin shortcuts at top of `/account`
+## Edge Function — `supabase/functions/place-order/index.ts`
 
-**File:** `src/pages/store/Account.tsx`
+- Payload থেকে `advanceTrxId` accept করব।
+- যদি `paymentMethod === 'cod'` এবং `deliveryDistrict !== 'Feni'` → `advanceTrxId` required (না থাকলে 400 error)। `payment_status = 'partial'` set করব।
+- Insert payload-এ `advance_trx_id` column save।
 
-- When `user?.role === 'admin'` (or `cashier`), render two prominent buttons (Dashboard, POS) in the top profile card area, right under the name/email block — easily reachable.
-- Use icons (`LayoutDashboard`, `ScanBarcode`) and primary styling.
-- Remove the duplicate Dashboard/POS links from `StoreLayout.tsx` footer "Follow Us" block (they remain reachable via Account; keeps footer clean). If preferred we can keep footer too — leaning toward keeping just at top per user request "নীচে থেকে সরাই".
+## Admin Orders Page
 
-### 4. Description shown to customer = exactly what admin types
+- Orders list/detail-এ যেখানে payment info দেখানো হয়, COD outside Feni হলে "Advance ৳{deliveryCharge} paid (TrxID: xxx) — Cash ৳{remaining} on delivery" দেখাবে।
 
-**Files:** `src/pages/store/ProductDetail.tsx` (already covered in #2 via `whitespace-pre-wrap`), and verify Admin form (`src/pages/admin/Products.tsx`) saves the raw textarea string without trimming/normalization. No data change required — only the display side needs `whitespace-pre-wrap`.
+## Migration
 
-### 5. Full language coverage + "YOUR SAVINGS" constant
+```sql
+ALTER TABLE public.orders
+  ADD COLUMN advance_trx_id text;
+```
 
-**Files:** `src/data/language.tsx`, `src/pages/store/Account.tsx`, `src/pages/store/ProductDetail.tsx`
+## Files to Modify
 
-Add translation keys (bn + en):
-- `product.savings` → both languages output literal: `YOUR SAVINGS` (always English label per user instruction). Used in ProductDetail savings line: `YOUR SAVINGS ৳{n}`.
-- `account.myPoints` → আমার পয়েন্ট / My Points
-- `account.totalEarned` → মোট অর্জিত / Total Earned
-- `account.totalRedeemed` → মোট রিডিম / Total Redeemed
-- `account.pointsRule` → "প্রতি ১০০ টাকায় ১ পয়েন্ট। ২০০ পয়েন্ট হলে রিডিম করতে পারবেন। ১ পয়েন্ট = ১ টাকা।" / "1 point per ৳100 spent. Redeem after 200 points. 1 point = ৳1."
-- `account.recentTx` → সাম্প্রতিক লেনদেন / Recent Transactions
+- `src/pages/store/Checkout.tsx` — UI + validation
+- `supabase/functions/place-order/index.ts` — server-side enforcement + save trxId
+- `src/pages/admin/Orders.tsx` — display advance info (read-only)
+- New migration for `advance_trx_id` column
 
-Replace the hardcoded Bengali strings in `Account.tsx` (lines 47, 52–53, 56, 59) with `t(...)` calls. Same for the savings line in `ProductDetail.tsx` (line 180) — always render `YOUR SAVINGS` regardless of language.
+## Out of Scope
 
-Also audit `ProductDetail.tsx` lines 156–157 ("মাত্র Xটি বাকি" / "Only X left") — already conditional on `lang`, fine.
-
-## Out of scope
-
-- No DB changes.
-- No changes to admin product form data flow (it already saves raw description).
-
-## Technical summary
-
-- ProductDetail: `object-cover` → `object-contain` on main image; description gets expand/collapse state (`useState<boolean>`) + `whitespace-pre-wrap`.
-- Account: conditional admin shortcut row; switch hardcoded bn strings to translation keys.
-- language.tsx: add ~6 new keys.
-- StoreLayout footer: remove the admin Dashboard/POS block (lines 282–287).
+- Real-time payment verification (manual trxId verification by admin, same as current bKash/bank flow).
+- Refund flow if customer cancels after advance paid (admin manual)।

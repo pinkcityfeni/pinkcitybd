@@ -196,6 +196,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          advance_trx_id: string | null
           created_at: string
           customer_email: string | null
           customer_name: string | null
@@ -225,6 +226,7 @@ export type Database = {
           voucher_discount: number
         }
         Insert: {
+          advance_trx_id?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -254,6 +256,7 @@ export type Database = {
           voucher_discount?: number
         }
         Update: {
+          advance_trx_id?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null

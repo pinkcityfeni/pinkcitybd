@@ -292,6 +292,21 @@ export default function Checkout() {
           <span>{t('checkout.total')}</span>
           <span className="text-primary">৳{grandTotal.toFixed(0)}</span>
         </div>
+        {needsAdvanceForCOD && (
+          <div className="mt-2 pt-2 border-t space-y-0.5">
+            <div className="flex justify-between text-primary font-medium">
+              <span>Advance Paid (bKash/Nagad)</span>
+              <span>৳{advanceAmount}</span>
+            </div>
+            <div className="flex justify-between text-foreground/80">
+              <span>Cash on Delivery</span>
+              <span>৳{remainingCOD.toFixed(0)}</span>
+            </div>
+            {trxId && (
+              <p className="text-[10px] text-muted-foreground">TrxID: {trxId}</p>
+            )}
+          </div>
+        )}
       </div>
 
       <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending || !!redeemError}>

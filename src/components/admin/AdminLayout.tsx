@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/data/language';
+import { NotificationBell } from '@/components/admin/NotificationBell';
 
 const NAV_KEYS = [
   { to: '/admin/dashboard', key: 'admin.dashboard' as const, icon: LayoutDashboard },
@@ -111,6 +112,7 @@ export default function AdminLayout() {
             </button>
             <LayoutDashboard className="h-4 w-4 text-sidebar-primary" />
             <span className="font-bold text-sm text-sidebar-primary-foreground flex-1">{t('admin.panel')}</span>
+            <NotificationBell />
             <Link to="/" className="p-1.5 rounded-lg hover:bg-sidebar-accent/50" aria-label="Home">
               <Home className="h-5 w-5" />
             </Link>
@@ -142,6 +144,11 @@ export default function AdminLayout() {
       )}
 
       <main className={`flex-1 overflow-auto ${isMobile ? 'pt-12' : ''}`}>
+        {!isMobile && (
+          <div className="sticky top-0 z-30 h-12 bg-background/80 backdrop-blur border-b flex items-center justify-end px-4 gap-2">
+            <NotificationBell />
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

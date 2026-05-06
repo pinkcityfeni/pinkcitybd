@@ -207,7 +207,9 @@ Deno.serve(async (req) => {
       delivery_area: data?.deliveryArea || null,
       delivery_charge: deliveryCharge,
       payment_method: data?.paymentMethod || null,
-      payment_status: data?.paymentStatus || (data?.paymentMethod === "cod" ? "pending" : "paid"),
+      payment_status: isCODOutsideFeni
+        ? "partial"
+        : (data?.paymentStatus || (data?.paymentMethod === "cod" ? "pending" : "paid")),
       split_payment: data?.splitPayment || null,
       discount: discountValue,
       discount_type: data?.discountType || null,

@@ -130,7 +130,10 @@ export default function Checkout() {
     return null;
   }
 
-  const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'bank';
+  const needsAdvanceForCOD = paymentMethod === 'cod' && !!district && !isFeni;
+  const needsTrxId = paymentMethod === 'bkash' || paymentMethod === 'bank' || needsAdvanceForCOD;
+  const advanceAmount = needsAdvanceForCOD ? deliveryCharge : 0;
+  const remainingCOD = needsAdvanceForCOD ? Math.max(0, grandTotal - advanceAmount) : 0;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -168,7 +171,8 @@ export default function Checkout() {
           deliveryZone,
           deliveryCharge,
           paymentMethod,
-          paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+          paymentStatus: needsAdvanceForCOD ? 'partial' : (paymentMethod === 'cod' ? 'pending' : 'paid'),
+          advanceTrxId: needsTrxId ? trxId : undefined,
           redeemPoints: effectiveRedeem > 0 ? effectiveRedeem : undefined,
           voucherCode: appliedVoucher?.code,
         },
@@ -288,6 +292,21 @@ export default function Checkout() {
           <span>{t('checkout.total')}</span>
           <span className="text-primary">৳{grandTotal.toFixed(0)}</span>
         </div>
+        {needsAdvanceForCOD && (
+          <div className="mt-2 pt-2 border-t space-y-0.5">
+            <div className="flex justify-between text-primary font-medium">
+              <span>Advance Paid (bKash/Nagad)</span>
+              <span>৳{advanceAmount}</span>
+            </div>
+            <div className="flex justify-between text-foreground/80">
+              <span>Cash on Delivery</span>
+              <span>৳{remainingCOD.toFixed(0)}</span>
+            </div>
+            {trxId && (
+              <p className="text-[10px] text-muted-foreground">TrxID: {trxId}</p>
+            )}
+          </div>
+        )}
       </div>
 
       <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary/20" onClick={handlePlaceOrder} disabled={placeOrderMut.isPending || !!redeemError}>
@@ -364,7 +383,15 @@ export default function Checkout() {
 
           {needsTrxId && (
             <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
-              {paymentMethod === 'bkash' && (
+              {needsAdvanceForCOD && (
+                <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-xs leading-relaxed">
+                  <p className="font-semibold text-primary mb-1">⚠️ Feni-এর বাইরে COD অর্ডার</p>
+                  <p className="text-foreground/80">
+                    অর্ডার confirm করতে delivery charge <span className="font-bold text-primary">৳{advanceAmount}</span> bKash/Nagad-এ আগে পাঠাতে হবে। বাকি <span className="font-bold">৳{remainingCOD.toFixed(0)}</span> পণ্য ডেলিভারির সময় cash দিবেন।
+                  </p>
+                </div>
+              )}
+              {(paymentMethod === 'bkash' || needsAdvanceForCOD) && (
                 <div className="space-y-2">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-pink-600">{t('checkout.bkashPersonal')}</p>
@@ -401,7 +428,11 @@ export default function Checkout() {
                 </div>
               )}
               <div className="pt-1 border-t border-accent/20">
-                <p className="text-xs text-muted-foreground mb-2">{t('checkout.sendAndEnterTrx', { amount: grandTotal.toFixed(0) })}</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {needsAdvanceForCOD
+                    ? `৳${advanceAmount} পাঠিয়ে নিচে Transaction ID দিন`
+                    : t('checkout.sendAndEnterTrx', { amount: grandTotal.toFixed(0) })}
+                </p>
                 <Label htmlFor="trxId" className="text-xs">Transaction ID <span className="text-destructive">*</span></Label>
                 <Input id="trxId" value={trxId} onChange={e => setTrxId(e.target.value)} placeholder={t('checkout.trxPlaceholder')} className="mt-1" />
               </div>

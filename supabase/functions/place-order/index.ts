@@ -60,6 +60,21 @@ Deno.serve(async (req) => {
     const phoneRaw: string = (data?.customerPhone || "").toString().trim();
     const phoneNorm = phoneRaw.replace(/\D/g, "");
 
+    // ─── COD Outside Feni: require advance delivery charge payment ───
+    const isCODOutsideFeni =
+      (data?.paymentMethod === "cod") &&
+      data?.deliveryDistrict &&
+      String(data?.deliveryDistrict).toLowerCase() !== "feni";
+    const advanceTrxId: string = (data?.advanceTrxId || "").toString().trim();
+    if (isCODOutsideFeni && !advanceTrxId) {
+      return new Response(JSON.stringify({
+        error: "Feni-এর বাইরে COD অর্ডারের জন্য আগে delivery charge bKash/Nagad-এ পাঠিয়ে Transaction ID দিতে হবে।",
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ─── Voucher validation (server-side, never trust client) ───
     const voucherCodeRaw: string = (data?.voucherCode || "").toString().trim().toUpperCase();
     let voucher: any = null;
@@ -192,7 +207,9 @@ Deno.serve(async (req) => {
       delivery_area: data?.deliveryArea || null,
       delivery_charge: deliveryCharge,
       payment_method: data?.paymentMethod || null,
-      payment_status: data?.paymentStatus || (data?.paymentMethod === "cod" ? "pending" : "paid"),
+      payment_status: isCODOutsideFeni
+        ? "partial"
+        : (data?.paymentStatus || (data?.paymentMethod === "cod" ? "pending" : "paid")),
       split_payment: data?.splitPayment || null,
       discount: discountValue,
       discount_type: data?.discountType || null,
@@ -201,6 +218,7 @@ Deno.serve(async (req) => {
       points_redeemed: redeemPoints,
       voucher_code: voucher ? voucher.code : null,
       voucher_discount: voucherDiscount,
+      advance_trx_id: advanceTrxId || null,
     };
 
     const { data: orderRow, error: orderError } = await adminClient

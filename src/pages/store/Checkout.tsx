@@ -368,7 +368,15 @@ export default function Checkout() {
 
           {needsTrxId && (
             <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
-              {paymentMethod === 'bkash' && (
+              {needsAdvanceForCOD && (
+                <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-xs leading-relaxed">
+                  <p className="font-semibold text-primary mb-1">⚠️ Feni-এর বাইরে COD অর্ডার</p>
+                  <p className="text-foreground/80">
+                    অর্ডার confirm করতে delivery charge <span className="font-bold text-primary">৳{advanceAmount}</span> bKash/Nagad-এ আগে পাঠাতে হবে। বাকি <span className="font-bold">৳{remainingCOD.toFixed(0)}</span> পণ্য ডেলিভারির সময় cash দিবেন।
+                  </p>
+                </div>
+              )}
+              {(paymentMethod === 'bkash' || needsAdvanceForCOD) && (
                 <div className="space-y-2">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-pink-600">{t('checkout.bkashPersonal')}</p>
@@ -405,7 +413,11 @@ export default function Checkout() {
                 </div>
               )}
               <div className="pt-1 border-t border-accent/20">
-                <p className="text-xs text-muted-foreground mb-2">{t('checkout.sendAndEnterTrx', { amount: grandTotal.toFixed(0) })}</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {needsAdvanceForCOD
+                    ? `৳${advanceAmount} পাঠিয়ে নিচে Transaction ID দিন`
+                    : t('checkout.sendAndEnterTrx', { amount: grandTotal.toFixed(0) })}
+                </p>
                 <Label htmlFor="trxId" className="text-xs">Transaction ID <span className="text-destructive">*</span></Label>
                 <Input id="trxId" value={trxId} onChange={e => setTrxId(e.target.value)} placeholder={t('checkout.trxPlaceholder')} className="mt-1" />
               </div>

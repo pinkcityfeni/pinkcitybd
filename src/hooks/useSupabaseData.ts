@@ -405,12 +405,13 @@ interface PlaceOrderData {
   deliveryZone?: DeliveryZone;
   deliveryCharge?: number;
   paymentMethod?: PaymentMethod;
-  paymentStatus?: 'pending' | 'paid';
+  paymentStatus?: 'pending' | 'paid' | 'partial';
   splitPayment?: SplitPayment;
   discount?: number;
   discountType?: 'fixed' | 'percent';
   redeemPoints?: number;
   voucherCode?: string;
+  advanceTrxId?: string;
 }
 
 export function usePlaceOrder() {

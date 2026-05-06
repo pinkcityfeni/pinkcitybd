@@ -22,6 +22,7 @@ const PAYMENT_LABELS: Record<string, { label: string; icon: React.ReactNode }> =
 const PAYMENT_STATUS_COLORS: Record<string, string> = {
   pending: 'bg-warning/10 text-warning border-warning/20',
   paid: 'bg-success/10 text-success border-success/20',
+  partial: 'bg-info/10 text-info border-info/20',
 };
 
 const STATUS_COLORS: Record<Order['status'], string> = {
@@ -72,7 +73,7 @@ export default function Orders() {
                       )}
                       {o.paymentStatus && (
                         <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${PAYMENT_STATUS_COLORS[o.paymentStatus] || ''}`}>
-                          {o.paymentStatus === 'paid' ? t('order.paid') : t('order.unpaid')}
+                          {o.paymentStatus === 'paid' ? t('order.paid') : o.paymentStatus === 'partial' ? 'Advance Paid' : t('order.unpaid')}
                         </span>
                       )}
                     </div>
@@ -104,9 +105,19 @@ export default function Orders() {
                           <span>{PAYMENT_LABELS[o.paymentMethod]?.label || o.paymentMethod}</span>
                           {o.paymentStatus && (
                             <span className={`ml-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium border ${PAYMENT_STATUS_COLORS[o.paymentStatus]}`}>
-                              {o.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+                              {o.paymentStatus === 'paid' ? 'Paid' : o.paymentStatus === 'partial' ? 'Advance Paid' : 'Unpaid'}
                             </span>
                           )}
+                        </div>
+                      )}
+                      {o.advanceTrxId && (
+                        <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2 p-2 rounded-lg bg-info/5 border border-info/20">
+                          <Smartphone className="h-3.5 w-3.5 shrink-0 text-info" />
+                          <span className="text-xs">
+                            <span className="font-medium">Advance ৳{o.deliveryCharge || 0} paid</span>
+                            <span className="font-mono ml-1">(TrxID: {o.advanceTrxId})</span>
+                            {o.paymentMethod === 'cod' && <span className="ml-1">— Cash ৳{Math.max(0, o.total - (o.deliveryCharge || 0)).toFixed(0)} on delivery</span>}
+                          </span>
                         </div>
                       )}
                     </div>

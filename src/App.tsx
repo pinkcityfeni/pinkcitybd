@@ -48,6 +48,7 @@ import FacebookImport from "@/pages/admin/FacebookImport";
 import Brands from "@/pages/admin/Brands";
 import Vouchers from "@/pages/admin/Vouchers";
 import DeliveryAreas from "@/pages/admin/DeliveryAreas";
+import AdminNotifications from "@/pages/admin/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,6 +118,7 @@ const App = () => (
               <Route path="users" element={<Users />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="delivery-areas" element={<DeliveryAreas />} />
+              <Route path="notifications" element={<AdminNotifications />} />
             </Route>
 
             {/* ─── Catch-all ─── */}

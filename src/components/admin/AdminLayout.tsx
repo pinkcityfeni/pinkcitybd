@@ -1,9 +1,10 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles, Tag, Ticket, Truck, Home } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Users, Warehouse, FolderTree, ScanBarcode, Store, ChevronLeft, ChevronRight, LogOut, Menu, X, Image, Star, Globe, Facebook, Sparkles, Tag, Ticket, Truck, Home, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/data/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/data/language';
+import { NotificationBell } from '@/components/admin/NotificationBell';
 
 const NAV_KEYS = [
   { to: '/admin/dashboard', key: 'admin.dashboard' as const, icon: LayoutDashboard },
@@ -20,6 +21,7 @@ const NAV_KEYS = [
   { to: '/admin/users', key: 'admin.users' as const, icon: Users },
   { to: '/admin/customers', key: 'admin.customers' as const, icon: Sparkles },
   { to: '/admin/delivery-areas', key: 'admin.deliveryAreas' as const, icon: Truck },
+  { to: '/admin/notifications', key: 'admin.notifications' as const, icon: Bell },
 ];
 
 function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed?: boolean }) {
@@ -111,6 +113,7 @@ export default function AdminLayout() {
             </button>
             <LayoutDashboard className="h-4 w-4 text-sidebar-primary" />
             <span className="font-bold text-sm text-sidebar-primary-foreground flex-1">{t('admin.panel')}</span>
+            <NotificationBell />
             <Link to="/" className="p-1.5 rounded-lg hover:bg-sidebar-accent/50" aria-label="Home">
               <Home className="h-5 w-5" />
             </Link>
@@ -142,6 +145,11 @@ export default function AdminLayout() {
       )}
 
       <main className={`flex-1 overflow-auto ${isMobile ? 'pt-12' : ''}`}>
+        {!isMobile && (
+          <div className="sticky top-0 z-30 h-12 bg-background/80 backdrop-blur border-b flex items-center justify-end px-4 gap-2">
+            <NotificationBell />
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

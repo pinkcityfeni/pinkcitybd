@@ -240,6 +240,7 @@ const translations = {
   'admin.users': { bn: 'ইউজার', en: 'Users' },
   'admin.customers': { bn: 'কাস্টমার পয়েন্ট', en: 'Customer Points' },
   'admin.deliveryAreas': { bn: 'ডেলিভারি এরিয়া', en: 'Delivery Areas' },
+  'admin.notifications': { bn: 'নোটিফিকেশন', en: 'Notifications' },
   'admin.pos': { bn: 'POS', en: 'POS' },
   'admin.storefront': { bn: 'স্টোরফ্রন্ট', en: 'Storefront' },
   'admin.logout': { bn: 'লগআউট', en: 'Logout' },

@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
     });
   } catch (err: any) {
     console.error("process-return error:", err);
-    return new Response(JSON.stringify({ error: err?.message || "Internal error" }), {
+    return new Response(JSON.stringify({ error: "Request failed. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

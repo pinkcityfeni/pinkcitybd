@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const VAPID_PUBLIC = 'BC2DKXgt1sYxAcyd_INyiMY9MbvowNUO63GJLIL1iljnQC7KCAh7Eo8UAy6YB15EcaRhPTJCwK5bfUPw8mQ6Y2Q';
+const VAPID_PUBLIC = 'BOxqT2CZMmzyTb7VCe0Me9jQJcNjfE8DExyedhyNRoKlOy5dsTc-IXWgk4eLGJR9Dfsz3x9JlGbyh3IOW9pNDI0';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });

@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
 
     let sent = 0, failed = 0;
     const expired: string[] = [];
+    const errors: string[] = [];
     await Promise.all(subs.map(async (s: any) => {
       try {
         const subscriber = appServer.subscribe({
@@ -82,7 +83,9 @@ Deno.serve(async (req) => {
       } catch (e: any) {
         failed++;
         const msg = String(e?.message || e);
-        if (msg.includes('410') || msg.includes('404') || msg.includes('gone')) expired.push(s.endpoint);
+        errors.push(msg.slice(0, 300));
+        console.error('push send failed', { endpoint: String(s.endpoint).slice(0, 80), message: msg, status: e?.status, name: e?.name });
+        if (msg.includes('410') || msg.includes('404') || msg.includes('403') || msg.toLowerCase().includes('gone') || msg.toLowerCase().includes('forbidden')) expired.push(s.endpoint);
       }
     }));
 
@@ -90,7 +93,7 @@ Deno.serve(async (req) => {
       await sb.from('push_subscriptions').delete().in('endpoint', expired);
     }
 
-    return new Response(JSON.stringify({ sent, failed, cleaned: expired.length }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ sent, failed, cleaned: expired.length, firstError: test ? errors[0] : undefined, note: !sent && failed ? 'Subscription expired. Enable on this device again.' : undefined }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }

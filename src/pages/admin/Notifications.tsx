@@ -62,7 +62,8 @@ export default function Notifications() {
 
   const sendTestPush = async () => {
     setTestingPush(true);
-    const { data, error } = await supabase.functions.invoke('send-push', { body: { test: true, endpoint: push.endpoint } });
+    await push.refresh();
+    const { data, error } = await supabase.functions.invoke('send-push', { body: { test: true } });
     setTestingPush(false);
     if (error) toast.error(error.message);
     else if (data?.sent) toast.success(`✅ Test push sent! Check your device.`);

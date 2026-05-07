@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import webpush from 'npm:web-push@3.6.7';
+import * as webpush from 'jsr:@negrel/webpush@0.5.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,6 +7,32 @@ const corsHeaders = {
 };
 
 const VAPID_PUBLIC = 'BOxqT2CZMmzyTb7VCe0Me9jQJcNjfE8DExyedhyNRoKlOy5dsTc-IXWgk4eLGJR9Dfsz3x9JlGbyh3IOW9pNDI0';
+
+function b64uToBytes(s: string): Uint8Array {
+  const pad = '='.repeat((4 - (s.length % 4)) % 4);
+  const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(b64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+function bytesToB64u(b: Uint8Array): string {
+  let s = '';
+  for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function buildVapidJwk(publicB64u: string, privateB64u: string) {
+  const pub = b64uToBytes(publicB64u);
+  if (pub.length !== 65 || pub[0] !== 0x04) throw new Error('Invalid VAPID public key');
+  const x = bytesToB64u(pub.slice(1, 33));
+  const y = bytesToB64u(pub.slice(33, 65));
+  const d = privateB64u.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return {
+    publicKey: { kty: 'EC', crv: 'P-256', x, y, key_ops: ['verify'] },
+    privateKey: { kty: 'EC', crv: 'P-256', x, y, d, key_ops: ['sign'] },
+  };
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -16,7 +42,12 @@ Deno.serve(async (req) => {
     if (!VAPID_PRIVATE) {
       return new Response(JSON.stringify({ error: 'VAPID_PRIVATE_KEY missing' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    webpush.setVapidDetails('mailto:admin@glamora.shop', VAPID_PUBLIC, VAPID_PRIVATE);
+    const exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE);
+    const vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
+    const appServer = await webpush.ApplicationServer.new({
+      contactInformation: 'mailto:admin@glamora.shop',
+      vapidKeys,
+    });
 
     const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -42,15 +73,16 @@ Deno.serve(async (req) => {
     const expired: string[] = [];
     await Promise.all(subs.map(async (s: any) => {
       try {
-        await webpush.sendNotification(
-          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-          payload,
-          { TTL: 60 }
-        );
+        const subscriber = appServer.subscribe({
+          endpoint: s.endpoint,
+          keys: { p256dh: s.p256dh, auth: s.auth },
+        });
+        await subscriber.pushTextMessage(payload, { ttl: 60 });
         sent++;
       } catch (e: any) {
         failed++;
-        if (e?.statusCode === 410 || e?.statusCode === 404) expired.push(s.endpoint);
+        const msg = String(e?.message || e);
+        if (msg.includes('410') || msg.includes('404') || msg.includes('gone')) expired.push(s.endpoint);
       }
     }));
 

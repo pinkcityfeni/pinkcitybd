@@ -17,7 +17,24 @@ function bufToB64(buf: ArrayBuffer | null) {
   const bytes = new Uint8Array(buf);
   let s = '';
   for (let i = 0; i < bytes.byteLength; i++) s += String.fromCharCode(bytes[i]);
-  return btoa(s);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function saveSubscription(sub: PushSubscription) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not signed in');
+
+  const json = sub.toJSON();
+  const { error } = await supabase.from('push_subscriptions').upsert({
+    user_id: user.id,
+    endpoint: sub.endpoint,
+    p256dh: json.keys?.p256dh || bufToB64(sub.getKey('p256dh')),
+    auth: json.keys?.auth || bufToB64(sub.getKey('auth')),
+    user_agent: navigator.userAgent.slice(0, 200),
+    last_used_at: new Date().toISOString(),
+  }, { onConflict: 'endpoint' });
+  if (error) throw error;
+  return sub.endpoint;
 }
 
 export function usePushSubscription() {
@@ -35,10 +52,17 @@ export function usePushSubscription() {
     try {
       const reg = await navigator.serviceWorker.getRegistration();
       const sub = await reg?.pushManager.getSubscription();
-      setSubscribed(!!sub);
-      setEndpoint(sub?.endpoint || null);
+      if (sub) {
+        const savedEndpoint = await saveSubscription(sub);
+        setSubscribed(true);
+        setEndpoint(savedEndpoint);
+      } else {
+        setSubscribed(false);
+        setEndpoint(null);
+      }
     } catch {
       setSubscribed(false);
+      setEndpoint(null);
     }
   }, []);
 
@@ -48,13 +72,19 @@ export function usePushSubscription() {
     setLoading(true);
     try {
       let reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) reg = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
+      if (!reg) await navigator.serviceWorker.register('/sw.js');
+      reg = await navigator.serviceWorker.ready;
 
       const perm = await Notification.requestPermission();
       if (perm !== 'granted') throw new Error('Notification permission denied');
 
       let sub = await reg.pushManager.getSubscription();
+      const existingKey = sub?.options.applicationServerKey ? bufToB64(sub.options.applicationServerKey) : null;
+      if (sub && existingKey && existingKey !== VAPID_PUBLIC_KEY) {
+        await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+        await sub.unsubscribe();
+        sub = null;
+      }
       if (!sub) {
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
@@ -62,23 +92,11 @@ export function usePushSubscription() {
         });
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not signed in');
-
-      const json = sub.toJSON();
-      const { error } = await supabase.from('push_subscriptions').upsert({
-        user_id: user.id,
-        endpoint: sub.endpoint,
-        p256dh: json.keys?.p256dh || bufToB64(sub.getKey('p256dh')),
-        auth: json.keys?.auth || bufToB64(sub.getKey('auth')),
-        user_agent: navigator.userAgent.slice(0, 200),
-        last_used_at: new Date().toISOString(),
-      }, { onConflict: 'endpoint' });
-      if (error) throw error;
+      const savedEndpoint = await saveSubscription(sub);
 
       setSubscribed(true);
-      setEndpoint(sub.endpoint);
-      return { ok: true };
+      setEndpoint(savedEndpoint);
+      return { ok: true, endpoint: savedEndpoint };
     } catch (e: any) {
       return { ok: false, error: e.message || String(e) };
     } finally {

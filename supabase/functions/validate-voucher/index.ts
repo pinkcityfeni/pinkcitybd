@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { code, items, customerPhone, userId } = await req.json();
+    const { code, items, customerPhone } = await req.json();
     if (!code || !Array.isArray(items) || items.length === 0) {
       return json({ valid: false, error: "Code and items required" }, 400);
     }
@@ -29,6 +29,20 @@ Deno.serve(async (req) => {
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(url, key);
 
+    // Derive userId from JWT only — never trust client-supplied userId
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      try {
+        const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+        const callerClient = createClient(url, anonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user } } = await callerClient.auth.getUser();
+        userId = user?.id ?? null;
+      } catch (_) { /* anonymous */ }
+    }
+
     const codeUp = String(code).trim().toUpperCase();
     const { data: v, error } = await admin
       .from("vouchers")
@@ -36,7 +50,10 @@ Deno.serve(async (req) => {
       .eq("code", codeUp)
       .maybeSingle();
 
-    if (error) return json({ valid: false, error: error.message }, 500);
+    if (error) {
+      console.error("validate-voucher lookup error:", error);
+      return json({ valid: false, error: "Validation failed. Please try again." }, 500);
+    }
     if (!v) return json({ valid: false, error: "ভাউচার কোড সঠিক নয়" });
     if (!v.active) return json({ valid: false, error: "ভাউচারটি বর্তমানে নিষ্ক্রিয়" });
 
@@ -63,14 +80,19 @@ Deno.serve(async (req) => {
       return json({ valid: false, error: `সর্বনিম্ন অর্ডার ৳${Number(v.min_order_amount)} প্রয়োজন` });
     }
 
-    // Per-customer redemption count
+    // Per-customer redemption count — check BOTH user and phone (max), prevents fake-phone bypass
     const phoneNorm = normalizePhone(customerPhone);
     if (phoneNorm || userId) {
-      let q = admin.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id);
-      if (phoneNorm) q = q.eq("customer_phone_normalized", phoneNorm);
-      else q = q.eq("user_id", userId);
-      const { count } = await q;
-      if ((count || 0) >= Number(v.per_customer_limit)) {
+      const [byUser, byPhone] = await Promise.all([
+        userId
+          ? admin.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id).eq("user_id", userId)
+          : Promise.resolve({ count: 0 } as any),
+        phoneNorm
+          ? admin.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id).eq("customer_phone_normalized", phoneNorm)
+          : Promise.resolve({ count: 0 } as any),
+      ]);
+      const usedCount = Math.max(byUser.count || 0, byPhone.count || 0);
+      if (usedCount >= Number(v.per_customer_limit)) {
         return json({ valid: false, error: "আপনি এই ভাউচার ইতিমধ্যে ব্যবহার করেছেন" });
       }
     }
@@ -83,7 +105,8 @@ Deno.serve(async (req) => {
       code: v.code,
     });
   } catch (e: any) {
-    return json({ valid: false, error: e?.message || "Validation failed" }, 500);
+    console.error("validate-voucher error:", e);
+    return json({ valid: false, error: "Validation failed. Please try again." }, 500);
   }
 });
 

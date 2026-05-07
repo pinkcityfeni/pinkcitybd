@@ -22,6 +22,12 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (type !== "online" && type !== "pos") {
+      return new Response(JSON.stringify({ error: "Invalid order type" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -44,8 +50,56 @@ Deno.serve(async (req) => {
       }
     }
 
-    const subtotal = items.reduce(
-      (sum: number, item: any) => sum + Number(item.product?.price || 0) * Number(item.quantity || 0),
+    // POS orders require staff auth
+    if (type === "pos") {
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Authentication required for POS orders" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: roleRow } = await adminClient
+        .from("user_roles").select("role").eq("user_id", userId);
+      const roles = (roleRow || []).map((r: any) => r.role);
+      if (!roles.includes("admin") && !roles.includes("cashier")) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // ─── Server-side price lookup (never trust client prices) ───
+    const productIds: string[] = Array.from(new Set(items.map((it: any) => it?.product?.id).filter(Boolean)));
+    if (productIds.length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid items" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: dbProducts, error: prodErr } = await adminClient
+      .from("products")
+      .select("id, name, price, buying_price, category, subcategory, image, barcode")
+      .in("id", productIds);
+    if (prodErr) {
+      console.error("place-order product lookup error:", prodErr);
+      return new Response(JSON.stringify({ error: "Request failed. Please try again." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const productMap = new Map<string, any>((dbProducts || []).map((p: any) => [p.id, p]));
+    for (const it of items) {
+      if (!productMap.has(it?.product?.id)) {
+        return new Response(JSON.stringify({ error: "One or more products no longer exist" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+    // Authoritative item shape using DB prices
+    const authItems = items.map((it: any) => {
+      const p = productMap.get(it.product.id);
+      const qty = Math.max(0, Math.floor(Number(it.quantity || 0)));
+      return { product: p, quantity: qty, price: Number(p.price || 0) };
+    });
+    const subtotal = authItems.reduce(
+      (sum: number, it: any) => sum + it.price * it.quantity,
       0,
     );
     const deliveryCharge = Number(data?.deliveryCharge || 0);
@@ -99,35 +153,41 @@ Deno.serve(async (req) => {
       // Scope check
       let eligibleSubtotal = 0;
       if (v.scope_type === "product") {
-        const m = items.filter((it: any) => it.product?.id === v.scope_product_id);
+        const m = authItems.filter((it: any) => it.product?.id === v.scope_product_id);
         if (m.length === 0) {
           return new Response(JSON.stringify({ error: "ভাউচার এই প্রোডাক্টের জন্য প্রযোজ্য নয়" }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        eligibleSubtotal = m.reduce((s: number, it: any) => s + Number(it.product?.price || 0) * Number(it.quantity || 0), 0);
+        eligibleSubtotal = m.reduce((s: number, it: any) => s + it.price * it.quantity, 0);
       } else {
         const cat = String(v.scope_category || "").toLowerCase();
-        const m = items.filter((it: any) => String(it.product?.category || "").toLowerCase() === cat);
+        const m = authItems.filter((it: any) => String(it.product?.category || "").toLowerCase() === cat);
         if (m.length === 0) {
           return new Response(JSON.stringify({ error: "ভাউচার এই ক্যাটাগরির জন্য প্রযোজ্য নয়" }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        eligibleSubtotal = m.reduce((s: number, it: any) => s + Number(it.product?.price || 0) * Number(it.quantity || 0), 0);
+        eligibleSubtotal = m.reduce((s: number, it: any) => s + it.price * it.quantity, 0);
       }
       if (Number(v.min_order_amount) > 0 && subtotal < Number(v.min_order_amount)) {
         return new Response(JSON.stringify({ error: `সর্বনিম্ন অর্ডার ৳${Number(v.min_order_amount)}` }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Per-customer limit
+      // Per-customer limit — check BOTH user id and phone (take max) so attackers can't bypass with fake phone
       if (phoneNorm || userId) {
-        let q = adminClient.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id);
-        if (phoneNorm) q = q.eq("customer_phone_normalized", phoneNorm);
-        else q = q.eq("user_id", userId!);
-        const { count } = await q;
-        if ((count || 0) >= Number(v.per_customer_limit)) {
+        const limit = Number(v.per_customer_limit);
+        const [byUser, byPhone] = await Promise.all([
+          userId
+            ? adminClient.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id).eq("user_id", userId)
+            : Promise.resolve({ count: 0 } as any),
+          phoneNorm
+            ? adminClient.from("voucher_redemptions").select("id", { count: "exact", head: true }).eq("voucher_id", v.id).eq("customer_phone_normalized", phoneNorm)
+            : Promise.resolve({ count: 0 } as any),
+        ]);
+        const usedCount = Math.max(byUser.count || 0, byPhone.count || 0);
+        if (usedCount >= limit) {
           return new Response(JSON.stringify({ error: "এই ভাউচার আপনি ইতিমধ্যে ব্যবহার করেছেন" }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -178,16 +238,15 @@ Deno.serve(async (req) => {
     // Earn points: 1 point per 100 taka spent (on goods value AFTER discount & redeem, excluding delivery)
     const pointsEarned = Math.floor(totalAfterDiscount / 100);
 
-    const orderItems = items.map((item: any) => ({
+    const orderItems = authItems.map((it: any) => ({
       product: {
-        id: item.product.id,
-        name: item.product.name,
-        price: Number(item.product.price || 0),
-        buyingPrice: Number(item.product.buyingPrice || 0),
-        barcode: item.product.barcode || "",
-        image: item.product.image || "",
+        id: it.product.id,
+        name: it.product.name,
+        price: Number(it.product.price || 0),
+        barcode: it.product.barcode || "",
+        image: it.product.image || "",
       },
-      quantity: Number(item.quantity || 0),
+      quantity: it.quantity,
     }));
 
     console.log("Inserting order, total:", total);
@@ -229,7 +288,9 @@ Deno.serve(async (req) => {
 
     if (orderError) {
       console.error("Order insert error:", JSON.stringify(orderError));
-      throw orderError;
+      return new Response(JSON.stringify({ error: "Request failed. Please try again." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log("Order created:", orderRow.id);
@@ -292,19 +353,19 @@ Deno.serve(async (req) => {
     }
 
     // Update stock
-    for (const item of items) {
+    for (const it of authItems) {
       const { data: productRow } = await adminClient
         .from("products")
         .select("stock")
-        .eq("id", item.product.id)
+        .eq("id", it.product.id)
         .maybeSingle();
 
       if (productRow) {
-        const nextStock = Math.max(0, Number(productRow.stock || 0) - Number(item.quantity || 0));
+        const nextStock = Math.max(0, Number(productRow.stock || 0) - it.quantity);
         await adminClient
           .from("products")
           .update({ stock: nextStock })
-          .eq("id", item.product.id);
+          .eq("id", it.product.id);
       }
     }
 
@@ -318,7 +379,7 @@ Deno.serve(async (req) => {
     });
   } catch (error: any) {
     console.error("place-order error:", error?.message || error);
-    return new Response(JSON.stringify({ error: error?.message || "Order failed" }), {
+    return new Response(JSON.stringify({ error: "Request failed. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

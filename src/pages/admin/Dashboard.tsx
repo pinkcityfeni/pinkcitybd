@@ -46,14 +46,14 @@ export default function Dashboard() {
     const today = new Date().toISOString().slice(0, 10);
     const todayOrders = orders.filter(o => o.date.slice(0, 10) === today);
     const todaySales = todayOrders.reduce((s, o) => s + o.total, 0);
-    const todayCost = todayOrders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+    const todayCost = todayOrders.reduce((s, o) => s + o.items.reduce((c, i) => c + (Number(i.product.buyingPrice) || 0) * i.quantity, 0), 0);
     const todayProfit = todaySales - todayCost;
     const todayOnline = todayOrders.filter(o => o.type === 'online');
     const todayPos = todayOrders.filter(o => o.type === 'pos');
     const allOnline = orders.filter(o => o.type === 'online');
     const allPos = orders.filter(o => o.type === 'pos');
     const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
-    const totalCost = orders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+    const totalCost = orders.reduce((s, o) => s + o.items.reduce((c, i) => c + (Number(i.product.buyingPrice) || 0) * i.quantity, 0), 0);
     const totalProfit = totalRevenue - totalCost;
     const lowStock = products.filter(p => p.stock < 15).sort((a, b) => a.stock - b.stock);
 

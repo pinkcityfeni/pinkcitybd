@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const VAPID_PUBLIC = 'BKeIUGHuEMQX0-3HuXUu8HENVyYQ-F0QjVKxFZz6mtiLCm0fKwrSTvRlQ7LpE1nLMa5Ikp-triCdGiUG2lgy2Fw';
+const VAPID_PUBLIC = 'BEePjvU1Ppgf2mM9wGgl7ppFxXANFQG6XkMbY5m9rsiyJ_LYOHx--W6sfhxRlI8nWsXVrcvfy4_RSwVZJPaiN78';
 
 function b64uToBytes(s: string): Uint8Array {
   const pad = '='.repeat((4 - (s.length % 4)) % 4);

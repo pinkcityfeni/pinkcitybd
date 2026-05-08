@@ -89,7 +89,7 @@ export default function Dashboard() {
       const label = d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short', year: '2-digit' });
       const mo = orders.filter(o => o.date.slice(0, 7) === key);
       const rev = mo.reduce((s, o) => s + o.total, 0);
-      const cost = mo.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+      const cost = mo.reduce((s, o) => s + o.items.reduce((c, i) => c + (Number(i.product.buyingPrice) || 0) * i.quantity, 0), 0);
       monthly.push({ month: label, revenue: rev, profit: rev - cost, orders: mo.length });
     }
     return { todaySales, todayProfit, todayOrders, todayOnline, todayPos, allOnline, allPos, totalRevenue, totalProfit, lowStock, monthly, topProducts, todayTopProducts };
@@ -102,7 +102,7 @@ export default function Dashboard() {
       return d >= start && d <= end;
     });
     const sales = fOrders.reduce((s, o) => s + o.total, 0);
-    const cost = fOrders.reduce((s, o) => s + o.items.reduce((c, i) => c + i.product.buyingPrice * i.quantity, 0), 0);
+    const cost = fOrders.reduce((s, o) => s + o.items.reduce((c, i) => c + (Number(i.product.buyingPrice) || 0) * i.quantity, 0), 0);
     const profit = sales - cost;
     const online = fOrders.filter(o => o.type === 'online');
     const pos = fOrders.filter(o => o.type === 'pos');
@@ -139,7 +139,7 @@ export default function Dashboard() {
           const bId = (i.product as any)?.brandId || productBrandMap[(i.product as any)?.id];
           if (bId === b.id) {
             revenue += Number(i.product.price) * i.quantity;
-            profit += (Number(i.product.price) - Number(i.product.buyingPrice)) * i.quantity;
+            profit += (Number(i.product.price) - (Number(i.product.buyingPrice) || 0)) * i.quantity;
             hit = true;
           }
         });

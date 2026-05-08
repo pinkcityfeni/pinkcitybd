@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const VAPID_PUBLIC = 'BKeIUGHuEMQX0-3HuXUu8HENVyYQ-F0QjVKxFZz6mtiLCm0fKwrSTvRlQ7LpE1nLMa5Ikp-triCdGiUG2lgy2Fw';
+const VAPID_PUBLIC = 'BEePjvU1Ppgf2mM9wGgl7ppFxXANFQG6XkMbY5m9rsiyJ_LYOHx--W6sfhxRlI8nWsXVrcvfy4_RSwVZJPaiN78';
 
 function b64uToBytes(s: string): Uint8Array {
   const pad = '='.repeat((4 - (s.length % 4)) % 4);
@@ -29,7 +29,7 @@ function buildVapidJwk(publicB64u: string, privateB64u: string) {
   const y = bytesToB64u(pub.slice(33, 65));
   const priv = b64uToBytes(privateB64u);
   const scalar = priv.length === 32 ? priv : priv.length === 33 && priv[0] === 0x04 ? priv.slice(1) : priv.length === 65 && priv[0] === 0x04 ? priv.slice(33, 65) : null;
-  if (!scalar) throw new Error('Invalid VAPID private key');
+  if (!scalar) throw new Error('Invalid VAPID private key (got ' + priv.length + ' bytes)');
   const d = bytesToB64u(scalar);
   return {
     publicKey: { kty: 'EC', crv: 'P-256', x, y, key_ops: ['verify'] },
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     if (!VAPID_PRIVATE) {
       return new Response(JSON.stringify({ error: 'VAPID_PRIVATE_KEY missing' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE);
+    const exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE.trim());
     const vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
     const appServer = await webpush.ApplicationServer.new({
       contactInformation: 'mailto:admin@glamora.shop',

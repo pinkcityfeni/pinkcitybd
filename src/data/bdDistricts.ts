@@ -9,15 +9,12 @@ export const BD_DISTRICTS_EN = [
   'Sunamganj','Sylhet','Tangail','Thakurgaon',
 ] as const;
 
-export const BD_DISTRICTS_BN: Record<string, string> = {
-  'Bagerhat': 'Bagerhat','Bandarban': 'Bandarban','Barguna': 'Barguna','Barisal': 'Barisal','Bhola': 'Bhola',
-  'Bogura': 'Bogra','Brahmanbaria': 'Brahmanbaria','Chandpur': 'Chandpur','Chattogram': 'Chattogram','Chuadanga': 'Chuadanga',
-  'Cox\'s Bazar': 'Cox's Bazar','Cumilla': 'Cumilla','Dhaka': 'Dhaka','Dinajpur': 'Dinajpur','Faridpur': 'Faridpur',
-  'Feni': 'Feni','Gaibandha': 'Gaibandha','Gazipur': 'Gazipur','Gopalganj': 'Gopalganj','Habiganj': 'Habiganj',
-  'Jamalpur': 'Jamalpur','Jashore': 'Jashore','Jhalokati': 'Jhalokati','Jhenaidah': 'Jhenaidah','Joypurhat': 'Joypurhat',
-  'Khagrachhari': 'Khagrachari','Khulna': 'Khulna','Kishoreganj': 'Kishoreganj','Kurigram': 'Kurigram','Kushtia': 'Kushtia',
-  'Lakshmipur': 'Lakshmipur','Lalmonirhat': 'Lalmonirhat','Madaripur': 'Madaripur','Magura': 'Magura','Manikganj': 'Manikganj',
-  'Meherpur': 'Meherpur','Moulvibazar': 'Moulvibazar','Munshiganj': 'Munshiganj','Mymensingh': 'Mymensingh','Naogaon': 'Naogaon',
+export const BD_DISTRICTS_BN: Record<string, string> = Object.fromEntries(
+  BD_DISTRICTS_EN.map((d) => [d, d])
+);
+
+const _UNUSED_BD_LEGACY = {
+  'Bagerhat': 'Bagerhat','Bandarban': 'Bandarban',
   'Narail': 'Narail','Narayanganj': 'Narayanganj','Narsingdi': 'Narsingdi','Natore': 'Natore','Nawabganj': 'Nawabganj',
   'Netrokona': 'Netrokona','Nilphamari': 'Nilphamari','Noakhali': 'Noakhali','Pabna': 'Pabna','Panchagarh': 'Panchagarh',
   'Patuakhali': 'Patuakhali','Pirojpur': 'Pirojpur','Rajbari': 'Rajbari','Rajshahi': 'Rajshahi','Rangamati': 'Rangamati',

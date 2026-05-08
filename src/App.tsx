@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,8 +9,8 @@ import { LanguageProvider } from "@/data/language";
 
 // Layouts
 import StoreLayout from "@/components/store/StoreLayout";
-import AdminLayout from "@/components/admin/AdminLayout";
-import POSLayout from "@/components/pos/POSLayout";
+const AdminLayout = lazy(() => import("@/components/admin/AdminLayout"));
+const POSLayout = lazy(() => import("@/components/pos/POSLayout"));
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Public pages - Store
@@ -28,30 +29,43 @@ import Signup from "@/pages/auth/Signup";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 
-// POS pages (protected: cashier or admin)
-import POSSales from "@/pages/pos/POSSales";
-import POSSalesHistory from "@/pages/pos/POSSalesHistory";
-import POSBarcode from "@/pages/pos/POSBarcode";
+// POS pages (lazy)
+const POSSales = lazy(() => import("@/pages/pos/POSSales"));
+const POSSalesHistory = lazy(() => import("@/pages/pos/POSSalesHistory"));
+const POSBarcode = lazy(() => import("@/pages/pos/POSBarcode"));
 
-// Admin pages (protected: admin only)
-import Dashboard from "@/pages/admin/Dashboard";
-import Products from "@/pages/admin/Products";
-import Orders from "@/pages/admin/Orders";
-import Inventory from "@/pages/admin/Inventory";
-import Sales from "@/pages/admin/Sales";
-import Users from "@/pages/admin/Users";
-import AdminCategories from "@/pages/admin/Categories";
-import AdminBanners from "@/pages/admin/Banners";
-import AdminReviews from "@/pages/admin/Reviews";
-import AdminCustomers from "@/pages/admin/Customers";
-import FacebookImport from "@/pages/admin/FacebookImport";
-import Brands from "@/pages/admin/Brands";
-import Vouchers from "@/pages/admin/Vouchers";
-import DeliveryAreas from "@/pages/admin/DeliveryAreas";
-import AdminNotifications from "@/pages/admin/Notifications";
+// Admin pages (lazy)
+const Dashboard = lazy(() => import("@/pages/admin/Dashboard"));
+const Products = lazy(() => import("@/pages/admin/Products"));
+const Orders = lazy(() => import("@/pages/admin/Orders"));
+const Inventory = lazy(() => import("@/pages/admin/Inventory"));
+const Sales = lazy(() => import("@/pages/admin/Sales"));
+const Users = lazy(() => import("@/pages/admin/Users"));
+const AdminCategories = lazy(() => import("@/pages/admin/Categories"));
+const AdminBanners = lazy(() => import("@/pages/admin/Banners"));
+const AdminReviews = lazy(() => import("@/pages/admin/Reviews"));
+const AdminCustomers = lazy(() => import("@/pages/admin/Customers"));
+const FacebookImport = lazy(() => import("@/pages/admin/FacebookImport"));
+const Brands = lazy(() => import("@/pages/admin/Brands"));
+const Vouchers = lazy(() => import("@/pages/admin/Vouchers"));
+const DeliveryAreas = lazy(() => import("@/pages/admin/DeliveryAreas"));
+const AdminNotifications = lazy(() => import("@/pages/admin/Notifications"));
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const PageFallback = () => (
+  <div className="min-h-screen flex items-center justify-center text-muted-foreground text-sm">
+    Loading…
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -61,6 +75,7 @@ const App = () => (
         <Sonner />
        <BrowserRouter>
           <ScrollToTop />
+          <Suspense fallback={<PageFallback />}>
           <Routes>
             {/* ─── Public: Customer Storefront ─── */}
             <Route element={<StoreLayout />}>
@@ -124,6 +139,7 @@ const App = () => (
             {/* ─── Catch-all ─── */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </LanguageProvider>

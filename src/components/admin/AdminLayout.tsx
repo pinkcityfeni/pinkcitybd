@@ -70,10 +70,6 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
         {!collapsed && user && (
           <div className="px-3 py-2 text-xs opacity-60 truncate">{user.name}</div>
         )}
-        <button onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-sidebar-accent/50 w-full text-left">
-          <Globe className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>{lang === 'bn' ? 'English' : 'বাংলা'}</span>}
-        </button>
         <Link to="/pos" onClick={handleLink} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-sidebar-accent/50">
           <ScanBarcode className="h-4 w-4 shrink-0" />
           {!collapsed && <span>{t('admin.pos')}</span>}

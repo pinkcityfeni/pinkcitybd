@@ -170,7 +170,7 @@ export default function Account() {
                   <SelectTrigger><SelectValue placeholder={t('checkout.selectArea')} /></SelectTrigger>
                   <SelectContent>
                     {activeAreas.map(a => (
-                      <SelectItem key={a.id} value={a.name}>{a.name} — ৳{a.charge}</SelectItem>
+                      <SelectItem key={a.id} value={a.name}>{a.name} — Tk {a.charge}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -193,7 +193,7 @@ export default function Account() {
               <button className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/30 transition-colors" onClick={() => setExpandedOrder(expanded ? null : o.id)}>
                 <div><p className="font-mono text-xs text-muted-foreground">{o.id}</p><p className="text-[10px] text-muted-foreground">{new Date(o.date).toLocaleDateString(locale)}</p></div>
                 <div className="flex items-center gap-3">
-                  <div className="text-right"><p className="font-bold text-sm" style={{ fontFamily: 'DM Sans, sans-serif' }}>৳{o.total.toFixed(0)}</p><p className={`text-[10px] capitalize font-medium ${o.status === 'completed' ? 'text-success' : o.status === 'cancelled' ? 'text-destructive' : o.status === 'pending' ? 'text-warning' : 'text-info'}`}>{o.status}</p></div>
+                  <div className="text-right"><p className="font-bold text-sm" style={{ fontFamily: 'DM Sans, sans-serif' }}>Tk {o.total.toFixed(0)}</p><p className={`text-[10px] capitalize font-medium ${o.status === 'completed' ? 'text-success' : o.status === 'cancelled' ? 'text-destructive' : o.status === 'pending' ? 'text-warning' : 'text-info'}`}>{o.status}</p></div>
                   {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </button>
@@ -218,10 +218,10 @@ export default function Account() {
                   )}
                   <div className="space-y-1 pt-2 border-t">
                     {o.items.map((item: any, idx: number) => (
-                      <div key={idx} className="flex justify-between text-sm"><span className="text-muted-foreground">{item.product.name} × {item.quantity}</span><span>৳{(item.product.price * item.quantity).toFixed(0)}</span></div>
+                      <div key={idx} className="flex justify-between text-sm"><span className="text-muted-foreground">{item.product.name} × {item.quantity}</span><span>Tk {(item.product.price * item.quantity).toFixed(0)}</span></div>
                     ))}
                     {o.deliveryCharge !== undefined && o.deliveryCharge > 0 && (
-                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('cart.deliveryCharge')}</span><span>৳{o.deliveryCharge}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('cart.deliveryCharge')}</span><span>Tk {o.deliveryCharge}</span></div>
                     )}
                   </div>
                 </div>

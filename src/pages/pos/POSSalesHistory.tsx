@@ -45,8 +45,8 @@ export default function POSSalesHistory() {
         <p className="text-sm opacity-60 mb-6">{t('posHistory.nTransactions', { n: orders.length })}</p>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.totalRevenue')}</p><p className="text-xl font-bold text-primary">৳{totalRev.toFixed(0)}</p></div>
-          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.totalProfit')}</p><p className="text-xl font-bold text-success">৳{(totalRev - totalCost).toFixed(0)}</p></div>
+          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.totalRevenue')}</p><p className="text-xl font-bold text-primary">Tk {totalRev.toFixed(0)}</p></div>
+          <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.totalProfit')}</p><p className="text-xl font-bold text-success">Tk {(totalRev - totalCost).toFixed(0)}</p></div>
           <div className="pos-panel"><p className="text-xs opacity-50">{t('posHistory.transactions')}</p><p className="text-xl font-bold">{orders.length}</p></div>
         </div>
 
@@ -73,18 +73,18 @@ export default function POSSalesHistory() {
                     <td className="py-3 font-mono text-xs">{o.id.slice(0, 8)}</td>
                     <td className="py-3 text-xs">{new Date(o.date).toLocaleString(locale)}</td>
                     <td className="py-3">{o.items.length}</td>
-                    <td className="py-3 text-right font-medium">৳{o.total.toFixed(0)}</td>
+                    <td className="py-3 text-right font-medium">Tk {o.total.toFixed(0)}</td>
                     <td className="py-3 text-xs">
                       {o.splitPayment ? (
                         <span className="space-y-0.5">
-                          <span className="block">{getMethodLabel(o.splitPayment.method1)}: ৳{o.splitPayment.amount1.toFixed(0)}</span>
-                          <span className="block">{getMethodLabel(o.splitPayment.method2)}: ৳{o.splitPayment.amount2.toFixed(0)}</span>
+                          <span className="block">{getMethodLabel(o.splitPayment.method1)}: Tk {o.splitPayment.amount1.toFixed(0)}</span>
+                          <span className="block">{getMethodLabel(o.splitPayment.method2)}: Tk {o.splitPayment.amount2.toFixed(0)}</span>
                         </span>
                       ) : (
                         getMethodLabel(o.paymentMethod || 'cash')
                       )}
                     </td>
-                    <td className="py-3 text-right text-success">৳{(o.total - cost).toFixed(0)}</td>
+                    <td className="py-3 text-right text-success">Tk {(o.total - cost).toFixed(0)}</td>
                     <td className="py-3">
                       <Badge
                         variant="outline"

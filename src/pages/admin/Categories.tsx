@@ -191,7 +191,7 @@ export default function Categories() {
                           <p className="font-medium truncate">{p.name}</p>
                           <p className="text-muted-foreground">{p.subcategory}</p>
                         </div>
-                        <span className="font-semibold text-primary shrink-0 ml-2">৳{p.price.toFixed(0)}</span>
+                        <span className="font-semibold text-primary shrink-0 ml-2">Tk {p.price.toFixed(0)}</span>
                       </div>
                     ))}
                   </div>

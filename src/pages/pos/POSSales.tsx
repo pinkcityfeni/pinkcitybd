@@ -215,8 +215,8 @@ export default function POSSales() {
           <h2 className="text-2xl font-bold mb-2">{t('pos.saleComplete')}</h2>
           <p className="text-sm opacity-70 mb-1">Order: {saleComplete.order.id.slice(0, 8)}</p>
           <p className="text-sm opacity-70 mb-1">{t('pos.nItemsSold', { n: saleItemCount })}</p>
-          <p className="text-3xl font-bold text-primary my-3">৳{saleComplete.order.total.toFixed(0)}</p>
-          <p className="text-sm text-success font-medium mb-2">{t('pos.profitLabel')}: ৳{saleComplete.profit.toFixed(0)}</p>
+          <p className="text-3xl font-bold text-primary my-3">Tk {saleComplete.order.total.toFixed(0)}</p>
+          <p className="text-sm text-success font-medium mb-2">{t('pos.profitLabel')}: Tk {saleComplete.profit.toFixed(0)}</p>
           {(saleComplete.pointsEarned > 0 || saleComplete.pointsRedeemed > 0) && (
             <div className="mb-3 p-2.5 rounded-lg bg-primary/10 border border-primary/20 inline-block text-xs space-y-0.5">
               {saleComplete.pointsRedeemed > 0 && <p>Redeem: <span className="font-bold">{saleComplete.pointsRedeemed} Points</span></p>}
@@ -225,8 +225,8 @@ export default function POSSales() {
           )}
           {saleComplete.order.splitPayment ? (
             <div className="text-xs opacity-70 mb-4 space-y-0.5">
-              <p>{getMethodLabel(saleComplete.order.splitPayment.method1)}: ৳{saleComplete.order.splitPayment.amount1.toFixed(0)}</p>
-              <p>{getMethodLabel(saleComplete.order.splitPayment.method2)}: ৳{saleComplete.order.splitPayment.amount2.toFixed(0)}</p>
+              <p>{getMethodLabel(saleComplete.order.splitPayment.method1)}: Tk {saleComplete.order.splitPayment.amount1.toFixed(0)}</p>
+              <p>{getMethodLabel(saleComplete.order.splitPayment.method2)}: Tk {saleComplete.order.splitPayment.amount2.toFixed(0)}</p>
             </div>
           ) : (
             <p className="text-xs opacity-70 mb-4">{t('pos.payment')}: {getMethodLabel(saleComplete.order.paymentMethod || 'cash')}</p>
@@ -303,9 +303,9 @@ export default function POSSales() {
               <button key={p.id} onClick={() => { if (p.stock <= 0) { toast.error(t('pos.outOfStock')); return; } addToPosCart(p); toast.success(`✓ ${p.name}`, { duration: 1500 }); focusBarcode(); }} className="p-3 rounded-lg text-left transition-all hover:bg-primary/10 hover:scale-[1.02] disabled:opacity-40" style={{ background: 'hsl(var(--pos-bg))' }} disabled={p.stock === 0}>
                 <p className="text-xs truncate font-medium">{p.name}</p>
                 <div className="flex items-baseline gap-1.5 mt-1">
-                  <p className="text-sm font-bold text-primary">৳{p.price.toFixed(0)}</p>
+                  <p className="text-sm font-bold text-primary">Tk {p.price.toFixed(0)}</p>
                   {p.compareAtPrice && p.compareAtPrice > p.price && (
-                    <span className="text-[9px] line-through opacity-50">৳{p.compareAtPrice.toFixed(0)}</span>
+                    <span className="text-[9px] line-through opacity-50">Tk {p.compareAtPrice.toFixed(0)}</span>
                   )}
                 </div>
                 <div className="flex justify-between items-center mt-1">
@@ -340,7 +340,7 @@ export default function POSSales() {
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
-              <span className="text-xs font-bold w-16 text-right">৳{(item.product.price * item.quantity).toFixed(0)}</span>
+              <span className="text-xs font-bold w-16 text-right">Tk {(item.product.price * item.quantity).toFixed(0)}</span>
               <button onClick={() => removeFromPosCart(item.product.id)} className="text-destructive/70 hover:text-destructive ml-1"><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
           ))}
@@ -401,12 +401,12 @@ export default function POSSales() {
             {redeemError && <p className="text-[10px] text-destructive font-medium">{redeemError}</p>}
           </div>
 
-          <div className="flex justify-between text-xs opacity-70"><span>{t('pos.subtotal')} ({t('pos.items', { n: itemCount })})</span><span>৳{subtotal.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs opacity-70"><span>{t('pos.subtotal')} ({t('pos.items', { n: itemCount })})</span><span>Tk {subtotal.toFixed(0)}</span></div>
 
           <div className="flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-primary shrink-0" />
             <div className="flex rounded-lg overflow-hidden flex-1" style={{ background: 'hsl(var(--pos-bg))' }}>
-              <button onClick={() => setDiscountType('fixed')} className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'fixed' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}>৳</button>
+              <button onClick={() => setDiscountType('fixed')} className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'fixed' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}>Tk </button>
               <button onClick={() => setDiscountType('percent')} className={`text-[10px] px-2 py-1 font-medium transition-colors ${discountType === 'percent' ? 'bg-primary text-primary-foreground' : 'opacity-50'}`}><Percent className="h-3 w-3" /></button>
               <Input type="number" placeholder={discountType === 'fixed' ? t('pos.discountFixed') : t('pos.discountPercent')} value={discountValue} onChange={e => setDiscountValue(e.target.value)} className="h-7 text-xs bg-transparent border-0 focus-visible:ring-0 flex-1" />
             </div>
@@ -414,7 +414,7 @@ export default function POSSales() {
           {discountAmount > 0 && (
             <div className="flex justify-between text-xs font-medium text-destructive">
               <span>{t('pos.discount')} {discountType === 'percent' ? `(${discountNum}%)` : ''}</span>
-              <span>-৳{discountAmount.toFixed(0)}</span>
+              <span>-Tk {discountAmount.toFixed(0)}</span>
             </div>
           )}
 
@@ -436,21 +436,21 @@ export default function POSSales() {
           {voucherDiscount > 0 && appliedVoucher && (
             <div className="flex justify-between text-xs font-medium text-primary">
               <span>Voucher ({appliedVoucher.code})</span>
-              <span>-৳{voucherDiscount.toFixed(0)}</span>
+              <span>-Tk {voucherDiscount.toFixed(0)}</span>
             </div>
           )}
 
           {effectiveRedeem > 0 && (
             <div className="flex justify-between text-xs font-medium text-primary">
               <span>Redeem Points ({effectiveRedeem})</span>
-              <span>-৳{effectiveRedeem.toFixed(0)}</span>
+              <span>-Tk {effectiveRedeem.toFixed(0)}</span>
             </div>
           )}
 
-          <div className="flex justify-between text-xs opacity-70"><span>{t('pos.costLabel')}</span><span>৳{totalCost.toFixed(0)}</span></div>
-          <div className="flex justify-between text-xs font-medium text-success"><span>{t('pos.profitLabel')}</span><span>৳{profit.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs opacity-70"><span>{t('pos.costLabel')}</span><span>Tk {totalCost.toFixed(0)}</span></div>
+          <div className="flex justify-between text-xs font-medium text-success"><span>{t('pos.profitLabel')}</span><span>Tk {profit.toFixed(0)}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2" style={{ borderColor: 'hsl(var(--pos-border))' }}>
-            <span>{t('pos.total')}</span><span className="text-primary">৳{total.toFixed(0)}</span>
+            <span>{t('pos.total')}</span><span className="text-primary">Tk {total.toFixed(0)}</span>
           </div>
           {willEarn > 0 && customerPhone && (
             <p className="text-[10px] text-success flex items-center gap-1"><Sparkles className="h-2.5 w-2.5" /> On this order +{willEarn} Points will be added</p>
@@ -488,7 +488,7 @@ export default function POSSales() {
                 <div>
                   <div className="flex justify-between items-center">
                     <p className="text-[10px] opacity-50 mb-1">{t('pos.secondPayment')}</p>
-                    <p className="text-[10px] font-medium text-primary">৳{splitAmt2.toFixed(0)}</p>
+                    <p className="text-[10px] font-medium text-primary">Tk {splitAmt2.toFixed(0)}</p>
                   </div>
                   <div className="flex gap-1">
                     {PAYMENT_METHODS.map(pm => (
@@ -503,7 +503,7 @@ export default function POSSales() {
           </div>
 
           <Button className="w-full" size="lg" disabled={posCart.length === 0 || !!redeemError} onClick={handleCompleteSale}>
-            {t('pos.completeSale')} — ৳{total.toFixed(0)}
+            {t('pos.completeSale')} — Tk {total.toFixed(0)}
           </Button>
         </div>
       </div>

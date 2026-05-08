@@ -70,12 +70,12 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
     }
     const name = textLines[0]?.slice(0, 80) || '';
     const rest = textLines.slice(1).join('\n');
-    const priceMatch = rest.match(/(?:৳|tk|Taka|price[\s:]+)\s*(\d{2,6})/i)
-      || rest.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i)
-      || block.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i);
+    const priceMatch = rest.match(/(?:Tk |tk|Taka|price[\s:]+)\s*(\d{2,6})/i)
+      || rest.match(/\b(\d{2,5})\s*(?:tk|Taka|Tk )/i)
+      || block.match(/\b(\d{2,5})\s*(?:tk|Taka|Tk )/i);
     const price = priceMatch ? priceMatch[1] : '';
-    const compareMatch = block.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|Taka)?\s*(\d{2,6})/i)
-      || block.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareMatch = block.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:Tk |tk|Taka)?\s*(\d{2,6})/i)
+      || block.match(/~~\s*(?:Tk |tk)?\s*(\d{2,6})\s*~~/i);
     const compareAtPrice = compareMatch ? compareMatch[1] : '';
     const description = rest.replace(/(?:price[\s:]+)\s*\d{2,6}/gi, '').trim();
     return {
@@ -115,10 +115,10 @@ export default function FacebookImport() {
     const lines = pastedText.split('\n').map(l => l.trim()).filter(Boolean);
     const name = lines[0]?.slice(0, 80) || '';
     const description = lines.slice(1).join('\n').trim() || lines[0] || '';
-    const priceMatch = pastedText.match(/(?:৳|tk|Taka|price[\s]+)\s*(\d{2,6})/i) || pastedText.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i);
+    const priceMatch = pastedText.match(/(?:Tk |tk|Taka|price[\s]+)\s*(\d{2,6})/i) || pastedText.match(/\b(\d{2,5})\s*(?:tk|Taka|Tk )/i);
     const price = priceMatch ? priceMatch[1] : '';
-    const compareMatch = pastedText.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|Taka)?\s*(\d{2,6})/i)
-      || pastedText.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
+    const compareMatch = pastedText.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:Tk |tk|Taka)?\s*(\d{2,6})/i)
+      || pastedText.match(/~~\s*(?:Tk |tk)?\s*(\d{2,6})\s*~~/i);
     const compareAt = compareMatch ? compareMatch[1] : '';
     setForm(f => ({ ...f, name, description, price: price || f.price, compareAtPrice: compareAt || f.compareAtPrice }));
     toast.success('Text parse Has been');
@@ -379,13 +379,13 @@ export default function FacebookImport() {
             <div><Label>Description</Label>
               <Textarea rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Selling Price (৳) *</Label>
+              <div><Label>Selling Price (Tk ) *</Label>
                 <Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
-              <div><Label>Buying Price (৳)</Label>
+              <div><Label>Buying Price (Tk )</Label>
                 <Input type="number" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
             <div>
-              <Label>Original Price / Discount Previous Price (৳)</Label>
+              <Label>Original Price / Discount Previous Price (Tk )</Label>
               <Input type="number" placeholder="Such as 700" value={form.compareAtPrice}
                 onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
               {Number(form.compareAtPrice) > Number(form.price) && Number(form.price) > 0 && (
@@ -500,7 +500,7 @@ Price: 350 tk`}</pre>
                 <Button size="sm" variant="outline" onClick={applyBrandToSelected}>Apply Brand</Button>
                 <Button size="sm" variant="outline" onClick={applyStockToSelected}>Apply Stock</Button>
                 <div className="flex items-center gap-1">
-                  <Input type="number" placeholder="Original ৳" className="h-8 w-24"
+                  <Input type="number" placeholder="Original Tk " className="h-8 w-24"
                     value={defaultCompareAt} onChange={e => setDefaultCompareAt(e.target.value)} />
                   <Button size="sm" variant="outline" onClick={applyCompareToSelected}>Apply</Button>
                 </div>
@@ -521,7 +521,7 @@ Price: 350 tk`}</pre>
                       <TableHead className="w-24">Images</TableHead>
                       <TableHead className="min-w-[180px]">Name *</TableHead>
                       <TableHead className="w-24">Price *</TableHead>
-                      <TableHead className="w-24">Original ৳</TableHead>
+                      <TableHead className="w-24">Original Tk </TableHead>
                       <TableHead className="w-20">Stock</TableHead>
                       <TableHead className="min-w-[120px]">Brand *</TableHead>
                       <TableHead className="min-w-[140px]">Category *</TableHead>

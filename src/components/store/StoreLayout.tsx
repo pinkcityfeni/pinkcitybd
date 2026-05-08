@@ -216,7 +216,7 @@ export default function StoreLayout() {
               </div>
               <div className="trust-badge">
                 <div className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center">
-                  <span className="text-lg font-bold">৳</span>
+                  <span className="text-lg font-bold">Tk </span>
                 </div>
                 <div>
                   <p className="text-xs font-semibold">{lang === 'bn' ? 'Best price' : 'Best Price'}</p>

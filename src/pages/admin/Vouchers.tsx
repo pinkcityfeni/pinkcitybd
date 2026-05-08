@@ -187,7 +187,7 @@ export default function Vouchers() {
                       {!v.active && <Badge variant="secondary">Inactive</Badge>}
                       {expired && <Badge variant="destructive">Expired</Badge>}
                     </div>
-                    <p className="text-2xl font-bold">৳{v.discountAmount}</p>
+                    <p className="text-2xl font-bold">Tk {v.discountAmount}</p>
                     <p className="text-xs text-muted-foreground capitalize mt-0.5">
                       {v.scopeType === 'product' ? `Product: ${productName(v.scopeProductId)}` : `Category: ${v.scopeCategory}`}
                     </p>
@@ -216,7 +216,7 @@ export default function Vouchers() {
                   {v.minOrderAmount > 0 && (
                     <div className="col-span-2">
                       <p className="opacity-60">Min order</p>
-                      <p className="font-medium text-foreground">৳{v.minOrderAmount}</p>
+                      <p className="font-medium text-foreground">Tk {v.minOrderAmount}</p>
                     </div>
                   )}
                 </div>
@@ -241,7 +241,7 @@ export default function Vouchers() {
             </div>
 
             <div>
-              <Label>Discount Amount (৳)</Label>
+              <Label>Discount Amount (Tk )</Label>
               <Input type="number" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="50" className="mt-1" />
             </div>
 
@@ -271,7 +271,7 @@ export default function Vouchers() {
                 >
                   <option value="">— Choose —</option>
                   {products.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} (৳{p.price})</option>
+                    <option key={p.id} value={p.id}>{p.name} (Tk {p.price})</option>
                   ))}
                 </select>
               </div>
@@ -308,7 +308,7 @@ export default function Vouchers() {
                 <Input type="number" min={1} value={perCustomerLimit} onChange={e => setPerCustomerLimit(e.target.value)} className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Min order ৳</Label>
+                <Label className="text-xs">Min order Tk </Label>
                 <Input type="number" min={0} value={minOrder} onChange={e => setMinOrder(e.target.value)} className="mt-1" />
               </div>
             </div>

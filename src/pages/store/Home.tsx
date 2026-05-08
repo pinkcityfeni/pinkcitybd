@@ -93,7 +93,7 @@ export default function Home() {
               <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? '100% Original' : '100% Original'}</p>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
-              <span className="text-lg font-bold text-primary">৳</span>
+              <span className="text-lg font-bold text-primary">Tk </span>
               <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'Best price' : 'Best Price'}</p>
             </div>
           </div>

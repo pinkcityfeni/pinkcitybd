@@ -21,10 +21,10 @@ export function PriceTag({ price, compareAt, size = 'md', className, showBadge =
 
   return (
     <div className={cn('flex items-center gap-1.5 flex-wrap', className)} style={{ fontFamily: 'DM Sans, sans-serif' }}>
-      <span className={cn('font-bold text-primary', s.price)}>৳{price.toFixed(0)}</span>
+      <span className={cn('font-bold text-primary', s.price)}>Tk {price.toFixed(0)}</span>
       {hasDiscount && (
         <>
-          <span className={cn('text-muted-foreground line-through', s.compare)}>৳{compareAt!.toFixed(0)}</span>
+          <span className={cn('text-muted-foreground line-through', s.compare)}>Tk {compareAt!.toFixed(0)}</span>
           {showBadge && (
             <span className={cn('inline-flex items-center rounded-full bg-destructive/10 text-destructive font-semibold', s.badge)}>
               −{pct}%

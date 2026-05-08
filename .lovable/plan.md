@@ -1,72 +1,50 @@
-# Web Push Notifications for Admin
+# আপনার কোডবেস audit — কী কী আছে আর কী ই আর কাজে আসছে না
 
-## Goal
-Order/review/advance-payment আসলে admin এর phone/desktop এ Messenger-style notification আসবে — sound, vibration, lock screen এ — even website বন্ধ থাকলেও।
+আমি পুরো project স্ক্যান করে দেখলাম। নিচে দুইটা list:
 
-## How it works (simple)
+---
 
-```
-Customer order → DB trigger → Edge function → Push service (Google/Apple)
-                                                    ↓
-                              📱 Admin phone "ding!" 🔔
-```
+## A) Code এ আছে কিন্তু আর কাজে আসছে না (remove করা যায়)
 
-Browser-এ একবার "Allow notifications" দিলেই হবে। Phone home screen-এ Glamora app icon save করলে native app এর মতো feel আসবে।
+1. **`src/data/userRegistry.ts`** — কোথাও import হচ্ছে না। সম্পূর্ণ unused dead file।
+2. **POS Barcode page** (`src/pages/pos/POSBarcode.tsx` + `/pos/barcode` route + POSLayout এর nav item)
+   - Barcode scanner এখন আর কোনো actual flow এ ব্যবহার হচ্ছে না — শুধু একটা standalone page। চাইলে রাখতে পারেন, না চাইলে remove।
+3. **Facebook Import** (`src/pages/admin/FacebookImport.tsx` + `/admin/fb-import` route + AdminLayout nav item)
+   - এখনো admin sidebar এ আছে। আপনি use করছেন কিনা confirm করলে remove করব।
+4. **পুরোনো notification কোড** এর কোন leftover আর নেই (আগের loop এ পরিষ্কার করা হয়েছে — verified)।
+5. **Push subscription related migration / table** — DB তে `push_subscriptions` table drop হয়ে গেছে, কোডেও কিছু নেই — clean ✅।
 
-## What I'll build
+---
 
-### 1. PWA setup (phone-এ install করা যাবে)
-- `public/manifest.json` update — Glamora branding, icons, theme color
-- `public/sw.js` — service worker যেটা background-এ push receive করবে
-- App register করার code `main.tsx`-এ
+## B) আরও যা যা change/improve করা যেতে পারে
 
-### 2. Push subscription system
-- নতুন table `push_subscriptions` — admin/cashier-এর device tokens store হবে
-- Admin Notifications page-এ button: "📱 Enable Phone Notifications"
-- Click করলে browser permission চাইবে → subscription save হবে
-- প্রতি device আলাদা register হবে (phone + desktop দুটোই কাজ করবে)
+### Performance / UX
+1. **Bundle slim করা** — `src/components/ui/` তে ৪৯টা shadcn component আছে; অনেকগুলো সম্ভবত ব্যবহার হচ্ছে না। Audit করে unused গুলো delete করতে পারি (build size কমবে)।
+2. **Image optimization** — `pink-city-text.jpg`, `logo.jpg` ইত্যাদি jpg/png; WebP এ convert করলে load fast হবে।
+3. **Lazy loading routes** — Admin/POS pages এখন eagerly import হচ্ছে। `React.lazy()` দিয়ে split করলে customer-side initial load অনেক fast হবে।
+4. **React Query stale time** — `new QueryClient()` default config এ; products/categories এর জন্য `staleTime` দিলে repeat fetch কমবে।
 
-### 3. Push sender (edge function)
-- নতুন function `send-push` — VAPID keys দিয়ে push পাঠাবে
-- existing `forward_notification_to_telegram` trigger-এ একই সাথে এটাও call হবে
-- Notification payload-এ থাকবে: emoji + title, body, click URL, sound flag
+### Feature gaps / polish
+5. **SEO** — Home/Shop/Category/Product pages এ `<title>`, meta description, JSON-LD product schema নেই। Google ranking এ help করবে।
+6. **PWA / "Add to Home Screen"** — manifest + service worker দিলে mobile এ app-like install হবে।
+7. **Order tracking page** — customer তার order এর status দেখতে পারে এমন কিছু আছে কিনা check করিনি; না থাকলে add করা যায়।
+8. **Wishlist sync** — এখন local state তে নাকি DB তে save হচ্ছে check করে দরকার হলে DB-backed করা।
+9. **Product reviews moderation flow** — admin reviews page আছে, কিন্তু customer-facing UI তে rating display কেমন আছে verify করা।
+10. **Stock low alert** — Telegram notification এ "low stock" trigger যোগ করা।
+11. **Customer points / loyalty** — DB তে `customer_points` + `point_transactions` table আছে আর hooks ও আছে, কিন্তু UI তে কতটুকু expose করা আছে দেখে polish করা যায়।
 
-### 4. Service worker behavior
-- Push আসলে: notification show + custom sound play (`/notification.mp3`)
-- Click করলে: admin orders page খুলবে
-- Vibration pattern (Messenger style): [200, 100, 200]
+### Security / housekeeping
+12. **Security scan run** — RLS policy review একটা scan চালিয়ে নিশ্চিত করা।
+13. **Console errors / network errors** clean করা।
 
-### 5. Admin UI updates
-- Notifications page-এ নতুন card: "📱 Phone Push Notifications"
-- Status badge: Enabled/Disabled per device
-- Test button: "Send test push"
-- "Disable on this device" option
+---
 
-## Setup steps for you (one-time, 2 মিনিট)
+## পরবর্তী step
 
-1. **Allow** চাপবেন যখন browser permission চাইবে
-2. Phone Chrome-এ site খুলে → menu → "Add to Home Screen" → Glamora icon চলে আসবে
-3. Test push পাঠিয়ে confirm করবেন
-4. ব্যাস! এরপর order এলেই phone "ding" 🔔
+আপনি বলুন কোনগুলো করব — আমি একটা একটা করে handle করব। সবচেয়ে recommend করব:
 
-## Technical details
+- **প্রথমে A সেকশনের 1-3** (dead code remove) — safe + instant cleanup
+- **তারপর B-1, B-3** (bundle slim + lazy routes) — site fast হবে
+- **এরপর B-5** (SEO) — Google search এ আসার জন্য
 
-**VAPID keys**: Edge function-এ generate করব, public key client-এ যাবে, private key secret হিসেবে থাকবে। কোনো paid service লাগবে না — Google/Apple এর free push servers ব্যবহার হবে।
-
-**Library**: `web-push` (Deno-compatible) for sending, browser native `PushManager` API for subscribing।
-
-**iOS support**: iOS 16.4+ Safari supports web push, কিন্তু site টা home screen-এ add করতেই হবে (PWA mode)। Android Chrome সব version-এ কাজ করে directly।
-
-**Notification sound**: Default system sound + custom `notification.mp3` (Messenger-like ding) play হবে service worker থেকে।
-
-**Existing flow**: Telegram + browser alert + in-app bell সব আগের মতো কাজ করবে — শুধু এই push টা যোগ হবে extra layer হিসেবে।
-
-## Files to add/edit
-
-- New: `public/manifest.json` (update), `public/sw.js`, `public/notification.mp3`
-- New: `supabase/functions/send-push/index.ts`
-- New migration: `push_subscriptions` table + trigger update
-- Edit: `src/main.tsx` (SW register), `src/pages/admin/Notifications.tsx` (push UI)
-- Add secrets: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
-
-Approve করলে শুরু করি?
+কোনগুলোতে যাব?

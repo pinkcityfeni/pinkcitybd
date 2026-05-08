@@ -9,8 +9,9 @@ const corsHeaders = {
 const VAPID_PUBLIC = 'BEePjvU1Ppgf2mM9wGgl7ppFxXANFQG6XkMbY5m9rsiyJ_LYOHx--W6sfhxRlI8nWsXVrcvfy4_RSwVZJPaiN78';
 
 function b64uToBytes(s: string): Uint8Array {
-  const pad = '='.repeat((4 - (s.length % 4)) % 4);
-  const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+  const cleaned = s.trim().replace(/\s+/g, '').replace(/=+$/, '');
+  const pad = '='.repeat((4 - (cleaned.length % 4)) % 4);
+  const b64 = (cleaned + pad).replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(b64);
   const out = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
@@ -45,8 +46,26 @@ Deno.serve(async (req) => {
     if (!VAPID_PRIVATE) {
       return new Response(JSON.stringify({ error: 'VAPID_PRIVATE_KEY missing' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE.trim());
-    const vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
+    let exported;
+    try {
+      exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE.trim());
+    } catch (err: any) {
+      const v = VAPID_PRIVATE.trim();
+      return new Response(JSON.stringify({
+        error: 'VAPID_PRIVATE_KEY is invalid: ' + err.message,
+        debug: { length: v.length, firstChars: v.slice(0, 4), lastChars: v.slice(-4), hasInvalidChars: /[^A-Za-z0-9_\-=]/.test(v) }
+      }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    let vapidKeys;
+    try {
+      vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
+    } catch (err: any) {
+      const v = VAPID_PRIVATE.trim();
+      return new Response(JSON.stringify({
+        error: 'importVapidKeys failed: ' + err.message,
+        debug: { privLen: v.length, dLen: exported.privateKey.d.length, xLen: exported.privateKey.x.length, yLen: exported.privateKey.y.length }
+      }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
     const appServer = await webpush.ApplicationServer.new({
       contactInformation: 'mailto:admin@glamora.shop',
       vapidKeys,

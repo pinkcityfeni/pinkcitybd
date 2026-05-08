@@ -217,7 +217,7 @@ export default function ProductDetail() {
               <PriceTag price={product.price} compareAt={product.compareAtPrice} size="lg" />
               {product.compareAtPrice && product.compareAtPrice > product.price && (
                 <p className="text-xs text-success font-medium mt-1">
-                  {t('product.savings')} Tk {(product.compareAtPrice - product.price).toFixed(0)}
+                  {t('product.savings')} ৳{(product.compareAtPrice - product.price).toFixed(0)}
                 </p>
               )}
             </div>
@@ -231,7 +231,7 @@ export default function ProductDetail() {
                 <span className="px-4 py-2 min-w-[3rem] text-center font-semibold text-sm border-x">{qty}</span>
                 <button className="px-3.5 py-2 hover:bg-muted text-sm font-bold transition-colors" onClick={() => setQty(q => Math.min(product.stock, q + 1))}>+</button>
               </div>
-              <p className="text-sm text-muted-foreground">= <span className="font-bold text-foreground">Tk {(product.price * qty).toFixed(0)}</span></p>
+              <p className="text-sm text-muted-foreground">= <span className="font-bold text-foreground">৳{(product.price * qty).toFixed(0)}</span></p>
             </div>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row">
               <Button variant="outline" onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 rounded-lg h-11 font-semibold"><ShoppingCart className="h-4 w-4 mr-2" /> {t('product.addToCart')}</Button>

@@ -184,16 +184,16 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={TrendingUp} label={t('dash.sales')} value={`Tk ${filtered.sales.toFixed(0)}`} sub={t('dash.orders', { n: filtered.orders.length })} color="text-primary" bgColor="bg-primary/10" />
-        <StatCard icon={ArrowUpRight} label={t('dash.profit')} value={`Tk ${filtered.profit.toFixed(0)}`} sub={`${t('dash.cost')}: Tk ${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
-        <StatCard icon={Monitor} label={t('dash.onlineLabel')} value={filtered.online.length.toString()} sub={`Tk ${filtered.online.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-blue-500" bgColor="bg-blue-500/10" />
-        <StatCard icon={ScanBarcode} label={t('dash.posLabel')} value={filtered.pos.length.toString()} sub={`Tk ${filtered.pos.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-violet-500" bgColor="bg-violet-500/10" />
+        <StatCard icon={TrendingUp} label={t('dash.sales')} value={`৳${filtered.sales.toFixed(0)}`} sub={t('dash.orders', { n: filtered.orders.length })} color="text-primary" bgColor="bg-primary/10" />
+        <StatCard icon={ArrowUpRight} label={t('dash.profit')} value={`৳${filtered.profit.toFixed(0)}`} sub={`${t('dash.cost')}: ৳${filtered.cost.toFixed(0)}`} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={Monitor} label={t('dash.onlineLabel')} value={filtered.online.length.toString()} sub={`৳${filtered.online.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-blue-500" bgColor="bg-blue-500/10" />
+        <StatCard icon={ScanBarcode} label={t('dash.posLabel')} value={filtered.pos.length.toString()} sub={`৳${filtered.pos.reduce((s, o) => s + o.total, 0).toFixed(0)}`} color="text-violet-500" bgColor="bg-violet-500/10" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={Package} label={t('dash.totalProducts')} value={products.length.toString()} sub={t('dash.nCategories', { n: categories.length })} color="text-accent" bgColor="bg-accent/10" />
         <StatCard icon={AlertTriangle} label={t('dash.lowStock')} value={stats.lowStock.length.toString()} sub={stats.lowStock.length > 0 ? t('dash.needRestock') : t('dash.allGood')} color={stats.lowStock.length > 0 ? 'text-destructive' : 'text-success'} bgColor={stats.lowStock.length > 0 ? 'bg-destructive/10' : 'bg-success/10'} />
-        <StatCard icon={ArrowUpRight} label={t('dash.todayProfit')} value={`Tk ${stats.todayProfit.toFixed(0)}`} sub={t('dash.fromSales', { n: stats.todayOrders.length })} color="text-success" bgColor="bg-success/10" />
+        <StatCard icon={ArrowUpRight} label={t('dash.todayProfit')} value={`৳${stats.todayProfit.toFixed(0)}`} sub={t('dash.fromSales', { n: stats.todayOrders.length })} color="text-success" bgColor="bg-success/10" />
         <StatCard icon={ShoppingCart} label={t('dash.pendingOrders')} value={orders.filter(o => o.status === 'pending').length.toString()} sub={t('dash.waitingProcess')} color="text-warning" bgColor="bg-warning/10" />
       </div>
 
@@ -220,15 +220,15 @@ export default function Dashboard() {
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
                     <p className="text-[10px] text-muted-foreground">Revenue</p>
-                    <p className="text-sm font-bold">Tk {revenue.toFixed(0)}</p>
+                    <p className="text-sm font-bold">৳{revenue.toFixed(0)}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-muted-foreground">Profit</p>
-                    <p className="text-sm font-bold text-success">Tk {profit.toFixed(0)}</p>
+                    <p className="text-sm font-bold text-success">৳{profit.toFixed(0)}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-muted-foreground">Stock</p>
-                    <p className="text-sm font-bold text-primary">Tk {stockValue.toFixed(0)}</p>
+                    <p className="text-sm font-bold text-primary">৳{stockValue.toFixed(0)}</p>
                   </div>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} formatter={(value: number) => `Tk ${value.toFixed(0)}`} />
+                <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} formatter={(value: number) => `৳${value.toFixed(0)}`} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="Revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="Profit" fill="hsl(142 71% 45%)" radius={[6, 6, 0, 0]} />
@@ -274,7 +274,7 @@ export default function Dashboard() {
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <Tooltip
                 contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
-                formatter={(value: number, name: string) => [`Tk ${value.toFixed(0)}`, name === 'revenue' ? 'Revenue' : 'Profit']}
+                formatter={(value: number, name: string) => [`৳${value.toFixed(0)}`, name === 'revenue' ? 'Revenue' : 'Profit']}
               />
               <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="url(#colorRevenue)" strokeWidth={2} />
               <Area type="monotone" dataKey="profit" stroke="hsl(142 71% 45%)" fill="url(#colorProfit)" strokeWidth={2} />
@@ -329,7 +329,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-2">
-                    <span className="text-xs font-bold">Tk {p.revenue.toFixed(0)}</span>
+                    <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
                     <span className="text-[10px] text-muted-foreground ml-1">({p.qty}Qty)</span>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-2">
-                    <span className="text-xs font-bold">Tk {p.revenue.toFixed(0)}</span>
+                    <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
                     <span className="text-[10px] text-muted-foreground ml-1">({p.qty}Qty)</span>
                   </div>
                 </div>
@@ -381,7 +381,7 @@ export default function Dashboard() {
                     <p className="text-sm mt-0.5">{o.customerName || 'Walk-in'}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold">Tk {o.total.toFixed(0)}</p>
+                    <p className="text-sm font-bold">৳{o.total.toFixed(0)}</p>
                     <p className={`text-[10px] capitalize ${o.status === 'completed' ? 'text-success' : o.status === 'pending' ? 'text-warning' : 'text-blue-500'}`}>{o.status}</p>
                   </div>
                 </div>
@@ -408,7 +408,7 @@ export default function Dashboard() {
                     <Pie data={catData} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} strokeWidth={0}>
                       {catData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                     </Pie>
-                    <Tooltip formatter={(v: number) => `Tk ${v.toFixed(0)}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
+                    <Tooltip formatter={(v: number) => `৳${v.toFixed(0)}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex-1 space-y-1.5">
@@ -416,7 +416,7 @@ export default function Dashboard() {
                     <div key={c.name} className="flex items-center gap-2 text-xs">
                       <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
                       <span className="flex-1 truncate">{c.icon} {c.name}</span>
-                      <span className="font-medium">Tk {c.value.toFixed(0)}</span>
+                      <span className="font-medium">৳{c.value.toFixed(0)}</span>
                     </div>
                   ))}
                 </div>

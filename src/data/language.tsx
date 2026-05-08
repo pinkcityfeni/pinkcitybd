@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
-export type Lang = 'bn\' | \'en';
+export type Lang = 'bn' | 'en';
 
 // ─── Translation dictionary ───
 const translations = {

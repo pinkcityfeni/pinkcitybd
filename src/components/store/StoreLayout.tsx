@@ -114,13 +114,13 @@ export default function StoreLayout() {
             </Link>
           </div>
 
-          {/* Center: Pink City text image */}
-          <Link to="/" className="flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[56vw] sm:max-w-none pointer-events-auto">
+          {/* Center: Pink City text image (absolute on mobile, in-flow on desktop to avoid nav overlap) */}
+          <Link to="/" className="flex items-center absolute md:static left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:translate-x-0 md:translate-y-0 max-w-[56vw] sm:max-w-none pointer-events-auto">
             <img src={pinkCityText} alt="Pink City" className="h-10 sm:h-12 max-w-full object-contain" />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6 ml-auto mr-4">
             {navLinks.map(l => (
               <Link
                 key={l.to}

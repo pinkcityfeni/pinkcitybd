@@ -29,7 +29,7 @@ function buildVapidJwk(publicB64u: string, privateB64u: string) {
   const y = bytesToB64u(pub.slice(33, 65));
   const priv = b64uToBytes(privateB64u);
   const scalar = priv.length === 32 ? priv : priv.length === 33 && priv[0] === 0x04 ? priv.slice(1) : priv.length === 65 && priv[0] === 0x04 ? priv.slice(33, 65) : null;
-  if (!scalar) throw new Error('Invalid VAPID private key');
+  if (!scalar) throw new Error('Invalid VAPID private key (got ' + priv.length + ' bytes)');
   const d = bytesToB64u(scalar);
   return {
     publicKey: { kty: 'EC', crv: 'P-256', x, y, key_ops: ['verify'] },

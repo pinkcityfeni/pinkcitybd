@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
         eligibleSubtotal = m.reduce((s: number, it: any) => s + it.price * it.quantity, 0);
       }
       if (Number(v.min_order_amount) > 0 && subtotal < Number(v.min_order_amount)) {
-        return new Response(JSON.stringify({ error: `Minimum Order Tk ${Number(v.min_order_amount)}` }), {
+        return new Response(JSON.stringify({ error: `Minimum Order ৳${Number(v.min_order_amount)}` }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

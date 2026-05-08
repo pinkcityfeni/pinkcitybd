@@ -43,7 +43,7 @@ export default function VoucherInput({
       return;
     }
     onApply({ code: res.code || c.toUpperCase(), discountAmount: res.discountAmount });
-    toast.success(`Voucher added — Tk {amount}${res.discountAmount} Discount`);
+    toast.success(`Voucher added — ৳{amount}${res.discountAmount} Discount`);
     setCode('');
   };
 
@@ -56,7 +56,7 @@ export default function VoucherInput({
           </div>
           <div className="min-w-0">
             <p className={`font-bold ${compact ? 'text-xs' : 'text-sm'} text-primary truncate`}>{applied.code}</p>
-            <p className={`${compact ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>-Tk {applied.discountAmount} Discount</p>
+            <p className={`${compact ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>-৳{applied.discountAmount} Discount</p>
           </div>
         </div>
         <button

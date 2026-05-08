@@ -64,7 +64,7 @@ export default function DeliveryAreas() {
         <h2 className="font-semibold">Outside Feni — Flat charge for all other districts</h2>
         <div className="flex items-end gap-2">
           <div className="flex-1">
-            <Label>Delivery charge (Tk )</Label>
+            <Label>Delivery charge (৳)</Label>
             <Input type="number" value={outsideCharge} onChange={e => setOutsideCharge(e.target.value)} />
           </div>
           <Button onClick={saveOutside}><Save className="h-4 w-4 mr-1" /> Save</Button>
@@ -82,7 +82,7 @@ export default function DeliveryAreas() {
             <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g., Feni Sadar" />
           </div>
           <div>
-            <Label>Charge (Tk )</Label>
+            <Label>Charge (৳)</Label>
             <Input type="number" value={newCharge} onChange={e => setNewCharge(Number(e.target.value))} />
           </div>
           <Button onClick={handleAdd}><Plus className="h-4 w-4 mr-1" /> Add</Button>

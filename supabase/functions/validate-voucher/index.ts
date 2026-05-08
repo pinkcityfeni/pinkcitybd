@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
 
     const cartTotal = cart.reduce((s, c) => s + Number(c.price) * Number(c.quantity), 0);
     if (Number(v.min_order_amount) > 0 && cartTotal < Number(v.min_order_amount)) {
-      return json({ valid: false, error: `Minimum Order Tk ${Number(v.min_order_amount)} Required` });
+      return json({ valid: false, error: `Minimum Order ৳${Number(v.min_order_amount)} Required` });
     }
 
     // Per-customer redemption count — check BOTH user and phone (max), prevents fake-phone bypass

@@ -113,7 +113,7 @@ export default function Brands() {
                   <div className="text-[10px] text-muted-foreground">Categories</div>
                 </div>
                 <div className="rounded-lg bg-muted/50 p-2">
-                  <div className="text-base font-bold text-primary">Tk {stockValue.toFixed(0)}</div>
+                  <div className="text-base font-bold text-primary">৳{stockValue.toFixed(0)}</div>
                   <div className="text-[10px] text-muted-foreground">Stock Value</div>
                 </div>
               </div>

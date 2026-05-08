@@ -124,11 +124,11 @@ export default function Products() {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const name = lines[0]?.slice(0, 80) || '';
     const description = lines.slice(1).join('\n').trim() || lines[0] || '';
-    const priceMatch = text.match(/(?:Tk |tk|Taka|price[\s:]+)\s*(\d{2,6})/i)
-      || text.match(/\b(\d{2,5})\s*(?:tk|Taka|Tk )/i);
+    const priceMatch = text.match(/(?:৳|tk|Taka|price[\s:]+)\s*(\d{2,6})/i)
+      || text.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
-    const compareMatch = text.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:Tk |tk|Taka)?\s*(\d{2,6})/i)
-      || text.match(/~~\s*(?:Tk |tk)?\s*(\d{2,6})\s*~~/i);
+    const compareMatch = text.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|Taka)?\s*(\d{2,6})/i)
+      || text.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
     const compareAt = compareMatch ? compareMatch[1] : '';
     setForm(f => ({
       ...f,
@@ -280,8 +280,8 @@ export default function Products() {
               {p.source === 'pos' && <Badge variant="secondary" className="text-[10px]">POS</Badge>}
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="font-bold text-primary">Tk {p.price.toFixed(0)}</span>
-              <span className="text-xs text-muted-foreground">{t('prod.buyPrice')}: Tk {p.buyingPrice.toFixed(0)}</span>
+              <span className="font-bold text-primary">৳{p.price.toFixed(0)}</span>
+              <span className="text-xs text-muted-foreground">{t('prod.buyPrice')}: ৳{p.buyingPrice.toFixed(0)}</span>
             </div>
           </div>
         ))}
@@ -318,8 +318,8 @@ export default function Products() {
                 <td className="py-3 font-mono text-xs">{p.barcode}</td>
                 <td className="py-3"><Badge variant="outline" className="text-xs">{p.category}</Badge></td>
                 <td className="py-3 text-xs text-muted-foreground">{p.subcategory}</td>
-                <td className="py-3 text-right">Tk {p.price.toFixed(0)}</td>
-                <td className="py-3 text-right text-muted-foreground">Tk {p.buyingPrice.toFixed(0)}</td>
+                <td className="py-3 text-right">৳{p.price.toFixed(0)}</td>
+                <td className="py-3 text-right text-muted-foreground">৳{p.buyingPrice.toFixed(0)}</td>
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? 'text-destructive' : ''}`}>{p.stock}</td>
                 <td className="py-3 text-right">
                   <button onClick={() => updateProductMut.mutate({ id: p.id, updates: { trending: !p.trending } })} className={`p-1 ${p.trending ? 'text-orange-500' : 'hover:text-orange-500'}`} title="Trending"><Flame className="h-4 w-4" /></button>
@@ -416,7 +416,7 @@ export default function Products() {
                 <>
                   A product with this name already exists. —{' '}
                   <strong>{duplicateWarning.name}</strong>
-                  {' '}({(brands.find(b => b.id === duplicateWarning.brandId)?.name) || '—'} · {duplicateWarning.category} · Stock: {duplicateWarning.stock} · Tk {duplicateWarning.price.toFixed(0)}).
+                  {' '}({(brands.find(b => b.id === duplicateWarning.brandId)?.name) || '—'} · {duplicateWarning.category} · Stock: {duplicateWarning.stock} · ৳{duplicateWarning.price.toFixed(0)}).
                   <br /><br />
                   Do you still want it as a new product? add Want to do?
                 </>
@@ -439,7 +439,7 @@ export default function Products() {
                 <>
                   This barcode <strong>#{duplicateBarcode.barcode}</strong> Already use Has been —{' '}
                   <strong>{duplicateBarcode.name}</strong>
-                  {' '}({(brands.find(b => b.id === duplicateBarcode.brandId)?.name) || '—'} · {duplicateBarcode.category} · Stock: {duplicateBarcode.stock} · Tk {duplicateBarcode.price.toFixed(0)}).
+                  {' '}({(brands.find(b => b.id === duplicateBarcode.brandId)?.name) || '—'} · {duplicateBarcode.category} · Stock: {duplicateBarcode.stock} · ৳{duplicateBarcode.price.toFixed(0)}).
                   <br /><br />
                   Barcode unique It is better to keep it. Still, do you want to save Want to do?
                 </>

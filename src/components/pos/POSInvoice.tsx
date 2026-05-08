@@ -56,8 +56,8 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
                 <span className="text-gray-400 text-[8px]">#{item.product.barcode}</span>
               </td>
               <td className="text-center py-1.5 text-[10px]">{item.quantity}</td>
-              <td className="text-right py-1.5 text-[10px]">Tk {item.product.price.toFixed(0)}</td>
-              <td className="text-right py-1.5 text-[10px] font-medium">Tk {(item.product.price * item.quantity).toFixed(0)}</td>
+              <td className="text-right py-1.5 text-[10px]">৳{item.product.price.toFixed(0)}</td>
+              <td className="text-right py-1.5 text-[10px] font-medium">৳{(item.product.price * item.quantity).toFixed(0)}</td>
             </tr>
           ))}
         </tbody>
@@ -66,29 +66,29 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
       <div className="border-t border-dashed border-gray-400 pt-2 space-y-1">
         <div className="flex justify-between text-[10px]">
           <span className="text-gray-500">{t('invoice.subtotal')} ({t('invoice.nItems', { n: itemCount })})</span>
-          <span>Tk {subtotal.toFixed(0)}</span>
+          <span>৳{subtotal.toFixed(0)}</span>
         </div>
         {order.discount && order.discount > 0 ? (
           <div className="flex justify-between text-[10px]">
             <span className="text-gray-500">{t('invoice.discount')} {order.discountType === 'percent' ? `(${order.discount}%)` : ''}</span>
-            <span className="text-red-500">-Tk {order.discountType === 'percent' ? Math.round(subtotal * order.discount / 100) : order.discount}</span>
+            <span className="text-red-500">-৳{order.discountType === 'percent' ? Math.round(subtotal * order.discount / 100) : order.discount}</span>
           </div>
         ) : null}
         {order.deliveryCharge ? (
           <div className="flex justify-between text-[10px]">
             <span className="text-gray-500">{t('invoice.delivery')}</span>
-            <span>Tk {order.deliveryCharge.toFixed(0)}</span>
+            <span>৳{order.deliveryCharge.toFixed(0)}</span>
           </div>
         ) : null}
         {order.pointsRedeemed && order.pointsRedeemed > 0 ? (
           <div className="flex justify-between text-[10px]">
             <span className="text-gray-500">Points Redeemed ({order.pointsRedeemed})</span>
-            <span className="text-red-500">-Tk {order.pointsRedeemed.toFixed(0)}</span>
+            <span className="text-red-500">-৳{order.pointsRedeemed.toFixed(0)}</span>
           </div>
         ) : null}
         <div className="flex justify-between font-bold text-sm border-t border-dashed border-gray-400 pt-2 mt-1">
           <span>{t('invoice.grandTotal')}</span>
-          <span>Tk {order.total.toFixed(0)}</span>
+          <span>৳{order.total.toFixed(0)}</span>
         </div>
         {order.pointsEarned && order.pointsEarned > 0 ? (
           <div className="flex justify-between text-[10px] pt-1">
@@ -102,8 +102,8 @@ const POSInvoice = forwardRef<HTMLDivElement, POSInvoiceProps>(({ order }, ref) 
         {order.splitPayment ? (
           <div className="space-y-0.5 mb-1">
             <p className="font-semibold text-gray-700">{t('invoice.splitPayment')}</p>
-            <p>{getMethodLabel(order.splitPayment.method1)}: Tk {order.splitPayment.amount1.toFixed(0)}</p>
-            <p>{getMethodLabel(order.splitPayment.method2)}: Tk {order.splitPayment.amount2.toFixed(0)}</p>
+            <p>{getMethodLabel(order.splitPayment.method1)}: ৳{order.splitPayment.amount1.toFixed(0)}</p>
+            <p>{getMethodLabel(order.splitPayment.method2)}: ৳{order.splitPayment.amount2.toFixed(0)}</p>
           </div>
         ) : (
           <p>{t('invoice.paymentLabel')}: {getMethodLabel(order.paymentMethod || 'cash')}</p>

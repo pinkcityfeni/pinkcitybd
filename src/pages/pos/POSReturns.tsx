@@ -20,7 +20,7 @@ export default function POSReturns() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="pos-panel">
           <p className="text-xs opacity-50">Total Refunds</p>
-          <p className="text-xl font-bold text-destructive">Tk {totalRefund.toFixed(0)}</p>
+          <p className="text-xl font-bold text-destructive">৳{totalRefund.toFixed(0)}</p>
         </div>
         <div className="pos-panel">
           <p className="text-xs opacity-50">Returns</p>
@@ -58,7 +58,7 @@ export default function POSReturns() {
                       <div key={i}>{it.name} × {it.quantity}</div>
                     ))}
                   </td>
-                  <td className="py-3 text-right font-medium text-destructive">Tk {Number(r.total_refund).toFixed(0)}</td>
+                  <td className="py-3 text-right font-medium text-destructive">৳{Number(r.total_refund).toFixed(0)}</td>
                   <td className="py-3 text-xs">
                     <Badge variant="outline" className="capitalize">{r.refund_method}</Badge>
                   </td>

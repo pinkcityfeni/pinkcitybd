@@ -56,7 +56,16 @@ Deno.serve(async (req) => {
         debug: { length: v.length, firstChars: v.slice(0, 4), lastChars: v.slice(-4), hasInvalidChars: /[^A-Za-z0-9_\-=]/.test(v) }
       }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
+    let vapidKeys;
+    try {
+      vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
+    } catch (err: any) {
+      const v = VAPID_PRIVATE.trim();
+      return new Response(JSON.stringify({
+        error: 'importVapidKeys failed: ' + err.message,
+        debug: { privLen: v.length, dLen: exported.privateKey.d.length, xLen: exported.privateKey.x.length, yLen: exported.privateKey.y.length }
+      }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
     const appServer = await webpush.ApplicationServer.new({
       contactInformation: 'mailto:admin@glamora.shop',
       vapidKeys,

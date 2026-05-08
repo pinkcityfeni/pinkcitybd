@@ -9,8 +9,9 @@ const corsHeaders = {
 const VAPID_PUBLIC = 'BEePjvU1Ppgf2mM9wGgl7ppFxXANFQG6XkMbY5m9rsiyJ_LYOHx--W6sfhxRlI8nWsXVrcvfy4_RSwVZJPaiN78';
 
 function b64uToBytes(s: string): Uint8Array {
-  const pad = '='.repeat((4 - (s.length % 4)) % 4);
-  const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+  const cleaned = s.trim().replace(/\s+/g, '').replace(/=+$/, '');
+  const pad = '='.repeat((4 - (cleaned.length % 4)) % 4);
+  const b64 = (cleaned + pad).replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(b64);
   const out = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
-export type Lang = 'bn' | 'en';
+export type Lang = 'bn\' | \'en';
 
 // ─── Translation dictionary ───
 const translations = {
@@ -188,7 +188,7 @@ const translations = {
   'auth.emailLabel': { bn: 'Email', en: 'Email' },
   'auth.passwordLabel': { bn: 'Password', en: 'Password' },
   'auth.signInBtn': { bn: 'Sign in', en: 'Sign In' },
-  'auth.noAccount': { bn: 'No account?', en: "Don't have an account?" },
+  'auth.noAccount': { bn: 'No account?', en: "Don't have an account?" },'
   'auth.signUp': { bn: 'Sign up', en: 'Sign up' },
   'auth.createAccount': { bn: 'Create account', en: 'Create an account' },
   'auth.earnRewards': { bn: 'Get exclusive offers starting today.', en: 'Get exclusive offers today' },
@@ -249,7 +249,7 @@ const translations = {
   // Dashboard
   'dash.title': { bn: 'Dashboard', en: 'Dashboard' },
   'dash.subtitle': { bn: 'Shop Performance Overview', en: 'Shop Performance Overview' },
-  'dash.todaySales': { bn: 'Today's Sales', en: "Today's Sales" },
+  'dash.todaySales': { bn: 'Today\'s Sales', en: "Today's Sales" },'
   'dash.orders': { bn: '{n}{n} Orders', en: '{n} orders' },
   'dash.onlineOrders': { bn: 'Online Order', en: 'Online Orders' },
   'dash.today': { bn: 'Today {n}Qty', en: 'Today {n}' },
@@ -261,7 +261,7 @@ const translations = {
   'dash.lowStock': { bn: 'Low stock', en: 'Low Stock' },
   'dash.needRestock': { bn: 'Restock needed', en: 'Needs restock' },
   'dash.allGood': { bn: 'All good', en: 'All good' },
-  'dash.todayProfit': { bn: 'Today's Profit', en: "Today's Profit" },
+  'dash.todayProfit': { bn: 'Today\'s Profit', en: "Today's Profit" },'
   'dash.fromSales': { bn: '{n}from {n} sales', en: 'From {n} sales' },
   'dash.pendingOrders': { bn: 'Pending Orders', en: 'Pending Orders' },
   'dash.waitingProcess': { bn: 'Pending processing', en: 'Waiting to be processed' },
@@ -347,8 +347,8 @@ const translations = {
   'cat.subAdded': { bn: 'Subcategory added', en: 'Subcategory added' },
   'cat.subRemoved': { bn: 'Subcategory has been deleted.', en: 'Subcategory removed' },
   'cat.catDeleted': { bn: 'Category has been deleted.', en: 'Category deleted' },
-  'cat.cantDelete': { bn: 'Cannot delete: {n}{qty} products in this category', en: "Can't delete: {n} products in this category" },
-  'cat.cantDeleteSub': { bn: 'Cannot delete: {n}{qty} items in this subcategory', en: "Can't delete: {n} products in this subcategory" },
+  'cat.cantDelete': { bn: 'Cannot delete: {n}{qty} products in this category', en: "Can't delete: {n} products in this category" },'
+  'cat.cantDeleteSub': { bn: 'Cannot delete: {n}{qty} items in this subcategory', en: "Can't delete: {n} products in this subcategory" },'
   'cat.enterSubName': { bn: 'Enter subcategory name', en: 'Please enter a subcategory name' },
   'cat.subExists': { bn: 'This subcategory already exists.', en: 'This subcategory already exists' },
   'cat.namePlaceholder': { bn: 'E.g.: Electronics', en: 'e.g. Electronics' },

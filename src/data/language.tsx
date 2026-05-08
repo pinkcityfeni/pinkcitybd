@@ -549,30 +549,26 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>(() => {
-    const saved = localStorage.getItem('app-lang');
-    return (saved === 'en' || saved === 'bn') ? saved : 'bn';
-  });
-
-  const handleSetLang = useCallback((newLang: Lang) => {
-    setLang(newLang);
-    localStorage.setItem('app-lang', newLang);
+  // Bangla support has been removed — the app is English-only.
+  const [lang] = useState<Lang>('en');
+  const handleSetLang = useCallback((_newLang: Lang) => {
+    // no-op: language switching is disabled
   }, []);
 
   const t = useCallback((key: TranslationKey, params?: Record<string, string | number>): string => {
     const entry = translations[key];
     if (!entry) return key;
-    let text: string = entry[lang] || entry.bn;
+    let text: string = entry.en || entry.bn;
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
         text = text.replace(`{${k}}`, String(v));
       });
     }
     return text;
-  }, [lang]);
+  }, []);
 
   return (
-    <LanguageContext.Provider value={{ lang, locale: lang === 'bn' ? 'bn-BD' : 'en-US', setLang: handleSetLang, t }}>
+    <LanguageContext.Provider value={{ lang: 'en', locale: 'en-US', setLang: handleSetLang, t }}>
       {children}
     </LanguageContext.Provider>
   );

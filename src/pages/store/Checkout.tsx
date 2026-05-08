@@ -385,9 +385,9 @@ export default function Checkout() {
             <div className="mt-3 p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-3">
               {needsAdvanceForCOD && (
                 <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-xs leading-relaxed">
-                  <p className="font-semibold text-primary mb-1">⚠️ Feni-Outside this COD Order</p>
+                  <p className="font-semibold text-primary mb-1">⚠️ COD order outside Feni</p>
                   <p className="text-foreground/80">
-                    Order confirm To do delivery charge <span className="font-bold text-primary">৳{advanceAmount}</span> bKash/Nagad-Must send before {n}. Rest <span className="font-bold">৳{remainingCOD.toFixed(0)}</span> Product Delivery Time cash Will give।
+                    To confirm the order, the delivery charge of <span className="font-bold text-primary">৳{advanceAmount}</span> must be sent in advance via bKash/Nagad. The remaining <span className="font-bold">৳{remainingCOD.toFixed(0)}</span> can be paid in cash on delivery.
                   </p>
                 </div>
               )}

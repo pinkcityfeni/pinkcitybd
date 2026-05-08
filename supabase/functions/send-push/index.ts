@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     if (!VAPID_PRIVATE) {
       return new Response(JSON.stringify({ error: 'VAPID_PRIVATE_KEY missing' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE);
+    const exported = buildVapidJwk(VAPID_PUBLIC, VAPID_PRIVATE.trim());
     const vapidKeys = await webpush.importVapidKeys(exported as any, { extractable: false });
     const appServer = await webpush.ApplicationServer.new({
       contactInformation: 'mailto:admin@glamora.shop',

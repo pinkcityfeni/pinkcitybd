@@ -35,15 +35,15 @@ export default function VoucherInput({
 
   const handleApply = async () => {
     const c = code.trim();
-    if (!c) { toast.error('ভাউচার কোড দিন'); return; }
-    if (items.length === 0) { toast.error('আগে কার্টে প্রোডাক্ট যোগ করুন'); return; }
+    if (!c) { toast.error('Enter Voucher Code'); return; }
+    if (items.length === 0) { toast.error('Add products to cart first.'); return; }
     const res = await validateMut.mutateAsync({ code: c, items, customerPhone, userId });
     if (!res.valid || !res.discountAmount) {
-      toast.error(res.error || 'ভাউচার ব্যবহার করা যাচ্ছে না');
+      toast.error(res.error || 'Voucher cannot be used.');
       return;
     }
     onApply({ code: res.code || c.toUpperCase(), discountAmount: res.discountAmount });
-    toast.success(`ভাউচার যুক্ত হলো — ৳${res.discountAmount} ছাড়`);
+    toast.success(`Voucher added — ৳{amount}${res.discountAmount} Discount`);
     setCode('');
   };
 
@@ -56,7 +56,7 @@ export default function VoucherInput({
           </div>
           <div className="min-w-0">
             <p className={`font-bold ${compact ? 'text-xs' : 'text-sm'} text-primary truncate`}>{applied.code}</p>
-            <p className={`${compact ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>-৳{applied.discountAmount} ছাড়</p>
+            <p className={`${compact ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>-৳{applied.discountAmount} Discount</p>
           </div>
         </div>
         <button
@@ -78,7 +78,7 @@ export default function VoucherInput({
         <Input
           value={code}
           onChange={e => setCode(e.target.value.toUpperCase())}
-          placeholder="ভাউচার কোড"
+          placeholder="Voucher Code"
           className={`${compact ? 'h-8 text-xs' : ''} pl-8 uppercase font-mono tracking-wider`}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleApply(); } }}
         />

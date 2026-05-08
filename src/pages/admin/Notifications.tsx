@@ -46,17 +46,17 @@ export default function Notifications() {
         <h1 className="text-2xl font-serif font-bold flex items-center gap-2">
           <MessageCircle className="h-6 w-6 text-[#0088cc]" /> Telegram Notifications
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">নতুন order, review, signup, advance payment হলে Telegram-এ alert আসবে।</p>
+        <p className="text-sm text-muted-foreground mt-1">New order, review, signup, advance payment If Telegram-In alert Will come।</p>
       </div>
 
       <Card className="p-5 space-y-4 rounded-2xl">
         <div className="bg-muted/50 rounded-xl p-3 text-xs space-y-1">
           <div className="font-medium">Setup steps:</div>
           <ol className="list-decimal list-inside space-y-0.5 text-muted-foreground">
-            <li>Telegram-এ আপনার connected bot খুঁজে বের করুন</li>
-            <li>Bot-কে <code className="bg-background px-1 rounded">/start</code> পাঠান বা যেকোনো message দিন</li>
-            <li>নিচে "Find my chat" চাপুন → আপনার chat select করুন</li>
-            <li>"Send test" চাপে confirm করুন ✅</li>
+            <li>Telegram-In your connected bot Find out</li>
+            <li>Bot-To <code className="bg-background px-1 rounded">/start</code> Send or any message Day</li>
+            <li>Below "Find my chat" Tap → Your chat select Do</li>
+            <li>"Send test" To press confirm Do ✅</li>
           </ol>
         </div>
 

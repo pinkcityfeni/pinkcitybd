@@ -58,7 +58,7 @@ export default function Categories() {
 
   const handleSave = () => {
     if (!catName.trim()) return;
-    if (!catBrandId) { toast.error('Brand select করুন'); return; }
+    if (!catBrandId) { toast.error('Brand select Do'); return; }
     if (editCat) {
       updateCategoryMut.mutate({ id: editCat.id, updates: { name: catName.trim(), icon: catIcon, image: catImage || undefined, brandId: catBrandId } });
       toast.success(t('cat.categoryUpdated'));
@@ -246,14 +246,14 @@ export default function Categories() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Category ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Category Delete??</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget && <><strong>{deleteTarget.name}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+              {deleteTarget && <><strong>{deleteTarget.name}</strong> will be deleted. This action cannot be undone.।</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDeleteCat}>ডিলিট করুন</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDeleteCat}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -261,13 +261,13 @@ export default function Categories() {
       <AlertDialog open={!!removeSubTarget} onOpenChange={(o) => { if (!o) setRemoveSubTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Subcategory ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Subcategory Delete??</AlertDialogTitle>
             <AlertDialogDescription>
-              {removeSubTarget && <><strong>{removeSubTarget.sc}</strong> ডিলিট করা হবে।</>}
+              {removeSubTarget && <><strong>{removeSubTarget.sc}</strong> Will be deleted।</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -277,7 +277,7 @@ export default function Categories() {
                 }
                 setRemoveSubTarget(null);
               }}
-            >ডিলিট করুন</AlertDialogAction>
+            >Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

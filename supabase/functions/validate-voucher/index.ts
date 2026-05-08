@@ -54,30 +54,30 @@ Deno.serve(async (req) => {
       console.error("validate-voucher lookup error:", error);
       return json({ valid: false, error: "Validation failed. Please try again." }, 500);
     }
-    if (!v) return json({ valid: false, error: "ভাউচার কোড সঠিক নয়" });
-    if (!v.active) return json({ valid: false, error: "ভাউচারটি বর্তমানে নিষ্ক্রিয়" });
+    if (!v) return json({ valid: false, error: "Invalid Voucher Code" });
+    if (!v.active) return json({ valid: false, error: "Voucher is currently inactive." });
 
     const now = new Date();
-    if (now < new Date(v.start_at)) return json({ valid: false, error: "ভাউচার এখনো শুরু হয়নি" });
-    if (now > new Date(v.expire_at)) return json({ valid: false, error: "ভাউচারের মেয়াদ শেষ" });
+    if (now < new Date(v.start_at)) return json({ valid: false, error: "Voucher has not started yet" });
+    if (now > new Date(v.expire_at)) return json({ valid: false, error: "Voucher expired" });
 
     // Scope match
     const cart: CartLine[] = items;
     let eligibleSubtotal = 0;
     if (v.scope_type === "product") {
       const matches = cart.filter(c => c.product_id === v.scope_product_id);
-      if (matches.length === 0) return json({ valid: false, error: "এই প্রোডাক্ট কার্টে নেই" });
+      if (matches.length === 0) return json({ valid: false, error: "This product is not in cart" });
       eligibleSubtotal = matches.reduce((s, c) => s + Number(c.price) * Number(c.quantity), 0);
     } else {
       const cat = String(v.scope_category || "").toLowerCase();
       const matches = cart.filter(c => String(c.category || "").toLowerCase() === cat);
-      if (matches.length === 0) return json({ valid: false, error: "এই ক্যাটাগরির প্রোডাক্ট কার্টে নেই" });
+      if (matches.length === 0) return json({ valid: false, error: "No products in this category in cart." });
       eligibleSubtotal = matches.reduce((s, c) => s + Number(c.price) * Number(c.quantity), 0);
     }
 
     const cartTotal = cart.reduce((s, c) => s + Number(c.price) * Number(c.quantity), 0);
     if (Number(v.min_order_amount) > 0 && cartTotal < Number(v.min_order_amount)) {
-      return json({ valid: false, error: `সর্বনিম্ন অর্ডার ৳${Number(v.min_order_amount)} প্রয়োজন` });
+      return json({ valid: false, error: `Minimum Order ৳${Number(v.min_order_amount)} Required` });
     }
 
     // Per-customer redemption count — check BOTH user and phone (max), prevents fake-phone bypass
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       ]);
       const usedCount = Math.max(byUser.count || 0, byPhone.count || 0);
       if (usedCount >= Number(v.per_customer_limit)) {
-        return json({ valid: false, error: "আপনি এই ভাউচার ইতিমধ্যে ব্যবহার করেছেন" });
+        return json({ valid: false, error: "You have already used this voucher." });
       }
     }
 

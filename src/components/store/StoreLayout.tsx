@@ -12,7 +12,7 @@ import { useAppSettings } from '@/hooks/useSupabaseData';
 
 function AnnouncementBar() {
   const { data: settings } = useAppSettings();
-  const text = settings?.announcement_text || '🚚 ফেনীতে ফ্রি ডেলিভারি | সারাদেশে ক্যাশ অন ডেলিভারি';
+  const text = settings?.announcement_text || '🚚 Free delivery in Feni | Cash on delivery nationwide';
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
@@ -210,8 +210,8 @@ export default function StoreLayout() {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>
-                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'গ্যারান্টেড' : 'Guaranteed'}</p>
+                  <p className="text-xs font-semibold">{lang === 'bn' ? '100% Original' : '100% Original'}</p>
+                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'Guaranteed' : 'Guaranteed'}</p>
                 </div>
               </div>
               <div className="trust-badge">
@@ -219,8 +219,8 @@ export default function StoreLayout() {
                   <span className="text-lg font-bold">৳</span>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold">{lang === 'bn' ? 'সেরা দাম' : 'Best Price'}</p>
-                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'সাশ্রয়ী মূল্য' : 'Affordable'}</p>
+                  <p className="text-xs font-semibold">{lang === 'bn' ? 'Best price' : 'Best Price'}</p>
+                  <p className="text-[10px] text-background/60">{lang === 'bn' ? 'Affordable price' : 'Affordable'}</p>
                 </div>
               </div>
             </div>
@@ -274,7 +274,7 @@ export default function StoreLayout() {
 
             {/* Follow Us */}
             <div>
-              <h4 className="font-semibold text-sm mb-4 uppercase tracking-wider text-background/80" style={{ fontFamily: 'DM Sans, sans-serif' }}>{lang === 'bn' ? 'ফলো করুন' : 'Follow Us'}</h4>
+              <h4 className="font-semibold text-sm mb-4 uppercase tracking-wider text-background/80" style={{ fontFamily: 'DM Sans, sans-serif' }}>{lang === 'bn' ? 'Follow us' : 'Follow Us'}</h4>
               <a href="https://www.facebook.com/share/17KZiPoqUF/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-background/70 hover:text-background transition-colors mb-4">
                 <Facebook className="h-4 w-4" />
                 <span>Facebook Page</span>

@@ -18,7 +18,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError('');
     const cleanEmail = sanitizeEmail(email);
-    if (!isValidEmail(cleanEmail)) { setError('সঠিক ইমেইল দিন'); return; }
+    if (!isValidEmail(cleanEmail)) { setError('Enter a valid email'); return; }
 
     setLoading(true);
     const { error: authError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
@@ -38,12 +38,12 @@ export default function ForgotPassword() {
         <div className="w-full max-w-sm animate-fade-in">
           <div className="rounded-xl border bg-card p-6 shadow-sm text-center">
             <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
-            <h2 className="font-display text-xl font-bold mb-2">ইমেইল পাঠানো হয়েছে</h2>
+            <h2 className="font-display text-xl font-bold mb-2">Email sent</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              আপনার ইমেইলে একটি পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে। লিংকে ক্লিক করে নতুন পাসওয়ার্ড সেট করুন।
+              A password reset link has been sent to your email. Click the link to set a new password.।
             </p>
             <Link to="/login" className="text-primary font-medium text-sm hover:underline">
-              লগইন পেজে ফিরে যান
+              Go back to Login Page
             </Link>
           </div>
         </div>
@@ -66,10 +66,10 @@ export default function ForgotPassword() {
 
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <Link to="/login" className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-3">
-            <ArrowLeft className="h-3 w-3 mr-1" /> লগইনে ফিরে যান
+            <ArrowLeft className="h-3 w-3 mr-1" /> Go back to login
           </Link>
-          <h1 className="font-display text-xl font-bold mb-1">পাসওয়ার্ড ভুলে গেছেন?</h1>
-          <p className="text-xs text-muted-foreground mb-5">আপনার ইমেইল দিন, আমরা রিসেট লিংক পাঠাবো।</p>
+          <h1 className="font-display text-xl font-bold mb-1">Forgot password?</h1>
+          <p className="text-xs text-muted-foreground mb-5">Enter your email, we will send a reset link.।</p>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
@@ -79,11 +79,11 @@ export default function ForgotPassword() {
               </div>
             )}
             <div>
-              <Label htmlFor="email" className="text-xs">ইমেইল</Label>
+              <Label htmlFor="email" className="text-xs">Email</Label>
               <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="rounded-lg" autoComplete="email" maxLength={255} />
             </div>
             <Button type="submit" className="w-full rounded-lg h-10 font-semibold" disabled={loading}>
-              {loading ? '...' : 'রিসেট লিংক পাঠান'}
+              {loading ? '...' : 'Send Reset Link'}
             </Button>
           </form>
         </div>

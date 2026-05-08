@@ -70,11 +70,11 @@ function parseBulkText(text: string, defaultStock: string, defaultCategory: stri
     }
     const name = textLines[0]?.slice(0, 80) || '';
     const rest = textLines.slice(1).join('\n');
-    const priceMatch = rest.match(/(?:৳|tk|টাকা|price[\s:]+)\s*(\d{2,6})/i)
-      || rest.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i)
-      || block.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
+    const priceMatch = rest.match(/(?:৳|tk|Taka|price[\s:]+)\s*(\d{2,6})/i)
+      || rest.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i)
+      || block.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
-    const compareMatch = block.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+    const compareMatch = block.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|Taka)?\s*(\d{2,6})/i)
       || block.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
     const compareAtPrice = compareMatch ? compareMatch[1] : '';
     const description = rest.replace(/(?:price[\s:]+)\s*\d{2,6}/gi, '').trim();
@@ -111,17 +111,17 @@ export default function FacebookImport() {
   const subcategories = selectedCat?.subcategories || [];
 
   const handleParseText = () => {
-    if (!pastedText.trim()) { toast.error('আগে post-এর text paste করুন'); return; }
+    if (!pastedText.trim()) { toast.error('Before post-Of text paste Do'); return; }
     const lines = pastedText.split('\n').map(l => l.trim()).filter(Boolean);
     const name = lines[0]?.slice(0, 80) || '';
     const description = lines.slice(1).join('\n').trim() || lines[0] || '';
-    const priceMatch = pastedText.match(/(?:৳|tk|টাকা|price[\s]+)\s*(\d{2,6})/i) || pastedText.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
+    const priceMatch = pastedText.match(/(?:৳|tk|Taka|price[\s]+)\s*(\d{2,6})/i) || pastedText.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
-    const compareMatch = pastedText.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+    const compareMatch = pastedText.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|Taka)?\s*(\d{2,6})/i)
       || pastedText.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
     const compareAt = compareMatch ? compareMatch[1] : '';
     setForm(f => ({ ...f, name, description, price: price || f.price, compareAtPrice: compareAt || f.compareAtPrice }));
-    toast.success('Text parse হয়েছে');
+    toast.success('Text parse Has been');
   };
 
   const removeImage = (i: number) => {
@@ -142,15 +142,15 @@ export default function FacebookImport() {
   };
 
   const handleImport = async () => {
-    if (!form.name.trim()) { toast.error('Product name দিন'); return; }
-    if (!form.price || Number(form.price) <= 0) { toast.error('Selling price দিন'); return; }
-    if (!form.brandId) { toast.error('Brand select করুন'); return; }
-    if (!form.category) { toast.error('Category select করুন'); return; }
-    if (form.imageUrls.length === 0) { toast.error('কমপক্ষে ১টা ছবি দিন'); return; }
+    if (!form.name.trim()) { toast.error('Product name Day'); return; }
+    if (!form.price || Number(form.price) <= 0) { toast.error('Selling price Day'); return; }
+    if (!form.brandId) { toast.error('Brand select Do'); return; }
+    if (!form.category) { toast.error('Category select Do'); return; }
+    if (form.imageUrls.length === 0) { toast.error('Please add at least 1 image'); return; }
     const sellPrice = Number(form.price);
     let compareAt = Number(form.compareAtPrice) || 0;
     if (compareAt > 0 && compareAt <= sellPrice) {
-      toast.warning('Original price selling price-এর চেয়ে বড় হওয়া উচিত — discount দেখানো হবে না');
+      toast.warning('Original price selling price-Should be greater than — discount Will not be shown');
       compareAt = 0;
     }
     setImporting(true);
@@ -165,7 +165,7 @@ export default function FacebookImport() {
         source: 'fb', brandId: form.brandId,
       };
       await addProductMut.mutateAsync(data);
-      toast.success(`✅ "${form.name}" add হয়েছে!`);
+      toast.success(`✅ "${form.name}" add Has been!`);
       setForm(EMPTY); setPastedText('');
     } catch (err: any) {
       toast.error('Import failed: ' + (err?.message || 'unknown error'));
@@ -202,11 +202,11 @@ export default function FacebookImport() {
   const selectedValidRows = validRows.filter(r => r.selected && r.status !== 'success');
 
   const handleParseBulk = () => {
-    if (!bulkText.trim()) { toast.error('আগে posts paste করুন'); return; }
+    if (!bulkText.trim()) { toast.error('Before posts paste Do'); return; }
     const parsed = parseBulkText(bulkText, defaultStock, defaultCategory, defaultBrandId || defaultBrand?.id || '');
-    if (parsed.length === 0) { toast.error('কোনো post detect করতে পারিনি'); return; }
+    if (parsed.length === 0) { toast.error('Any post detect could not do'); return; }
     setRows(parsed);
-    toast.success(`${parsed.length}টি post parse হয়েছে — table-এ check করুন`);
+    toast.success(`${parsed.length}Qty post parse Has been — table-In check Do`);
   };
 
   const updateRow = (id: string, patch: Partial<DraftRow>) => {
@@ -220,27 +220,27 @@ export default function FacebookImport() {
   };
 
   const applyCategoryToSelected = () => {
-    if (!defaultCategory) { toast.error('আগে একটা default category select করুন'); return; }
+    if (!defaultCategory) { toast.error('Before one default category select Do'); return; }
     setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, category: defaultCategory } : r));
-    toast.success('Category apply হয়েছে');
+    toast.success('Category apply Has been');
   };
 
   const applyStockToSelected = () => {
     setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, stock: defaultStock } : r));
-    toast.success('Stock apply হয়েছে');
+    toast.success('Stock apply Has been');
   };
 
   const applyBrandToSelected = () => {
-    if (!defaultBrandId) { toast.error('আগে Brand select করুন'); return; }
+    if (!defaultBrandId) { toast.error('Before Brand select Do'); return; }
     setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, brandId: defaultBrandId } : r));
-    toast.success('Brand apply হয়েছে');
+    toast.success('Brand apply Has been');
   };
 
   const [defaultCompareAt, setDefaultCompareAt] = useState('');
   const applyCompareToSelected = () => {
-    if (!defaultCompareAt) { toast.error('আগে Original price দিন'); return; }
+    if (!defaultCompareAt) { toast.error('Before Original price Day'); return; }
     setRows(rs => rs.map(r => r.selected && r.status !== 'success' ? { ...r, compareAtPrice: defaultCompareAt } : r));
-    toast.success('Original price apply হয়েছে');
+    toast.success('Original price apply Has been');
   };
 
   const uploadRowImages = async (id: string, files: FileList | null) => {
@@ -262,7 +262,7 @@ export default function FacebookImport() {
 
   const handleBulkImport = async () => {
     const targets = selectedValidRows;
-    if (targets.length === 0) { toast.error('কোনো valid row select করা নেই'); return; }
+    if (targets.length === 0) { toast.error('Any valid row select Not done'); return; }
     setBulkImporting(true);
     setBulkProgress({ done: 0, total: targets.length });
     let success = 0, failed = 0;
@@ -292,7 +292,7 @@ export default function FacebookImport() {
       setBulkProgress({ done: i + 1, total: targets.length });
     }
     setBulkImporting(false);
-    toast.success(`✅ ${success}টি import হয়েছে${failed ? `, ❌ ${failed}টি failed` : ''}`);
+    toast.success(`✅ ${success}Qty import Has been${failed ? `, ❌ ${failed}Qty failed` : ''}`);
     // Auto-remove success rows after a moment
     setTimeout(() => setRows(rs => rs.filter(r => r.status !== 'success')), 2000);
   };
@@ -302,9 +302,9 @@ export default function FacebookImport() {
       <div>
         <h1 className="page-header flex items-center gap-2">
           <Facebook className="h-6 w-6 text-[#1877F2]" />
-          Facebook থেকে Product Import
+          Facebook From Product Import
         </h1>
-        <p className="page-subheader">একটা একটা করে অথবা একসাথে অনেকগুলো post import করুন</p>
+        <p className="page-subheader">One by one or many at once. post import Do</p>
       </div>
 
       <Tabs defaultValue="single" className="w-full">
@@ -317,16 +317,16 @@ export default function FacebookImport() {
         <TabsContent value="single" className="space-y-6 mt-4">
           <Card className="p-4 bg-primary/5 border-primary/20">
             <button onClick={() => setShowGuide(s => !s)} className="flex items-center justify-between w-full text-left">
-              <span className="font-semibold text-sm">📖 কিভাবে use করবেন? (step-by-step)</span>
+              <span className="font-semibold text-sm">📖 How to use Will do? (step-by-step)</span>
               {showGuide ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {showGuide && (
               <ol className="mt-3 space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-                <li>Facebook-এ আপনার page-এর post-টা open করুন।</li>
-                <li>Post-এর <strong>text/caption</strong> select করে copy করুন → "Post Text" box-এ paste → <strong>"Auto-fill Form"</strong>।</li>
-                <li>Post-এর ছবি গুলো আপনার ফোন/computer-এ <strong>save/download</strong> করুন।</li>
-                <li>"ছবি upload করুন" section থেকে save করা ছবি গুলো <strong>upload</strong> করুন (একসাথে একাধিক select করতে পারবেন)।</li>
-                <li>Price, stock, category check করে <strong>"Import as Product"</strong> চাপুন।</li>
+                <li>Facebook-In your page-Of post-Item open Do।</li>
+                <li>Post-Of <strong>text/caption</strong> select Done copy Do → "Post Text" box-In paste → <strong>"Auto-fill Form"</strong>।</li>
+                <li>Post-Its images are with your phone/computer-In <strong>save/download</strong> Do।</li>
+                <li>"Image upload Do" section From save Pictured items <strong>upload</strong> Do (multiple at once select can do)।</li>
+                <li>Price, stock, category check Done <strong>"Import as Product"</strong> Tap।</li>
               </ol>
             )}
           </Card>
@@ -334,10 +334,10 @@ export default function FacebookImport() {
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
-              <h2 className="font-semibold">Post-এর Text Paste করুন</h2>
+              <h2 className="font-semibold">Post-Of Text Paste Do</h2>
             </div>
             <Textarea rows={5}
-              placeholder={`এখানে Facebook post-এর caption paste করুন...\n\nGold Plated Necklace Set\nসুন্দর design\nPrice: 1500 tk`}
+              placeholder={`Here Facebook post-Of caption paste Do...\n\nGold Plated Necklace Set\nBeautiful design\nPrice: 1500 tk`}
               value={pastedText} onChange={e => setPastedText(e.target.value)} />
             <Button onClick={handleParseText} variant="secondary" size="sm">✨ Auto-fill Form</Button>
           </Card>
@@ -345,12 +345,12 @@ export default function FacebookImport() {
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
-              <h2 className="font-semibold">ছবি upload করুন</h2>
+              <h2 className="font-semibold">Image upload Do</h2>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-dashed cursor-pointer hover:bg-muted/50">
                 <ImageIcon className="h-4 w-4" />
-                <span>Upload ছবি (একাধিক select করতে পারেন)</span>
+                <span>Upload Image (multiple select can do)</span>
                 <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileUpload} />
               </label>
             </div>
@@ -385,15 +385,15 @@ export default function FacebookImport() {
                 <Input type="number" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
             <div>
-              <Label>Original Price / Discount আগের দাম (৳)</Label>
-              <Input type="number" placeholder="যেমন 700" value={form.compareAtPrice}
+              <Label>Original Price / Discount Previous Price (৳)</Label>
+              <Input type="number" placeholder="Such as 700" value={form.compareAtPrice}
                 onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
               {Number(form.compareAtPrice) > Number(form.price) && Number(form.price) > 0 && (
                 <p className="text-xs text-primary mt-1 font-medium">
-                  ✨ {Math.round((1 - Number(form.price) / Number(form.compareAtPrice)) * 100)}% OFF দেখাবে
+                  ✨ {Math.round((1 - Number(form.price) / Number(form.compareAtPrice)) * 100)}% OFF Will show
                 </p>
               )}
-              <p className="text-xs text-muted-foreground mt-1">Optional — selling price-এর চেয়ে বড় দিলে discount badge দেখাবে</p>
+              <p className="text-xs text-muted-foreground mt-1">Optional — selling price-If you give bigger than this discount badge Will show</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Stock</Label>
@@ -435,12 +435,12 @@ export default function FacebookImport() {
         <TabsContent value="bulk" className="space-y-4 mt-4">
           <Card className="p-4 bg-primary/5 border-primary/20">
             <button onClick={() => setShowBulkGuide(s => !s)} className="flex items-center justify-between w-full text-left">
-              <span className="font-semibold text-sm">📖 Bulk format কিভাবে?</span>
+              <span className="font-semibold text-sm">📖 Bulk format How to?</span>
               {showBulkGuide ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {showBulkGuide && (
               <div className="mt-3 text-sm text-muted-foreground space-y-2">
-                <p>প্রতিটা product আলাদা করার জন্য একটা লাইনে শুধু <code className="bg-muted px-1 rounded">---</code> দিন। Parse হওয়ার পর table-এর প্রতিটা row-এ <strong>+</strong> button দিয়ে ছবি upload করুন।</p>
+                <p>Each product to separate, just on one line. <code className="bg-muted px-1 rounded">---</code> Day। Parse after being table-every bit of it row-In <strong>+</strong> button Photo with upload Do।</p>
                 <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">{`Gold Necklace Set
 Beautiful party design
 Price: 1500 tk
@@ -448,14 +448,14 @@ Price: 1500 tk
 Pink Lipstick Matte
 Long lasting color
 Price: 350 tk`}</pre>
-                <p>Parse → table-এ ছবি upload + edit → select → Import।</p>
+                <p>Parse → table-This photo upload + edit → select → Import।</p>
               </div>
             )}
           </Card>
 
           {/* Paste area */}
           <Card className="p-4 space-y-3">
-            <Label>একসাথে অনেকগুলো post paste করুন (<code className="bg-muted px-1 rounded text-xs">---</code> দিয়ে আলাদা)</Label>
+            <Label>Many at once post paste Do (<code className="bg-muted px-1 rounded text-xs">---</code> separate by)</Label>
             <Textarea rows={10} value={bulkText} onChange={e => setBulkText(e.target.value)}
               placeholder={`Product 1\nDescription\nPrice: 500 tk\n---\nProduct 2\n...`} />
             <div className="flex flex-wrap gap-3 items-end">

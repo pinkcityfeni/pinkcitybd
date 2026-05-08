@@ -25,7 +25,7 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
     const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
     if (files.length === 0) return;
     const valid = files.filter(f => {
-      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name}: 5MB-এর বেশি — skip`); return false; }
+      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name}: 5MB-More than this — skip`); return false; }
       return true;
     });
     if (valid.length === 0) return;
@@ -36,8 +36,8 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
       let failed = 0;
       results.forEach(r => { if (r.status === 'fulfilled') urls.push(r.value); else failed++; });
       if (urls.length > 0) onChange([...images, ...urls]);
-      if (failed > 0) toast.error(`${failed}টি ছবি upload হয়নি`);
-      if (urls.length > 0) toast.success(`${urls.length}টি ছবি upload হয়েছে`);
+      if (failed > 0) toast.error(`${failed}{qty} images upload Has not`);
+      if (urls.length > 0) toast.success(`${urls.length}{qty} images upload Has been`);
     } finally {
       setUploading(0);
     }
@@ -65,7 +65,7 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
       <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-dashed cursor-pointer hover:bg-muted/50 text-xs text-muted-foreground">
         {uploading > 0
           ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading {uploading}...</>
-          : <><ImageIcon className="h-4 w-4" /> Upload ছবি (একাধিক select করতে পারেন)</>}
+          : <><ImageIcon className="h-4 w-4" /> Upload Image (multiple select can do)</>}
         <input type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} disabled={uploading > 0} />
       </label>
       <div className="flex flex-wrap gap-2">
@@ -86,11 +86,11 @@ function MultiImageUpload({ images, onChange, uploadLabel }: { images: string[];
           className="flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground disabled:opacity-50"
           title={uploadLabel}>
           <Camera className="h-4 w-4" />
-          <span className="text-[10px] mt-1 text-center px-1">+ আরো</span>
+          <span className="text-[10px] mt-1 text-center px-1">+ More</span>
         </button>
       </div>
       <p className="text-[10px] text-muted-foreground">
-        File picker-এ Ctrl/Cmd চেপে click করে অনেকগুলো select করুন, অথবা ছবি drag-drop করুন।
+        File picker-In Ctrl/Cmd Press click done many select do, or a picture drag-drop Do।
       </p>
       <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
     </div>
@@ -120,14 +120,14 @@ export default function Products() {
 
   const handleParseCaption = () => {
     const text = captionText.trim();
-    if (!text) { toast.error('আগে caption paste করুন'); return; }
+    if (!text) { toast.error('Before caption paste Do'); return; }
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const name = lines[0]?.slice(0, 80) || '';
     const description = lines.slice(1).join('\n').trim() || lines[0] || '';
-    const priceMatch = text.match(/(?:৳|tk|টাকা|price[\s:]+)\s*(\d{2,6})/i)
-      || text.match(/\b(\d{2,5})\s*(?:tk|টাকা|৳)/i);
+    const priceMatch = text.match(/(?:৳|tk|Taka|price[\s:]+)\s*(\d{2,6})/i)
+      || text.match(/\b(\d{2,5})\s*(?:tk|Taka|৳)/i);
     const price = priceMatch ? priceMatch[1] : '';
-    const compareMatch = text.match(/(?:was|আগে|original|আসল|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|টাকা)?\s*(\d{2,6})/i)
+    const compareMatch = text.match(/(?:was|Before|original|Original|reg(?:ular)?)\s*[:\-]?\s*(?:৳|tk|Taka)?\s*(\d{2,6})/i)
       || text.match(/~~\s*(?:৳|tk)?\s*(\d{2,6})\s*~~/i);
     const compareAt = compareMatch ? compareMatch[1] : '';
     setForm(f => ({
@@ -137,7 +137,7 @@ export default function Products() {
       price: price || f.price,
       compareAtPrice: compareAt || f.compareAtPrice,
     }));
-    toast.success('Caption parse হয়েছে');
+    toast.success('Caption parse Has been');
   };
 
   const filtered = products.filter(p => {
@@ -184,11 +184,11 @@ export default function Products() {
 
   const handleSave = () => {
     if (!form.name || !form.price || !form.category) { toast.error(t('prod.fillRequired')); return; }
-    if (!form.brandId) { toast.error('Brand select করুন'); return; }
+    if (!form.brandId) { toast.error('Brand select Do'); return; }
     const compareAt = Number(form.compareAtPrice) || 0;
     const sellPrice = Number(form.price);
     if (compareAt > 0 && compareAt <= sellPrice) {
-      toast.error('পুরাতন দাম বর্তমান দামের চেয়ে বেশি হতে হবে');
+      toast.error('Old price must be greater than current price.');
       return;
     }
     if (!editProduct) {
@@ -206,9 +206,9 @@ export default function Products() {
     setForm(f => ({ ...f, barcode: code }));
     const existing = products.find(p => p.barcode.trim() === code.trim() && p.id !== editProduct?.id);
     if (existing) {
-      toast.warning(`এই barcode আগে থেকেই আছে: ${existing.name}`);
+      toast.warning(`This barcode Already exists: ${existing.name}`);
     } else {
-      toast.success('Barcode scan হয়েছে');
+      toast.success('Barcode scan Has been');
     }
   };
 
@@ -352,10 +352,10 @@ export default function Products() {
             {!editProduct && (
               <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-3 space-y-2">
                 <Label className="text-xs flex items-center gap-1">
-                  ✨ Caption থেকে auto-fill <span className="text-muted-foreground font-normal">(FB post / caption paste করুন)</span>
+                  ✨ Caption From auto-fill <span className="text-muted-foreground font-normal">(FB post / caption paste Do)</span>
                 </Label>
                 <Textarea rows={3} value={captionText} onChange={e => setCaptionText(e.target.value)}
-                  placeholder={`Gold Plated Necklace Set\nসুন্দর party design\nPrice: 1500 tk`} />
+                  placeholder={`Gold Plated Necklace Set\nBeautiful party design\nPrice: 1500 tk`} />
                 <Button type="button" size="sm" variant="secondary" onClick={handleParseCaption}>
                   ✨ Auto-fill Form
                 </Button>
@@ -370,9 +370,9 @@ export default function Products() {
               <div><Label>{t('prod.buyingPrice')}</Label><Input type="number" step="1" value={form.buyingPrice} onChange={e => setForm(f => ({ ...f, buyingPrice: e.target.value }))} /></div>
             </div>
             <div>
-              <Label>পুরাতন দাম / MRP <span className="text-muted-foreground text-xs">(ঐচ্ছিক — ডিসকাউন্ট দেখাতে)</span></Label>
-              <Input type="number" step="1" placeholder="যেমন 700" value={form.compareAtPrice} onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
-              <p className="text-[11px] text-muted-foreground mt-1">সেলিং দামের চেয়ে বেশি দিলে কাস্টমার কাটা দাগ ও ডিসকাউন্ট % দেখবে। খালি রাখলে কিছু দেখাবে না।</p>
+              <Label>Old Price / MRP <span className="text-muted-foreground text-xs">(Optional – to show discount)</span></Label>
+              <Input type="number" step="1" placeholder="Such as 700" value={form.compareAtPrice} onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} />
+              <p className="text-[11px] text-muted-foreground mt-1">If more than selling price, customer gets crossed out price & discount % will show. Leaving it blank will show nothing.।</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -410,22 +410,22 @@ export default function Products() {
       <AlertDialog open={!!duplicateWarning} onOpenChange={(o) => { if (!o) setDuplicateWarning(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>⚠️ একই নামের প্রোডাক্ট আছে</AlertDialogTitle>
+            <AlertDialogTitle>⚠️ Product with same name exists</AlertDialogTitle>
             <AlertDialogDescription>
               {duplicateWarning && (
                 <>
-                  এই নামে একটি প্রোডাক্ট আগে থেকেই আছে —{' '}
+                  A product with this name already exists. —{' '}
                   <strong>{duplicateWarning.name}</strong>
                   {' '}({(brands.find(b => b.id === duplicateWarning.brandId)?.name) || '—'} · {duplicateWarning.category} · Stock: {duplicateWarning.stock} · ৳{duplicateWarning.price.toFixed(0)}).
                   <br /><br />
-                  আপনি কি তবুও নতুন প্রোডাক্ট হিসেবে add করতে চান?
+                  Do you still want it as a new product? add Want to do?
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>না, বাতিল করুন</AlertDialogCancel>
-            <AlertDialogAction onClick={performSave}>হ্যাঁ, add করুন</AlertDialogAction>
+            <AlertDialogCancel>No, cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={performSave}>Yes, add Do</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -433,22 +433,22 @@ export default function Products() {
       <AlertDialog open={!!duplicateBarcode} onOpenChange={(o) => { if (!o) setDuplicateBarcode(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>⚠️ একই Barcode-এর প্রোডাক্ট আছে</AlertDialogTitle>
+            <AlertDialogTitle>⚠️ Same Barcode-has products</AlertDialogTitle>
             <AlertDialogDescription>
               {duplicateBarcode && (
                 <>
-                  এই barcode <strong>#{duplicateBarcode.barcode}</strong> আগে থেকেই use হয়েছে —{' '}
+                  This barcode <strong>#{duplicateBarcode.barcode}</strong> Already use Has been —{' '}
                   <strong>{duplicateBarcode.name}</strong>
                   {' '}({(brands.find(b => b.id === duplicateBarcode.brandId)?.name) || '—'} · {duplicateBarcode.category} · Stock: {duplicateBarcode.stock} · ৳{duplicateBarcode.price.toFixed(0)}).
                   <br /><br />
-                  Barcode unique রাখাই ভাল। তবুও কি save করতে চান?
+                  Barcode unique It is better to keep it. Still, do you want to save Want to do?
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>না, ঠিক করি</AlertDialogCancel>
-            <AlertDialogAction onClick={performSave}>হ্যাঁ, save করুন</AlertDialogAction>
+            <AlertDialogCancel>No, fix it</AlertDialogCancel>
+            <AlertDialogAction onClick={performSave}>Yes, save Do</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -456,17 +456,17 @@ export default function Products() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>প্রোডাক্ট ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this product??</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteTarget && (
                 <>
-                  <strong>{deleteTarget.name}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।
+                  <strong>{deleteTarget.name}</strong> will be deleted. This action cannot be undone.।
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -477,7 +477,7 @@ export default function Products() {
                 setDeleteTarget(null);
               }}
             >
-              ডিলিট করুন
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

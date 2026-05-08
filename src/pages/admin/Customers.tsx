@@ -18,11 +18,11 @@ function GrantDialog() {
 
   const handleSubmit = async () => {
     const p = parseInt(points);
-    if (!phone.trim()) { toast.error('ফোন নাম্বার দিন'); return; }
-    if (!p || p <= 0) { toast.error('পয়েন্ট সঠিকভাবে দিন'); return; }
+    if (!phone.trim()) { toast.error('Enter phone number'); return; }
+    if (!p || p <= 0) { toast.error('Enter points correctly'); return; }
     try {
       await grant.mutateAsync({ phone, name: name.trim(), points: p, note: note.trim() });
-      toast.success(`${p} পয়েন্ট যোগ হয়েছে`);
+      toast.success(`${p} Points added`);
       setOpen(false); setPhone(''); setName(''); setPoints(''); setNote('');
     } catch (e: any) {
       toast.error(e.message || 'Failed');
@@ -32,30 +32,30 @@ function GrantDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm"><UserPlus className="h-4 w-4 mr-1.5" />কাস্টমারকে পয়েন্ট দিন</Button>
+        <Button size="sm"><UserPlus className="h-4 w-4 mr-1.5" />Give points to customer</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>যেকোনো নাম্বারে পয়েন্ট দিন</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Give points to any number.</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">ফোন নাম্বার *</label>
+            <label className="text-xs text-muted-foreground mb-1 block">Phone Number *</label>
             <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">নাম (নতুন কাস্টমার হলে)</label>
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="কাস্টমারের নাম" />
+            <label className="text-xs text-muted-foreground mb-1 block">Name (for new customer)</label>
+            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Customer Name" />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">পয়েন্ট *</label>
-            <Input type="number" min={1} value={points} onChange={e => setPoints(e.target.value)} placeholder="যেমন: 100" />
+            <label className="text-xs text-muted-foreground mb-1 block">Points *</label>
+            <Input type="number" min={1} value={points} onChange={e => setPoints(e.target.value)} placeholder="Such as: 100" />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">কারণ (optional)</label>
-            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="যেমন: প্রথম পরিদর্শন বোনাস" />
+            <label className="text-xs text-muted-foreground mb-1 block">Reason (optional)</label>
+            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="e.g.: First Visit Bonus" />
           </div>
-          <p className="text-[11px] text-muted-foreground">কাস্টমার থাকলে পয়েন্ট যোগ হবে, না থাকলে নতুন অ্যাকাউন্ট তৈরি হবে।</p>
+          <p className="text-[11px] text-muted-foreground">If customer exists, points will be added; otherwise, a new account will be created.।</p>
           <Button onClick={handleSubmit} disabled={grant.isPending} className="w-full">
-            {grant.isPending ? 'সংরক্ষণ হচ্ছে...' : 'পয়েন্ট দিন'}
+            {grant.isPending ? 'Saving...' : 'Give Points'}
           </Button>
         </div>
       </DialogContent>
@@ -71,10 +71,10 @@ function AdjustDialog({ customer }: { customer: CustomerPoints }) {
 
   const handleSubmit = async () => {
     const d = parseInt(delta);
-    if (!d) { toast.error('পরিবর্তনের পরিমাণ দিন'); return; }
+    if (!d) { toast.error('Enter change amount'); return; }
     try {
       await adjust.mutateAsync({ customerId: customer.id, delta: d, note });
-      toast.success(`${d > 0 ? '+' : ''}${d} পয়েন্ট আপডেট হয়েছে`);
+      toast.success(`${d > 0 ? '+' : ''}${d} Points updated`);
       setOpen(false); setDelta(''); setNote('');
     } catch (e: any) {
       toast.error(e.message || 'Failed');
@@ -84,20 +84,20 @@ function AdjustDialog({ customer }: { customer: CustomerPoints }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">পয়েন্ট সমন্বয়</Button>
+        <Button size="sm" variant="outline">Point Adjustment</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{customer.name || customer.phone} — পয়েন্ট সমন্বয়</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{customer.name || customer.phone} — Point Adjustment</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">বর্তমান: <span className="font-bold text-primary">{customer.points}</span></p>
+          <p className="text-sm text-muted-foreground">Current: <span className="font-bold text-primary">{customer.points}</span></p>
           <div className="flex gap-2">
-            <Button type="button" size="sm" variant="outline" onClick={() => setDelta(String(Math.abs(parseInt(delta) || 0)))}><Plus className="h-3 w-3 mr-1" />যোগ</Button>
-            <Button type="button" size="sm" variant="outline" onClick={() => setDelta(String(-Math.abs(parseInt(delta) || 0)))}><Minus className="h-3 w-3 mr-1" />বাদ</Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setDelta(String(Math.abs(parseInt(delta) || 0)))}><Plus className="h-3 w-3 mr-1" />Add</Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setDelta(String(-Math.abs(parseInt(delta) || 0)))}><Minus className="h-3 w-3 mr-1" />Remove</Button>
           </div>
-          <Input type="number" placeholder="পরিমাণ (e.g. 50 অথবা -50)" value={delta} onChange={e => setDelta(e.target.value)} />
-          <Input placeholder="কারণ (optional)" value={note} onChange={e => setNote(e.target.value)} />
+          <Input type="number" placeholder="Amount (e.g. 50 Or -50)" value={delta} onChange={e => setDelta(e.target.value)} />
+          <Input placeholder="Reason (optional)" value={note} onChange={e => setNote(e.target.value)} />
           <Button onClick={handleSubmit} disabled={adjust.isPending} className="w-full">
-            {adjust.isPending ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন'}
+            {adjust.isPending ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </DialogContent>
@@ -126,26 +126,26 @@ export default function Customers() {
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-bold">কাস্টমার পয়েন্ট</h1>
+          <h1 className="text-xl font-bold">Customer Points</h1>
         </div>
         <GrantDialog />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-xl border bg-card p-4">
-          <p className="text-xs text-muted-foreground">মোট কাস্টমার</p>
+          <p className="text-xs text-muted-foreground">Total Customers</p>
           <p className="text-2xl font-bold">{customers.length}</p>
         </div>
         <div className="rounded-xl border bg-card p-4">
-          <p className="text-xs text-muted-foreground">বর্তমান পয়েন্ট</p>
+          <p className="text-xs text-muted-foreground">Current Points</p>
           <p className="text-2xl font-bold text-primary">{totalPoints}</p>
         </div>
         <div className="rounded-xl border bg-card p-4">
-          <p className="text-xs text-muted-foreground">মোট অর্জিত</p>
+          <p className="text-xs text-muted-foreground">Total Earned</p>
           <p className="text-2xl font-bold text-success">{totalEarned}</p>
         </div>
         <div className="rounded-xl border bg-card p-4">
-          <p className="text-xs text-muted-foreground">মোট রিডিম</p>
+          <p className="text-xs text-muted-foreground">Total Redeem</p>
           <p className="text-2xl font-bold text-destructive">{totalRedeemed}</p>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function Customers() {
       <div className="flex items-center gap-2 rounded-xl border bg-card p-2">
         <Search className="h-4 w-4 text-muted-foreground ml-2" />
         <Input
-          placeholder="ফোন / নাম দিয়ে খুঁজুন..."
+          placeholder="Phone / Search by Name..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="border-0 focus-visible:ring-0"
@@ -165,20 +165,20 @@ export default function Customers() {
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs">
               <tr>
-                <th className="text-left p-3">নাম</th>
-                <th className="text-left p-3">ফোন</th>
-                <th className="text-right p-3">পয়েন্ট</th>
-                <th className="text-right p-3 hidden md:table-cell">অর্জিত</th>
-                <th className="text-right p-3 hidden md:table-cell">রিডিম</th>
-                <th className="text-right p-3">অ্যাকশন</th>
+                <th className="text-left p-3">Name</th>
+                <th className="text-left p-3">Phone</th>
+                <th className="text-right p-3">Points</th>
+                <th className="text-right p-3 hidden md:table-cell">Earned</th>
+                <th className="text-right p-3 hidden md:table-cell">Redeem</th>
+                <th className="text-right p-3">Action</th>
               </tr>
             </thead>
             <tbody>
               {isLoading && (
-                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">লোড হচ্ছে...</td></tr>
+                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Loading...</td></tr>
               )}
               {!isLoading && filtered.length === 0 && (
-                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">কোনো কাস্টমার পাওয়া যায়নি</td></tr>
+                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No customer found.</td></tr>
               )}
               {filtered.map(c => (
                 <tr key={c.id} className="border-t hover:bg-muted/20">

@@ -35,23 +35,23 @@ export default function Brands() {
 
   const handleSave = () => {
     const trimmed = name.trim();
-    if (!trimmed) { toast.error('Brand name দিন'); return; }
+    if (!trimmed) { toast.error('Brand name Day'); return; }
     if (editBrand) {
       updateBrandMut.mutate({ id: editBrand.id, updates: { name: trimmed, color } });
-      toast.success('Brand update হয়েছে');
+      toast.success('Brand update Has been');
     } else {
       addBrandMut.mutate({ name: trimmed, slug: slugify(trimmed), color });
-      toast.success('নতুন brand যোগ হয়েছে');
+      toast.success('New brand Added');
     }
     setDialogOpen(false);
   };
 
   const requestDelete = (b: Brand) => {
-    if (b.isDefault) { toast.error('Default brand delete করা যাবে না'); return; }
+    if (b.isDefault) { toast.error('Default brand delete cannot be done'); return; }
     const productCount = products.filter(p => p.brandId === b.id).length;
     const catCount = categories.filter(c => c.brandId === b.id).length;
     if (productCount > 0 || catCount > 0) {
-      toast.error(`এই brand এ ${productCount}টি product ও ${catCount}টি category আছে। আগে move/delete করুন।`);
+      toast.error(`This brand In ${productCount}Qty product And ${catCount}Qty category is available. Before move/delete Do।`);
       return;
     }
     setDeleteTarget(b);
@@ -59,7 +59,7 @@ export default function Brands() {
   const confirmDelete = () => {
     if (!deleteTarget) return;
     deleteBrandMut.mutate(deleteTarget.id);
-    toast.success('Brand delete হয়েছে');
+    toast.success('Brand delete Has been');
     setDeleteTarget(null);
   };
 
@@ -68,9 +68,9 @@ export default function Brands() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="page-header">Brands</h1>
-          <p className="page-subheader">{brands.length} টি brand</p>
+          <p className="page-subheader">{brands.length} Qty brand</p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> নতুন Brand</Button>
+        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> New Brand</Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -124,11 +124,11 @@ export default function Brands() {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>{editBrand ? 'Brand Edit' : 'নতুন Brand'}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editBrand ? 'Brand Edit' : 'New Brand'}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
             <div>
               <Label>Brand Name</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="যেমন Pastel" />
+              <Input value={name} onChange={e => setName(e.target.value)} placeholder="Such as Pastel" />
             </div>
             <div>
               <Label>Color</Label>
@@ -152,14 +152,14 @@ export default function Brands() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Brand ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Brand Delete??</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget && <><strong>{deleteTarget.name}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+              {deleteTarget && <><strong>{deleteTarget.name}</strong> will be deleted. This action cannot be undone.।</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>ডিলিট করুন</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

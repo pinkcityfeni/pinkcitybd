@@ -26,9 +26,9 @@ export default function Reviews() {
   const handleApprove = async (id: string, approved: boolean) => {
     try {
       await approveMut.mutateAsync({ id, approved });
-      toast.success(approved ? 'Review অনুমোদিত হয়েছে ✓' : 'Review pending করা হয়েছে');
+      toast.success(approved ? 'Review Approved ✓' : 'Review pending Done');
     } catch {
-      toast.error('পরিবর্তন করা যায়নি');
+      toast.error('Could not be changed');
     }
   };
 
@@ -36,9 +36,9 @@ export default function Reviews() {
     if (!deleteId) return;
     try {
       await deleteMut.mutateAsync(deleteId);
-      toast.success('Review delete হয়েছে');
+      toast.success('Review delete Has been');
     } catch {
-      toast.error('Delete করা যায়নি');
+      toast.error('Delete Could not be done');
     } finally {
       setDeleteId(null);
     }
@@ -79,7 +79,7 @@ export default function Reviews() {
 
       {filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-12">
-          {filter === 'pending' ? 'কোনো pending review নেই' : t('review.noReviews')}
+          {filter === 'pending' ? 'Any pending review Not available' : t('review.noReviews')}
         </p>
       ) : (
         <div className="space-y-3">
@@ -155,12 +155,12 @@ export default function Reviews() {
       <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Review ডিলিট করবেন?</AlertDialogTitle>
-            <AlertDialogDescription>এই review টি ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</AlertDialogDescription>
+            <AlertDialogTitle>Review Delete??</AlertDialogTitle>
+            <AlertDialogDescription>This review will be deleted. This action cannot be undone.।</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>ডিলিট করুন</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

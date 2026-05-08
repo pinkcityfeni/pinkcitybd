@@ -274,7 +274,7 @@ export default function Dashboard() {
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <Tooltip
                 contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
-                formatter={(value: number, name: string) => [`৳${value.toFixed(0)}`, name === 'revenue' ? 'রেভিনিউ' : 'লাভ']}
+                formatter={(value: number, name: string) => [`৳${value.toFixed(0)}`, name === 'revenue' ? 'Revenue' : 'Profit']}
               />
               <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="url(#colorRevenue)" strokeWidth={2} />
               <Area type="monotone" dataKey="profit" stroke="hsl(142 71% 45%)" fill="url(#colorProfit)" strokeWidth={2} />
@@ -330,7 +330,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right shrink-0 ml-2">
                     <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
-                    <span className="text-[10px] text-muted-foreground ml-1">({p.qty}টি)</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">({p.qty}Qty)</span>
                   </div>
                 </div>
               ))}
@@ -355,7 +355,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right shrink-0 ml-2">
                     <span className="text-xs font-bold">৳{p.revenue.toFixed(0)}</span>
-                    <span className="text-[10px] text-muted-foreground ml-1">({p.qty}টি)</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">({p.qty}Qty)</span>
                   </div>
                 </div>
               ))}
@@ -434,8 +434,8 @@ export default function Dashboard() {
             <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
             <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
             <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} />
-            <Bar dataKey="revenue" name="রেভিনিউ" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="profit" name="লাভ" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="profit" name="Profit" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
           </BarChart>
         </ResponsiveContainer>

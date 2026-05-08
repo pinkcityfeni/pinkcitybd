@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
     const advanceTrxId: string = (data?.advanceTrxId || "").toString().trim();
     if (isCODOutsideFeni && !advanceTrxId) {
       return new Response(JSON.stringify({
-        error: "Feni-এর বাইরে COD অর্ডারের জন্য আগে delivery charge bKash/Nagad-এ পাঠিয়ে Transaction ID দিতে হবে।",
+        error: "Feni-Outside this COD For orders, first delivery charge bKash/Nagad-Sent to Transaction ID must be given।",
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -140,13 +140,13 @@ Deno.serve(async (req) => {
         .eq("code", voucherCodeRaw)
         .maybeSingle();
       if (!v || !v.active) {
-        return new Response(JSON.stringify({ error: "ভাউচার কোড সঠিক নয় বা নিষ্ক্রিয়" }), {
+        return new Response(JSON.stringify({ error: "Voucher code is incorrect or inactive." }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const now = new Date();
       if (now < new Date(v.start_at) || now > new Date(v.expire_at)) {
-        return new Response(JSON.stringify({ error: "ভাউচারের মেয়াদ নেই" }), {
+        return new Response(JSON.stringify({ error: "Voucher Expired" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
       if (v.scope_type === "product") {
         const m = authItems.filter((it: any) => it.product?.id === v.scope_product_id);
         if (m.length === 0) {
-          return new Response(JSON.stringify({ error: "ভাউচার এই প্রোডাক্টের জন্য প্রযোজ্য নয়" }), {
+          return new Response(JSON.stringify({ error: "Voucher is not applicable for this product." }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -164,14 +164,14 @@ Deno.serve(async (req) => {
         const cat = String(v.scope_category || "").toLowerCase();
         const m = authItems.filter((it: any) => String(it.product?.category || "").toLowerCase() === cat);
         if (m.length === 0) {
-          return new Response(JSON.stringify({ error: "ভাউচার এই ক্যাটাগরির জন্য প্রযোজ্য নয়" }), {
+          return new Response(JSON.stringify({ error: "Voucher is not applicable for this category." }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         eligibleSubtotal = m.reduce((s: number, it: any) => s + it.price * it.quantity, 0);
       }
       if (Number(v.min_order_amount) > 0 && subtotal < Number(v.min_order_amount)) {
-        return new Response(JSON.stringify({ error: `সর্বনিম্ন অর্ডার ৳${Number(v.min_order_amount)}` }), {
+        return new Response(JSON.stringify({ error: `Minimum Order ৳${Number(v.min_order_amount)}` }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
         ]);
         const usedCount = Math.max(byUser.count || 0, byPhone.count || 0);
         if (usedCount >= limit) {
-          return new Response(JSON.stringify({ error: "এই ভাউচার আপনি ইতিমধ্যে ব্যবহার করেছেন" }), {
+          return new Response(JSON.stringify({ error: "You have already used this voucher." }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }

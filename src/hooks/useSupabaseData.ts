@@ -654,8 +654,8 @@ export function useCreateOrGrantCustomer() {
   return useMutation({
     mutationFn: async ({ phone, name, points, note }: { phone: string; name?: string; points: number; note?: string }) => {
       const norm = normalizePhone(phone);
-      if (!norm) throw new Error('সঠিক ফোন নাম্বার দিন');
-      if (!Number.isFinite(points) || points <= 0) throw new Error('পয়েন্ট ১ বা তার বেশি দিন');
+      if (!norm) throw new Error('Enter valid phone number');
+      if (!Number.isFinite(points) || points <= 0) throw new Error('Points 1 or more days');
 
       const { data: existing } = await supabase
         .from('customer_points' as any)

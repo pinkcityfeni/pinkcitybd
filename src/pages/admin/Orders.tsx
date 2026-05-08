@@ -147,7 +147,7 @@ export default function Orders() {
                            </>
                          )}
                          <Button size="sm" variant="destructive" onClick={() => setDeleteId(o.id)}>
-                           <Trash2 className="h-3.5 w-3.5 mr-1" /> ডিলিট
+                           <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
                          </Button>
                        </div>
                     </div>
@@ -162,15 +162,15 @@ export default function Orders() {
       <AlertDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>অর্ডার ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Order?</AlertDialogTitle>
             <AlertDialogDescription>
-              এই অর্ডারটি স্থায়ীভাবে মুছে যাবে। এটি আর ফিরিয়ে আনা যাবে না।
+              This order will be permanently deleted. It cannot be recovered.।
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrderMut.mutate(deleteId); toast.success('অর্ডার ডিলিট হয়েছে'); setDeleteId(null); } }}>
-              ডিলিট করুন
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrderMut.mutate(deleteId); toast.success('Order deleted'); setDeleteId(null); } }}>
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

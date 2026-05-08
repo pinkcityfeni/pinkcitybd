@@ -64,7 +64,7 @@ export default function BarcodeScannerDialog({ open, onOpenChange, onDetected }:
         };
         rafRef.current = requestAnimationFrame(tick);
       } catch (e: any) {
-        setError(e?.message || 'ক্যামেরা চালু করা যায়নি');
+        setError(e?.message || 'Camera could not be started');
       }
     })();
 
@@ -94,20 +94,20 @@ export default function BarcodeScannerDialog({ open, onOpenChange, onDetected }:
           {error && <p className="text-xs text-destructive">{error}</p>}
           {!supported && (
             <p className="text-xs text-muted-foreground">
-              এই browser এ auto-detect support নেই। নিচে barcode টা manually লিখে দিন অথবা USB scanner দিয়ে input দিন।
+              This browser In auto-detect support not available. Below barcode Item manually Write down or USB scanner By input Day।
             </p>
           )}
           <div className="flex gap-2">
             <Input
               autoFocus
-              placeholder="Barcode manually লিখুন বা scanner দিয়ে scan করুন"
+              placeholder="Barcode manually Write or scanner By scan Do"
               value={manual}
               onChange={(e) => setManual(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitManual(); } }}
             />
             <Button type="button" onClick={submitManual}>Use</Button>
           </div>
-          <Button type="button" variant="outline" className="w-full" onClick={() => onOpenChange(false)}>বাতিল</Button>
+          <Button type="button" variant="outline" className="w-full" onClick={() => onOpenChange(false)}>Cancel</Button>
         </div>
       </DialogContent>
     </Dialog>

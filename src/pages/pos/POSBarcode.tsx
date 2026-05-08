@@ -60,7 +60,7 @@ export default function POSBarcode() {
               <h3 className="font-bold text-lg">{result.name}</h3>
               <p className="text-sm opacity-60">{result.description}</p>
               <div className="flex items-center gap-4 mt-2 text-sm">
-                <span className="font-bold text-primary text-lg">৳{result.price.toFixed(0)}</span>
+                <span className="font-bold text-primary text-lg">Tk {result.price.toFixed(0)}</span>
                 <span className="opacity-50">{t('product.barcode')}: #{result.barcode}</span>
                 <span className={result.stock < 20 ? 'text-warning' : 'text-success'}>{t('posBarcode.inStock', { n: result.stock })}</span>
               </div>

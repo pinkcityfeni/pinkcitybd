@@ -90,11 +90,11 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col items-center text-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? '১০০% অরিজিনাল' : '100% Original'}</p>
+              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? '100% Original' : '100% Original'}</p>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
-              <span className="text-lg font-bold text-primary">৳</span>
-              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'সেরা দাম' : 'Best Price'}</p>
+              <span className="text-lg font-bold text-primary">Tk </span>
+              <p className="text-[10px] sm:text-xs font-semibold">{lang === 'bn' ? 'Best price' : 'Best Price'}</p>
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function Home() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="section-title">{t('home.forYou')}</h2>
-            <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'আমাদের সেরা কালেকশন' : 'Our best collection'}</p>
+            <p className="text-xs text-muted-foreground mt-1">{lang === 'bn' ? 'Our Best Collection' : 'Our best collection'}</p>
           </div>
           <Link to="/shop" className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all">
             {t('home.viewAll')} <ChevronRight className="h-3.5 w-3.5" />

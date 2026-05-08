@@ -156,20 +156,20 @@ export default function AdminBanners() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Banner ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Banner Delete??</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget && <><strong>{deleteTarget.title || 'এই banner'}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+              {deleteTarget && <><strong>{deleteTarget.title || 'This banner'}</strong> will be deleted. This action cannot be undone.।</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteTarget) { deleteBannerMut.mutate(deleteTarget.id); toast.success(t('banner.deleted')); }
                 setDeleteTarget(null);
               }}
-            >ডিলিট করুন</AlertDialogAction>
+            >Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

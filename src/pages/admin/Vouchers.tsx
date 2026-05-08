@@ -96,11 +96,11 @@ export default function Vouchers() {
   const handleSave = async () => {
     const c = code.trim().toUpperCase();
     const amt = parseFloat(discount) || 0;
-    if (!c) return toast.error('কোড দিন');
-    if (amt <= 0) return toast.error('Discount amount দিন');
-    if (scopeType === 'product' && !scopeProductId) return toast.error('Product select করুন');
-    if (scopeType === 'category' && !scopeCategory) return toast.error('Category select করুন');
-    if (new Date(expireAt) <= new Date(startAt)) return toast.error('Expire date start এর পরে হতে হবে');
+    if (!c) return toast.error('Enter code');
+    if (amt <= 0) return toast.error('Discount amount Day');
+    if (scopeType === 'product' && !scopeProductId) return toast.error('Product select Do');
+    if (scopeType === 'category' && !scopeCategory) return toast.error('Category select Do');
+    if (new Date(expireAt) <= new Date(startAt)) return toast.error('Expire date start Must be after');
 
     const payload = {
       code: c,
@@ -118,10 +118,10 @@ export default function Vouchers() {
     try {
       if (editVoucher) {
         await updateMut.mutateAsync({ id: editVoucher.id, updates: payload });
-        toast.success('Voucher update হয়েছে');
+        toast.success('Voucher update Has been');
       } else {
         await createMut.mutateAsync(payload);
-        toast.success('Voucher তৈরি হয়েছে');
+        toast.success('Voucher Created');
       }
       setDialogOpen(false);
     } catch (e: any) {
@@ -136,7 +136,7 @@ export default function Vouchers() {
     if (!deleteTarget) return;
     try {
       await deleteMut.mutateAsync(deleteTarget.id);
-      toast.success('Voucher delete হয়েছে');
+      toast.success('Voucher delete Has been');
     } catch (e: any) {
       toast.error(e?.message || 'Delete failed');
     } finally {
@@ -146,7 +146,7 @@ export default function Vouchers() {
 
   const handleToggleActive = async (v: Voucher) => {
     await updateMut.mutateAsync({ id: v.id, updates: { active: !v.active } });
-    toast.success(v.active ? 'নিষ্ক্রিয় করা হলো' : 'সক্রিয় করা হলো');
+    toast.success(v.active ? 'Deactivated' : 'Activated');
   };
 
   const productName = (id?: string | null) => products.find(p => p.id === id)?.name || '—';
@@ -159,7 +159,7 @@ export default function Vouchers() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Ticket className="h-6 w-6 text-primary" /> Vouchers
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Product/Category specific discount codes manage করুন</p>
+          <p className="text-sm text-muted-foreground mt-1">Product/Category specific discount codes manage Do</p>
         </div>
         <Button onClick={openNew} className="rounded-full">
           <Plus className="h-4 w-4 mr-1" /> New Voucher
@@ -169,9 +169,9 @@ export default function Vouchers() {
       {vouchers.length === 0 ? (
         <div className="rounded-2xl border bg-card p-12 text-center">
           <Ticket className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-          <p className="text-muted-foreground">এখনো কোনো voucher তৈরি হয়নি</p>
+          <p className="text-muted-foreground">Still no voucher Not created</p>
           <Button onClick={openNew} variant="outline" className="mt-4 rounded-full">
-            <Plus className="h-4 w-4 mr-1" /> প্রথম voucher তৈরি করুন
+            <Plus className="h-4 w-4 mr-1" /> First voucher Create
           </Button>
         </div>
       ) : (
@@ -187,7 +187,7 @@ export default function Vouchers() {
                       {!v.active && <Badge variant="secondary">Inactive</Badge>}
                       {expired && <Badge variant="destructive">Expired</Badge>}
                     </div>
-                    <p className="text-2xl font-bold">৳{v.discountAmount}</p>
+                    <p className="text-2xl font-bold">Tk {v.discountAmount}</p>
                     <p className="text-xs text-muted-foreground capitalize mt-0.5">
                       {v.scopeType === 'product' ? `Product: ${productName(v.scopeProductId)}` : `Category: ${v.scopeCategory}`}
                     </p>
@@ -216,7 +216,7 @@ export default function Vouchers() {
                   {v.minOrderAmount > 0 && (
                     <div className="col-span-2">
                       <p className="opacity-60">Min order</p>
-                      <p className="font-medium text-foreground">৳{v.minOrderAmount}</p>
+                      <p className="font-medium text-foreground">Tk {v.minOrderAmount}</p>
                     </div>
                   )}
                 </div>
@@ -241,7 +241,7 @@ export default function Vouchers() {
             </div>
 
             <div>
-              <Label>Discount Amount (৳)</Label>
+              <Label>Discount Amount (Tk )</Label>
               <Input type="number" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="50" className="mt-1" />
             </div>
 
@@ -271,7 +271,7 @@ export default function Vouchers() {
                 >
                   <option value="">— Choose —</option>
                   {products.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} (৳{p.price})</option>
+                    <option key={p.id} value={p.id}>{p.name} (Tk {p.price})</option>
                   ))}
                 </select>
               </div>
@@ -308,7 +308,7 @@ export default function Vouchers() {
                 <Input type="number" min={1} value={perCustomerLimit} onChange={e => setPerCustomerLimit(e.target.value)} className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Min order ৳</Label>
+                <Label className="text-xs">Min order Tk </Label>
                 <Input type="number" min={0} value={minOrder} onChange={e => setMinOrder(e.target.value)} className="mt-1" />
               </div>
             </div>
@@ -316,7 +316,7 @@ export default function Vouchers() {
             <div className="flex items-center justify-between pt-2 border-t">
               <div>
                 <Label>Active</Label>
-                <p className="text-xs text-muted-foreground">নিষ্ক্রিয় করলে customer apply করতে পারবে না</p>
+                <p className="text-xs text-muted-foreground">If disabled customer apply Cannot do</p>
               </div>
               <Switch checked={active} onCheckedChange={setActive} />
             </div>
@@ -334,14 +334,14 @@ export default function Vouchers() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Voucher ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Voucher Delete??</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget && <>Voucher <strong>{deleteTarget.code}</strong> ডিলিট করা হবে। এই কাজ আর ফেরানো যাবে না।</>}
+              {deleteTarget && <>Voucher <strong>{deleteTarget.code}</strong> will be deleted. This action cannot be undone.।</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>ডিলিট করুন</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

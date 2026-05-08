@@ -29,10 +29,10 @@ export function isValidPhone(phone: string): boolean {
 }
 
 export function isStrongPassword(password: string): { valid: boolean; message: string } {
-  if (password.length < 6) return { valid: false, message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে' };
-  if (password.length > 128) return { valid: false, message: 'পাসওয়ার্ড ১২৮ অক্ষরের বেশি হতে পারবে না' };
-  if (!/[a-zA-Z]/.test(password)) return { valid: false, message: 'পাসওয়ার্ডে কমপক্ষে একটি অক্ষর থাকতে হবে' };
-  if (!/[0-9]/.test(password)) return { valid: false, message: 'পাসওয়ার্ডে কমপক্ষে একটি সংখ্যা থাকতে হবে' };
+  if (password.length < 6) return { valid: false, message: 'Password must be at least 6 characters.' };
+  if (password.length > 128) return { valid: false, message: 'Password cannot be more than 128 characters.' };
+  if (!/[a-zA-Z]/.test(password)) return { valid: false, message: 'Password must contain at least one letter.' };
+  if (!/[0-9]/.test(password)) return { valid: false, message: 'Password must contain at least one number.' };
   return { valid: true, message: '' };
 }
 
@@ -59,7 +59,7 @@ export function checkLoginRateLimit(email: string): { allowed: boolean; message:
     const remaining = Math.ceil((record.lockedUntil - now) / 60000);
     return {
       allowed: false,
-      message: `অনেকবার ভুল চেষ্টা হয়েছে। ${remaining} মিনিট পরে চেষ্টা করুন।`,
+      message: `Too many failed attempts। ${remaining} Try again after {n} minutes।`,
       remainingTime: remaining,
     };
   }

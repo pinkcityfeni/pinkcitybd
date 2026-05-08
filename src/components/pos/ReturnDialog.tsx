@@ -63,7 +63,7 @@ export default function ReturnDialog({ order, open, onOpenChange }: Props) {
       const res = await processReturn.mutateAsync({
         order_id: order.id, items, refund_method: method, reason,
       });
-      toast.success(`Return processed — Refund ৳${res.total_refund.toFixed(0)}` +
+      toast.success(`Return processed — Refund Tk ${res.total_refund.toFixed(0)}` +
         (res.points_reverted > 0 ? ` · −${res.points_reverted} pts` : ''));
       onOpenChange(false);
       setQtyMap({}); setReason('');
@@ -96,7 +96,7 @@ export default function ReturnDialog({ order, open, onOpenChange }: Props) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{it.name}</p>
                       <p className="text-xs opacity-60">
-                        ৳{it.price.toFixed(0)} × sold {it.sold}
+                        Tk {it.price.toFixed(0)} × sold {it.sold}
                         {it.alreadyReturned > 0 && ` · returned ${it.alreadyReturned}`}
                         {' · max '}{it.max}
                       </p>
@@ -140,7 +140,7 @@ export default function ReturnDialog({ order, open, onOpenChange }: Props) {
               <div>
                 <Label className="text-xs">Refund Total</Label>
                 <div className="h-9 mt-1 px-3 rounded-md border bg-muted/40 flex items-center font-semibold">
-                  ৳{refundTotal.toFixed(0)}
+                  Tk {refundTotal.toFixed(0)}
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function ReturnDialog({ order, open, onOpenChange }: Props) {
             <Button
               onClick={handleSubmit}
               disabled={totalQty === 0 || processReturn.isPending}>
-              {processReturn.isPending ? 'Processing…' : `Process Return · ৳${refundTotal.toFixed(0)}`}
+              {processReturn.isPending ? 'Processing…' : `Process Return · Tk ${refundTotal.toFixed(0)}`}
             </Button>
           )}
         </DialogFooter>

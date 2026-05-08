@@ -39,7 +39,7 @@ async function getAdminAccessToken() {
     const refreshedToken = refreshed.session?.access_token;
 
     if (refreshError || !refreshedToken) {
-      throw new Error('সেশন শেষ হয়ে গেছে, আবার লগইন করুন');
+      throw new Error('Session has expired, please log in again.');
     }
 
     return refreshedToken;
@@ -49,7 +49,7 @@ async function getAdminAccessToken() {
   const accessToken = sessionData.session?.access_token;
 
   if (!accessToken) {
-    throw new Error('সেশন পাওয়া যায়নি, আবার লগইন করুন');
+    throw new Error('Session not found, please log in again.');
   }
 
   return accessToken;
@@ -129,16 +129,16 @@ export default function Users() {
     if (dialog.type === 'role') {
       try {
         await updateRoleMut.mutateAsync({ userId: dialog.user.id, newRole: dialog.newRole });
-        toast.success(`${dialog.user.name} এখন ${dialog.newRole}`);
+        toast.success(`${dialog.user.name} Now ${dialog.newRole}`);
       } catch (err: any) {
-        toast.error(err.message || 'Role পরিবর্তন ব্যর্থ');
+        toast.error(err.message || 'Role Change failed');
       }
     } else if (dialog.type === 'delete') {
       try {
         await deleteUserMut.mutateAsync(dialog.user.id);
-        toast.success(`${dialog.user.name} এর একাউন্ট মুছে ফেলা হয়েছে`);
+        toast.success(`${dialog.user.name} account has been deleted.`);
       } catch (err: any) {
-        toast.error(err.message || 'একাউন্ট মুছতে ব্যর্থ');
+        toast.error(err.message || 'Failed to delete account');
       }
     }
     setDialog(null);
@@ -159,7 +159,7 @@ export default function Users() {
   };
 
   const isPending = updateRoleMut.isPending || deleteUserMut.isPending;
-  const errorMessage = error instanceof Error ? error.message : 'Users লোড করা যায়নি';
+  const errorMessage = error instanceof Error ? error.message : 'Users Could not load';
 
   return (
     <div className="p-6 animate-fade-in">
@@ -174,7 +174,7 @@ export default function Users() {
         <div className="stat-card flex flex-col items-start gap-3">
           <p className="text-sm text-destructive">{errorMessage}</p>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-            {isFetching ? 'লোড হচ্ছে...' : 'আবার চেষ্টা করুন'}
+            {isFetching ? 'Loading...' : 'Try again'}
           </Button>
         </div>
       ) : (
@@ -197,7 +197,7 @@ export default function Users() {
                   <tr key={u.id} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="py-3 font-medium">
                       {u.name}
-                      {isSelf && <span className="text-[10px] text-muted-foreground ml-1">(আপনি)</span>}
+                      {isSelf && <span className="text-[10px] text-muted-foreground ml-1">(You)</span>}
                     </td>
                     <td className="py-3 text-muted-foreground">{u.phone || '—'}</td>
                     <td className="py-3 text-muted-foreground">{u.email}</td>
@@ -247,13 +247,13 @@ export default function Users() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {dialog?.type === 'delete' ? 'একাউন্ট মুছে ফেলবেন?' : 'Role পরিবর্তন করবেন?'}
+              {dialog?.type === 'delete' ? 'Delete Account?' : 'Role You will change?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {dialog?.type === 'role'
-                ? `${dialog.user.name} এর role "${dialog.user.role}" থেকে "${dialog.newRole}" তে পরিবর্তন হবে।`
+                ? `${dialog.user.name} Of role "${dialog.user.role}" From "${dialog.newRole}" will be changed to।`
                 : dialog?.type === 'delete'
-                ? `${dialog.user.name} (${dialog.user.email}) এর একাউন্ট সম্পূর্ণভাবে মুছে ফেলা হবে। এই কাজটি আর ফেরানো যাবে না।`
+                ? `${dialog.user.name} (${dialog.user.email}) account will be permanently deleted. This action cannot be undone.।`
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -264,7 +264,7 @@ export default function Users() {
               disabled={isPending}
               className={dialog?.type === 'delete' ? 'bg-destructive hover:bg-destructive/90' : ''}
             >
-              {isPending ? 'Processing...' : dialog?.type === 'delete' ? 'মুছে ফেলুন' : 'Confirm'}
+              {isPending ? 'Processing...' : dialog?.type === 'delete' ? 'Delete' : 'Confirm'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

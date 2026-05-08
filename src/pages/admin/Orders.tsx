@@ -83,7 +83,7 @@ export default function Orders() {
                       <span className="text-muted-foreground text-xs">{new Date(o.date).toLocaleString(locale)}</span>
                     </div>
                   </div>
-                  <span className="font-bold text-primary">৳{o.total.toFixed(0)}</span>
+                  <span className="font-bold text-primary">Tk {o.total.toFixed(0)}</span>
                   {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </button>
 
@@ -96,7 +96,7 @@ export default function Orders() {
                       {o.deliveryZone && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Truck className="h-3.5 w-3.5 shrink-0" />
-                          <span>{o.deliveryZone === 'feni' ? t('order.feni') : t('order.outsideFeni')} — ৳{o.deliveryCharge || 0}</span>
+                          <span>{o.deliveryZone === 'feni' ? t('order.feni') : t('order.outsideFeni')} — Tk {o.deliveryCharge || 0}</span>
                         </div>
                       )}
                       {o.paymentMethod && (
@@ -114,9 +114,9 @@ export default function Orders() {
                         <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2 p-2 rounded-lg bg-info/5 border border-info/20">
                           <Smartphone className="h-3.5 w-3.5 shrink-0 text-info" />
                           <span className="text-xs">
-                            <span className="font-medium">Advance ৳{o.deliveryCharge || 0} paid</span>
+                            <span className="font-medium">Advance Tk {o.deliveryCharge || 0} paid</span>
                             <span className="font-mono ml-1">(TrxID: {o.advanceTrxId})</span>
-                            {o.paymentMethod === 'cod' && <span className="ml-1">— Cash ৳{Math.max(0, o.total - (o.deliveryCharge || 0)).toFixed(0)} on delivery</span>}
+                            {o.paymentMethod === 'cod' && <span className="ml-1">— Cash Tk {Math.max(0, o.total - (o.deliveryCharge || 0)).toFixed(0)} on delivery</span>}
                           </span>
                         </div>
                       )}
@@ -127,13 +127,13 @@ export default function Orders() {
                       {o.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-sm py-1">
                           <span>{item.product.name} × {item.quantity}</span>
-                          <span className="font-medium">৳{(item.product.price * item.quantity).toFixed(0)}</span>
+                          <span className="font-medium">Tk {(item.product.price * item.quantity).toFixed(0)}</span>
                         </div>
                       ))}
                       {o.deliveryCharge !== undefined && o.deliveryCharge > 0 && (
                         <div className="flex justify-between text-sm py-1">
                           <span className="text-muted-foreground">{t('order.deliveryCharge')}</span>
-                          <span>৳{o.deliveryCharge}</span>
+                          <span>Tk {o.deliveryCharge}</span>
                         </div>
                       )}
                     </div>
@@ -147,7 +147,7 @@ export default function Orders() {
                            </>
                          )}
                          <Button size="sm" variant="destructive" onClick={() => setDeleteId(o.id)}>
-                           <Trash2 className="h-3.5 w-3.5 mr-1" /> ডিলিট
+                           <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
                          </Button>
                        </div>
                     </div>
@@ -162,15 +162,15 @@ export default function Orders() {
       <AlertDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>অর্ডার ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Order?</AlertDialogTitle>
             <AlertDialogDescription>
-              এই অর্ডারটি স্থায়ীভাবে মুছে যাবে। এটি আর ফিরিয়ে আনা যাবে না।
+              This order will be permanently deleted. It cannot be recovered.।
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrderMut.mutate(deleteId); toast.success('অর্ডার ডিলিট হয়েছে'); setDeleteId(null); } }}>
-              ডিলিট করুন
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deleteId) { deleteOrderMut.mutate(deleteId); toast.success('Order deleted'); setDeleteId(null); } }}>
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

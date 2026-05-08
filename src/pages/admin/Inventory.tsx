@@ -48,7 +48,7 @@ export default function Inventory() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="stat-card"><p className="text-sm text-muted-foreground">{t('inv.totalValue')}</p><p className="text-2xl font-bold">৳{totalValue.toFixed(0)}</p></div>
+        <div className="stat-card"><p className="text-sm text-muted-foreground">{t('inv.totalValue')}</p><p className="text-2xl font-bold">Tk {totalValue.toFixed(0)}</p></div>
         <div className="stat-card"><p className="text-sm text-muted-foreground">{t('inv.lowStockItems')}</p><p className="text-2xl font-bold text-warning">{lowStock}</p></div>
         <div className="stat-card"><p className="text-sm text-muted-foreground">{t('inv.outOfStock')}</p><p className="text-2xl font-bold text-destructive">{outOfStock}</p></div>
       </div>
@@ -87,7 +87,7 @@ export default function Inventory() {
                 <td className="py-3 text-xs">{p.category} · {p.subcategory}</td>
                 <td className="py-3 font-mono text-xs">{p.barcode}</td>
                 <td className={`py-3 text-right font-medium ${p.stock < 20 ? p.stock === 0 ? 'text-destructive' : 'text-warning' : ''}`}>{p.stock}</td>
-                <td className="py-3 text-right">৳{(p.buyingPrice * p.stock).toFixed(0)}</td>
+                <td className="py-3 text-right">Tk {(p.buyingPrice * p.stock).toFixed(0)}</td>
                 <td className="py-3">
                   <div className="flex items-center justify-end gap-1">
                     <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => adjust(p.id, -1)}><Minus className="h-3 w-3" /></Button>

@@ -98,7 +98,7 @@ export default function StoreLayout() {
       <AnnouncementBar />
 
       {/* Main Header */}
-      <header ref={headerRef} className="sticky top-0 z-50 bg-background border-b">
+      <header ref={headerRef} className="z-50 bg-background border-b">
         {/* Falling rose petals across the header */}
         <div className="petal-field" aria-hidden="true">
           <span className="petal petal-1">🌸</span>

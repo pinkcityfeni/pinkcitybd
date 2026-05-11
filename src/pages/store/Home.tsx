@@ -46,7 +46,10 @@ export default function Home() {
         </section>
       )}
 
-      <section className="border-b bg-background sticky top-[6.4rem] z-30">
+      <section
+        className="border-b bg-background sticky z-40"
+        style={{ top: 'var(--header-h, 6.4rem)' }}
+      >
         <div className="container mx-auto px-3 py-3">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-0.5">
             {categories.map(c => (

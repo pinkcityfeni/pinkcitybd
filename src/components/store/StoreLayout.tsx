@@ -58,6 +58,20 @@ export default function StoreLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => {
+      document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => { ro.disconnect(); window.removeEventListener('resize', update); };
+  }, []);
 
   const navLinks = [
     { to: '/', label: t('nav.home') },
@@ -84,7 +98,7 @@ export default function StoreLayout() {
       <AnnouncementBar />
 
       {/* Main Header */}
-      <header className="sticky top-0 z-50 bg-background border-b">
+      <header ref={headerRef} className="sticky top-0 z-50 bg-background border-b">
         {/* Falling rose petals across the header */}
         <div className="petal-field" aria-hidden="true">
           <span className="petal petal-1">🌸</span>

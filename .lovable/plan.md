@@ -1,26 +1,15 @@
-## সমস্যা
+## অবস্থা
 
-Home page এ category strip (🌸 আইকনসহ horizontal row) এর class `sticky top-[6.4rem] z-30` — কিন্তু header এর actual height এই value এর সাথে match করছে না। ফলে scroll করলে strip stick হলেও header এর পিছনে hide হয়ে যাচ্ছে, যেন freeze কাজ করছে না।
+আগের ফিক্সেই এই কাজটা মূলত হয়ে গেছে:
+- `<header>` (logo + nav + search bar) already `sticky top-0 z-50` — scroll এ উপরে থাকবে।
+- Category strip এখন `sticky top: var(--header-h)` + `z-40` — header এর actual height মেপে ঠিক নিচে freeze হবে।
 
-Header stack (StoreLayout.tsx):
-- AnnouncementBar (~28px)
-- Main header h-14 (56px)
-- Search bar (~36px)
-- **মোট ≈ 120px**, কিন্তু sticky offset = 102px (6.4rem)
+শুধু announcement bar (উপরের সরু rose-pink ribbon) sticky না, scroll এ উপরে চলে যায়। User-এর choice অনুযায়ী এটাই কাঙ্ক্ষিত (logo+search+category freeze, announcement freeze না)।
 
-এছাড়া `z-30` < header এর `z-50`, তাই overlap হলে strip ঢেকে যাবে।
+## যাচাই
+- Preview reload করে home page scroll করলে দেখতে হবে: announcement উপরে চলে যাচ্ছে, কিন্তু logo + search bar + 🌸 category row screen এর top এ stuck আছে।
 
-## Fix
+যদি এখনো scroll এ search/category উপরে চলে যায়, তাহলে নতুন issue — তখন আরো debug করতে হবে (parent overflow, transform context, ইত্যাদি)।
 
-`src/pages/store/Home.tsx` line 49:
-- Sticky offset হেডারের নিচে fit করানো — একটা ref/measurement বা সরাসরি StoreLayout এর header কে একটা CSS variable (e.g. `--header-h`) expose করে strip এ `top: var(--header-h)` ব্যবহার করা।
-- সবচেয়ে simple ও robust approach: StoreLayout এর sticky `<header>` এ একটা ResizeObserver দিয়ে height মাপা এবং `document.documentElement.style.setProperty('--header-h', ...)` সেট করা।
-- Home এ category strip: `style={{ top: 'var(--header-h, 7.5rem)' }}` + `z-40` (header এর `z-50` এর নিচে but content এর উপর)।
-
-এতে mobile/desktop, search bar এর height change হলেও সঠিকভাবে freeze থাকবে।
-
-## পরিবর্তিত ফাইল
-1. `src/components/store/StoreLayout.tsx` — header এ ref + ResizeObserver যোগ করে `--header-h` CSS variable set করা।
-2. `src/pages/store/Home.tsx` — category strip এর hardcoded `top-[6.4rem]` সরিয়ে dynamic `var(--header-h)` ব্যবহার + z-index `z-40`।
-
-কোনো design/business logic পরিবর্তন নেই — শুধু sticky behaviour ঠিক করা।
+## অতিরিক্ত পরিবর্তন প্রয়োজন?
+আপাতত **নতুন কোনো code change লাগছে না** — আগের patch ই এই behaviour deliver করছে। User কে preview refresh করে check করতে বলব। সমস্যা থাকলে next iteration এ ancestor overflow/transform investigate করব।

@@ -58,10 +58,10 @@ export default function StoreLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
+  const searchBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = headerRef.current;
+    const el = searchBarRef.current;
     if (!el) return;
     const update = () => {
       document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`);
@@ -98,7 +98,7 @@ export default function StoreLayout() {
       <AnnouncementBar />
 
       {/* Main Header */}
-      <header ref={headerRef} className="z-50 bg-background border-b">
+      <header className="z-50 bg-background border-b">
         {/* Falling rose petals across the header */}
         <div className="petal-field" aria-hidden="true">
           <span className="petal petal-1">🌸</span>
@@ -191,7 +191,7 @@ export default function StoreLayout() {
       </header>
 
       {/* Sticky Search Bar (kept frozen on scroll) */}
-      <div className="sticky top-0 z-40 border-b border-t bg-background overflow-hidden px-3 py-1.5">
+      <div ref={searchBarRef} className="sticky top-0 z-40 border-b border-t bg-background overflow-hidden px-3 py-1.5">
         <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input

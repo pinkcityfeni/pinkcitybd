@@ -47,7 +47,8 @@ export default function Home() {
       )}
 
       <section
-        className="border-b bg-background sticky top-0 z-40"
+        className="border-b bg-background sticky z-30"
+        style={{ top: 'var(--header-h, 0px)' }}
       >
         <div className="container mx-auto px-3 py-3">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-0.5">

@@ -169,19 +169,6 @@ export default function StoreLayout() {
           </div>
         </div>
 
-        {/* Search Bar below header */}
-        <div className="border-t px-3 py-1.5 bg-background overflow-hidden">
-          <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              placeholder={t('nav.search')}
-              className="pl-9 h-8 text-xs rounded-lg bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </form>
-        </div>
-
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t bg-background animate-fade-in">
@@ -202,6 +189,19 @@ export default function StoreLayout() {
           </div>
         )}
       </header>
+
+      {/* Sticky Search Bar (kept frozen on scroll) */}
+      <div className="sticky top-0 z-40 border-b border-t bg-background overflow-hidden px-3 py-1.5">
+        <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            placeholder={t('nav.search')}
+            className="pl-9 h-8 text-xs rounded-lg bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </form>
+      </div>
 
       <main className="flex-1 pb-16 md:pb-0"><Outlet /></main>
 

@@ -1,50 +1,26 @@
-# আপনার কোডবেস audit — কী কী আছে আর কী ই আর কাজে আসছে না
+## সমস্যা
 
-আমি পুরো project স্ক্যান করে দেখলাম। নিচে দুইটা list:
+Home page এ category strip (🌸 আইকনসহ horizontal row) এর class `sticky top-[6.4rem] z-30` — কিন্তু header এর actual height এই value এর সাথে match করছে না। ফলে scroll করলে strip stick হলেও header এর পিছনে hide হয়ে যাচ্ছে, যেন freeze কাজ করছে না।
 
----
+Header stack (StoreLayout.tsx):
+- AnnouncementBar (~28px)
+- Main header h-14 (56px)
+- Search bar (~36px)
+- **মোট ≈ 120px**, কিন্তু sticky offset = 102px (6.4rem)
 
-## A) Code এ আছে কিন্তু আর কাজে আসছে না (remove করা যায়)
+এছাড়া `z-30` < header এর `z-50`, তাই overlap হলে strip ঢেকে যাবে।
 
-1. **`src/data/userRegistry.ts`** — কোথাও import হচ্ছে না। সম্পূর্ণ unused dead file।
-2. **POS Barcode page** (`src/pages/pos/POSBarcode.tsx` + `/pos/barcode` route + POSLayout এর nav item)
-   - Barcode scanner এখন আর কোনো actual flow এ ব্যবহার হচ্ছে না — শুধু একটা standalone page। চাইলে রাখতে পারেন, না চাইলে remove।
-3. **Facebook Import** (`src/pages/admin/FacebookImport.tsx` + `/admin/fb-import` route + AdminLayout nav item)
-   - এখনো admin sidebar এ আছে। আপনি use করছেন কিনা confirm করলে remove করব।
-4. **পুরোনো notification কোড** এর কোন leftover আর নেই (আগের loop এ পরিষ্কার করা হয়েছে — verified)।
-5. **Push subscription related migration / table** — DB তে `push_subscriptions` table drop হয়ে গেছে, কোডেও কিছু নেই — clean ✅।
+## Fix
 
----
+`src/pages/store/Home.tsx` line 49:
+- Sticky offset হেডারের নিচে fit করানো — একটা ref/measurement বা সরাসরি StoreLayout এর header কে একটা CSS variable (e.g. `--header-h`) expose করে strip এ `top: var(--header-h)` ব্যবহার করা।
+- সবচেয়ে simple ও robust approach: StoreLayout এর sticky `<header>` এ একটা ResizeObserver দিয়ে height মাপা এবং `document.documentElement.style.setProperty('--header-h', ...)` সেট করা।
+- Home এ category strip: `style={{ top: 'var(--header-h, 7.5rem)' }}` + `z-40` (header এর `z-50` এর নিচে but content এর উপর)।
 
-## B) আরও যা যা change/improve করা যেতে পারে
+এতে mobile/desktop, search bar এর height change হলেও সঠিকভাবে freeze থাকবে।
 
-### Performance / UX
-1. **Bundle slim করা** — `src/components/ui/` তে ৪৯টা shadcn component আছে; অনেকগুলো সম্ভবত ব্যবহার হচ্ছে না। Audit করে unused গুলো delete করতে পারি (build size কমবে)।
-2. **Image optimization** — `pink-city-text.jpg`, `logo.jpg` ইত্যাদি jpg/png; WebP এ convert করলে load fast হবে।
-3. **Lazy loading routes** — Admin/POS pages এখন eagerly import হচ্ছে। `React.lazy()` দিয়ে split করলে customer-side initial load অনেক fast হবে।
-4. **React Query stale time** — `new QueryClient()` default config এ; products/categories এর জন্য `staleTime` দিলে repeat fetch কমবে।
+## পরিবর্তিত ফাইল
+1. `src/components/store/StoreLayout.tsx` — header এ ref + ResizeObserver যোগ করে `--header-h` CSS variable set করা।
+2. `src/pages/store/Home.tsx` — category strip এর hardcoded `top-[6.4rem]` সরিয়ে dynamic `var(--header-h)` ব্যবহার + z-index `z-40`।
 
-### Feature gaps / polish
-5. **SEO** — Home/Shop/Category/Product pages এ `<title>`, meta description, JSON-LD product schema নেই। Google ranking এ help করবে।
-6. **PWA / "Add to Home Screen"** — manifest + service worker দিলে mobile এ app-like install হবে।
-7. **Order tracking page** — customer তার order এর status দেখতে পারে এমন কিছু আছে কিনা check করিনি; না থাকলে add করা যায়।
-8. **Wishlist sync** — এখন local state তে নাকি DB তে save হচ্ছে check করে দরকার হলে DB-backed করা।
-9. **Product reviews moderation flow** — admin reviews page আছে, কিন্তু customer-facing UI তে rating display কেমন আছে verify করা।
-10. **Stock low alert** — Telegram notification এ "low stock" trigger যোগ করা।
-11. **Customer points / loyalty** — DB তে `customer_points` + `point_transactions` table আছে আর hooks ও আছে, কিন্তু UI তে কতটুকু expose করা আছে দেখে polish করা যায়।
-
-### Security / housekeeping
-12. **Security scan run** — RLS policy review একটা scan চালিয়ে নিশ্চিত করা।
-13. **Console errors / network errors** clean করা।
-
----
-
-## পরবর্তী step
-
-আপনি বলুন কোনগুলো করব — আমি একটা একটা করে handle করব। সবচেয়ে recommend করব:
-
-- **প্রথমে A সেকশনের 1-3** (dead code remove) — safe + instant cleanup
-- **তারপর B-1, B-3** (bundle slim + lazy routes) — site fast হবে
-- **এরপর B-5** (SEO) — Google search এ আসার জন্য
-
-কোনগুলোতে যাব?
+কোনো design/business logic পরিবর্তন নেই — শুধু sticky behaviour ঠিক করা।

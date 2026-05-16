@@ -21,4 +21,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://pinkcitybd.lovable.app/sitemap.xml
+Sitemap: https://pinkcity.com.bd/sitemap.xml

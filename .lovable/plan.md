@@ -1,30 +1,53 @@
-## সমস্যা কী?
+## সমস্যাটা আসলে কী
 
-Database-এ ৪টা product আছে, কিন্তু storefront-এ একটাও show হচ্ছে না।
+আমি check করলাম — `pinkcity.com.bd` domain technically **ঠিকই কাজ করছে**:
+- DNS resolve হচ্ছে (185.158.133.1)
+- HTTPS load হচ্ছে (HTTP 200, SSL active)
+- Browser এ direct URL দিলে site আসবে
 
-আমি check করে দেখলাম — storefront `products_public` view থেকে product fetch করে। Network log-এ ওই request `200 OK` দিচ্ছে কিন্তু response `[]` (empty)।
+তাহলে Google এ আসছে না কেন? দুটো কারণ:
 
-### Root cause
+### 1. Google indexing এখনো হয়নি
+নতুন domain Google index করতে কয়েক দিন – কয়েক সপ্তাহ লাগে। এই সময়ে Google search এ "pinkcity.com.bd" লিখলে আসবে না।
 
-আগের security fix-এ `products` table-এর `"Public can view products"` policy drop করা হয়েছিল (যাতে `buying_price` leak না হয়)। `products_public` view সেই table-এর উপর তৈরি, এবং সেটা `security_invoker = on` mode-এ আছে — মানে view query করলে caller-এর (anon user-এর) permission দিয়ে base table পড়ার চেষ্টা করে। Base table-এ anon-এর কোনো SELECT policy নেই, তাই view সবসময় empty return করছে।
+### 2. সব SEO tag পুরনো `lovable.app` URL এ point করছে
+আপনার site এ এখনো canonical, sitemap, structured data — সবগুলোতে `pinkcitybd.lovable.app` দেওয়া। Google তাই আসল domain হিসেবে lovable.app কেই ধরছে, `pinkcity.com.bd` কে duplicate ভাবছে।
 
-পাশাপাশি view-এ `anon` / `authenticated` role-এর জন্য SELECT grant-ও missing।
-
-## Fix plan
-
-একটা নতুন migration দিয়ে:
-
-1. `products_public` view-কে **`security_invoker = off`** (security definer mode) করা — যাতে view owner-এর permission দিয়ে base table পড়ে, RLS bypass করে। এটা safe কারণ view-এ `buying_price` already excluded।
-2. View-এর উপর `GRANT SELECT ... TO anon, authenticated` reapply করা।
-3. Verify: anon দিয়ে `select * from products_public` করলে ৪টা product আসছে কিনা।
-
-### Technical detail
-
-```sql
-ALTER VIEW public.products_public SET (security_invoker = off);
-GRANT SELECT ON public.products_public TO anon, authenticated;
+```text
+index.html  → canonical = pinkcitybd.lovable.app  ❌
+sitemap.xml → all URLs  = pinkcitybd.lovable.app  ❌
+JSON-LD     → url       = pinkcitybd.lovable.app  ❌
+OG image    = lovable.app domain                  ❌
 ```
 
-Base `products` table-এর RLS policies অপরিবর্তিত থাকবে (admin/cashier only) — তাই `buying_price` এখনো customer-দের কাছে hidden।
+## যা যা ঠিক করব
 
-Migration apply করার পর storefront refresh করলেই product দেখাবে।
+### Step 1 — সব SEO reference পাল্টে `pinkcity.com.bd` করব
+- `index.html`:
+  - `<link rel="canonical">` → `https://pinkcity.com.bd/`
+  - JSON-LD এর `url` → `https://pinkcity.com.bd`
+  - OG `og:url` → `https://pinkcity.com.bd/`
+- `public/sitemap.xml`: সব URL `pinkcity.com.bd` এ পাল্টাব এবং product/category পাতাগুলো যোগ করব
+- `public/robots.txt`: sitemap URL update
+
+### Step 2 — Google কে তাড়াতাড়ি জানানোর জন্য
+এটা আমি code এ করতে পারব না, আপনাকে একবার করতে হবে (১০ মিনিটের কাজ):
+
+1. **Google Search Console** এ যান → `pinkcity.com.bd` add করুন
+2. Domain verify করুন (DNS TXT record দিয়ে — Lovable Domain settings থেকে DNS manage করা যায়)
+3. Sitemap submit করুন: `https://pinkcity.com.bd/sitemap.xml`
+4. URL Inspection tool এ home URL দিয়ে **"Request Indexing"** চাপুন
+
+এই step ছাড়া Google নিজে থেকে index করতে সপ্তাহ লেগে যাবে।
+
+### Step 3 — Verify
+আমি code change করার পর check করব:
+- canonical tag correct
+- sitemap এ নতুন URL
+- DNS/SSL আগে থেকেই ঠিক আছে, তাই কিছু করতে হবে না
+
+## এখন আপনি কী করতে পারেন (test এর জন্য)
+
+iPhone Safari/Chrome এ **address bar এ সরাসরি লিখুন**: `pinkcity.com.bd` — site আসার কথা। যদি না আসে, তাহলে DNS/network issue, সেটা আলাদা debug করব।
+
+Google search এ আসতে index হওয়া লাগবে — সেটা আমার code fix + আপনার Search Console submit এর পর শুরু হবে।

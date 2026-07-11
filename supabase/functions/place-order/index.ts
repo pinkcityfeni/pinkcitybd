@@ -44,9 +44,8 @@ Deno.serve(async (req) => {
         });
         const { data: { user } } = await callerClient.auth.getUser();
         userId = user?.id ?? null;
-        console.log("Authenticated user:", userId);
-      } catch (e) {
-        console.log("Auth check failed (continuing as guest):", e);
+      } catch {
+        // continuing as guest — do not log auth details
       }
     }
 
@@ -249,7 +248,7 @@ Deno.serve(async (req) => {
       quantity: it.quantity,
     }));
 
-    console.log("Inserting order, total:", total);
+    // Insert order — do not log PII (name/phone/address)
 
     const insertPayload = {
       user_id: userId,
@@ -293,7 +292,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log("Order created:", orderRow.id);
+    // Order created — id available in response
 
     // Record voucher redemption
     if (voucher) {
@@ -378,7 +377,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("place-order error:", error?.message || error);
+    console.error("place-order error:", error?.message ? String(error.message).slice(0, 200) : "unknown");
     return new Response(JSON.stringify({ error: "Request failed. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Trash2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 import { useOrders, useMyPoints, useMyPointTransactions, useDeliveryAreas } from '@/hooks/useSupabaseData';
@@ -67,6 +69,21 @@ export default function Account() {
     { status: 'completed', label: t('account.delivered'), icon: CheckCircle2 },
   ];
   const handleLogout = async () => { await logout(); navigate('/'); };
+  const [deleting, setDeleting] = useState(false);
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-my-account');
+      if (error) throw error;
+      toast.success('Your account and personal data have been deleted.');
+      await logout();
+      navigate('/');
+    } catch (e: any) {
+      toast.error(e?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
   const getStepIndex = (status: string) => status === 'cancelled' ? -1 : ORDER_STEPS.findIndex(s => s.status === status);
 
   return (
@@ -230,6 +247,37 @@ export default function Account() {
           );
         })}
         {orders.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">{t('account.noOrders')}</p>}
+      </div>
+
+      {/* Danger zone: permanent account + personal data deletion */}
+      <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
+        <h3 className="font-semibold text-sm text-destructive mb-1 flex items-center gap-2">
+          <Trash2 className="h-4 w-4" /> Delete account
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          This will permanently remove your login, profile, saved address, phone, email and loyalty points. Past order records are kept for accounting but with personal information removed. This cannot be undone.
+        </p>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete my account'}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete account permanently?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your account, profile, saved address, phone number, email and loyalty points will be permanently deleted. Past order records are anonymized. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Yes, delete everything
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
